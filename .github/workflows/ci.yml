@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run linters
+      run: |
+        poetry run black --check src/ tests/
+        poetry run ruff check src/ tests/
+        poetry run mypy src/
+
+    - name: Run tests with coverage
+      run: poetry run pytest --cov=src/robot_flower_princess --cov-report=xml --cov-report=term
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t robot-flower-princess:test .
+
+    - name: Test Docker image
+      run: |
+        docker run -d -p 8000:8000 --name test-api robot-flower-princess:test
+        sleep 10
+        curl -f http://localhost:8000/health || exit 1
+        docker stop test-api

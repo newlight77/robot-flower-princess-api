@@ -5,7 +5,7 @@ from ..schemas.game_schema import (
     GameStateResponse,
     ActionResponse,
     GameHistoryResponse,
-    EndedGamesResponse,
+    GamesResponse,
 )
 from ..dependencies import get_game_repository
 from ....application.ports.game_repository import GameRepository
@@ -18,7 +18,7 @@ from ....application.use_cases.pick_flower import PickFlowerUseCase, PickFlowerC
 from ....application.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
 from ....application.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
 from ....application.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
-from ....application.use_cases.get_ended_games import GetEndedGamesUseCase, GetEndedGamesQuery
+from ....application.use_cases.get_games import GetGamesUseCase, GetGamesQuery
 from ....domain.value_objects.direction import Direction
 
 router = APIRouter(prefix="/api/games", tags=["games"])
@@ -44,18 +44,31 @@ def create_game(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=EndedGamesResponse)
-def get_ended_games(
+@router.get("/", response_model=GamesResponse)
+def get_games(
     limit: int = 10,
+    status: str = None,
     repository: GameRepository = Depends(get_game_repository),
-) -> EndedGamesResponse:
-    """Get the last N games that have ended (victory or game_over)."""
+) -> GamesResponse:
+    """Get the last N games, optionally filtered by status."""
     try:
-        use_case = GetEndedGamesUseCase(repository)
-        result = use_case.execute(GetEndedGamesQuery(limit=limit))
-        return EndedGamesResponse(
-            games=result.games,
-            total=len(result.games)
+        use_case = GetGamesUseCase(repository)
+        result = use_case.execute(GetGamesQuery(limit=limit, status=status))
+
+        # Convert dataclass GameSummary to Pydantic GameSummary
+        from ..schemas.game_schema import GameSummary as PydanticGameSummary
+        pydantic_games = [
+            PydanticGameSummary(
+                game_id=game.game_id,
+                status=game.status,
+                board=game.board
+            )
+            for game in result.games
+        ]
+
+        return GamesResponse(
+            games=pydantic_games,
+            total=len(pydantic_games)
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

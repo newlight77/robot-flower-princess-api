@@ -32,15 +32,13 @@ class InMemoryGameRepository(GameRepository):
     def get_history(self, game_id: str) -> Optional[GameHistory]:
         return self._histories.get(game_id)
 
-    def get_ended_games(self, limit: int = 10) -> List[tuple[str, Board]]:
-        """Get the last N games that have ended (victory or game_over)."""
-        ended_games = []
+    def get_games(self, limit: int = 10, status: str = None) -> List[tuple[str, Board]]:
+        """Get the last N games, optionally filtered by status."""
+        filtered_games = []
         for game_id, board in self._games.items():
-            status = board.get_status()
-            if status in [GameStatus.VICTORY, GameStatus.GAME_OVER]:
-                ended_games.append((game_id, board))
+            board_status = board.get_status()
+            if status is None or board_status.value == status:
+                filtered_games.append((game_id, board))
 
-        # Sort by game_id (assuming newer games have higher IDs or different ordering)
-        # For simplicity, we'll return the last N games from the dict
-        # In a real implementation, you might want to track creation/end timestamps
-        return list(self._games.items())[-limit:] if len(ended_games) > limit else ended_games
+        # Return the last N filtered games
+        return filtered_games[-limit:] if len(filtered_games) > limit else filtered_games

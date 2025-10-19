@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 from ..ports.game_repository import GameRepository
 
 @dataclass
-class GetEndedGamesQuery:
+class GetGamesQuery:
     limit: int = 10
+    status: Optional[str] = None
 
 @dataclass
 class GameSummary:
@@ -13,23 +14,23 @@ class GameSummary:
     board: dict
 
 @dataclass
-class GetEndedGamesResult:
+class GetGamesResult:
     games: List[GameSummary]
 
-class GetEndedGamesUseCase:
+class GetGamesUseCase:
     def __init__(self, repository: GameRepository):
         self.repository = repository
 
-    def execute(self, query: GetEndedGamesQuery) -> GetEndedGamesResult:
-        """Get the last N games that have ended."""
-        ended_games = self.repository.get_ended_games(query.limit)
+    def execute(self, query: GetGamesQuery) -> GetGamesResult:
+        """Get the last N games, optionally filtered by status."""
+        games = self.repository.get_games(query.limit, query.status)
 
         game_summaries = []
-        for game_id, board in ended_games:
+        for game_id, board in games:
             game_summaries.append(GameSummary(
                 game_id=game_id,
                 status=board.get_status().value,
                 board=board.to_dict()
             ))
 
-        return GetEndedGamesResult(games=game_summaries)
+        return GetGamesResult(games=game_summaries)

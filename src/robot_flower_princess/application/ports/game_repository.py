@@ -37,6 +37,6 @@ class GameRepository(ABC):
         pass
 
     @abstractmethod
-    def get_ended_games(self, limit: int = 10) -> List[tuple[str, Board]]:
-        """Get the last N games that have ended (victory or game_over)."""
+    def get_games(self, limit: int = 10, status: str = None) -> List[tuple[str, Board]]:
+        """Get the last N games, optionally filtered by status."""
         pass

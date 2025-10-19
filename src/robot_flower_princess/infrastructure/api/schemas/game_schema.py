@@ -28,6 +28,6 @@ class GameSummary(BaseModel):
     status: str
     board: dict
 
-class EndedGamesResponse(BaseModel):
+class GamesResponse(BaseModel):
     games: List[GameSummary]
     total: int

@@ -36,7 +36,7 @@ def create_game(
             CreateGameCommand(rows=request.rows, cols=request.cols)
         )
         return GameStateResponse(
-            game_id=result.game_id,
+            id=result.game_id,
             board=result.board_state,
             message="Game created successfully",
         )
@@ -59,7 +59,7 @@ def get_games(
         from ..schemas.game_schema import GameSummary as PydanticGameSummary
         pydantic_games = [
             PydanticGameSummary(
-                game_id=game.game_id,
+                id=game.game_id,
                 status=game.status,
                 board=game.board
             )
@@ -84,7 +84,7 @@ def get_game_state(
         use_case = GetGameStateUseCase(repository)
         result = use_case.execute(GetGameStateQuery(game_id=game_id))
         return GameStateResponse(
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message="Game state retrieved successfully",
         )
@@ -102,7 +102,7 @@ def get_game_history(
         use_case = GetGameHistoryUseCase(repository)
         result = use_case.execute(GetGameHistoryQuery(game_id=game_id))
         return GameHistoryResponse(
-            game_id=game_id,
+            id=game_id,
             history=result.history,
         )
     except ValueError as e:
@@ -124,7 +124,7 @@ def rotate_robot(
         )
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )
@@ -143,7 +143,7 @@ def move_robot(
         result = use_case.execute(MoveRobotCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )
@@ -162,7 +162,7 @@ def pick_flower(
         result = use_case.execute(PickFlowerCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )
@@ -181,7 +181,7 @@ def drop_flower(
         result = use_case.execute(DropFlowerCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )
@@ -200,7 +200,7 @@ def give_flowers(
         result = use_case.execute(GiveFlowersCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )
@@ -239,7 +239,7 @@ def autoplay(
         result = use_case.execute(AutoplayCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=f"{result.message} (Actions taken: {result.actions_taken})",
         )

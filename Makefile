@@ -1,3 +1,9 @@
+#!make
+
+# Robot Flower Princess - Makefile
+
+SHELL := /bin/sh
+
 .PHONY: help install setup test test-cov lint format run docker-up docker-down clean
 
 help:

@@ -9,22 +9,22 @@ class RotateRequest(BaseModel):
     direction: Literal["north", "south", "east", "west"] = Field(description="Direction to face")
 
 class GameStateResponse(BaseModel):
-    game_id: str
+    id: str
     board: dict
     message: str = ""
 
 class ActionResponse(BaseModel):
     success: bool
-    game_id: str
+    id: str
     board: dict
     message: str
 
 class GameHistoryResponse(BaseModel):
-    game_id: str
+    id: str
     history: dict
 
 class GameSummary(BaseModel):
-    game_id: str
+    id: str
     status: str
     board: dict
 

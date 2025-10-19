@@ -21,22 +21,22 @@ def test_create_game():
     response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     assert response.status_code == 201
     data = response.json()
-    assert "game_id" in data
+    assert "id" in data
     assert data["board"]["rows"] == 5
 
 
 def test_get_game_state():
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["game_id"]
+    game_id = create_response.json()["id"]
 
     response = client.get(f"/api/games/{game_id}")
     assert response.status_code == 200
-    assert response.json()["game_id"] == game_id
+    assert response.json()["id"] == game_id
 
 
 def test_rotate_robot():
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["game_id"]
+    game_id = create_response.json()["id"]
 
     response = client.post(
         f"/api/games/{game_id}/actions/rotate",
@@ -48,7 +48,7 @@ def test_rotate_robot():
 
 def test_get_game_history():
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["game_id"]
+    game_id = create_response.json()["id"]
 
     response = client.get(f"/api/games/{game_id}/history")
     assert response.status_code == 200
@@ -57,7 +57,7 @@ def test_get_game_history():
 
 def test_autoplay():
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["game_id"]
+    game_id = create_response.json()["id"]
 
     response = client.post(f"/api/games/{game_id}/autoplay")
     assert response.status_code == 200

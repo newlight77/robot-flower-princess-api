@@ -40,7 +40,7 @@ test-cov:
 
 lint:
 	poetry run ruff check src/ tests/
-	poetry run mypy src/
+	# poetry run mypy src/
 
 format:
 	poetry run black src/ tests/

@@ -5,15 +5,18 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class DropFlowerCommand:
     game_id: str
+
 
 @dataclass
 class DropFlowerResult:
     success: bool
     board_state: dict
     message: str
+
 
 class DropFlowerUseCase:
     def __init__(self, repository: GameRepository):
@@ -36,7 +39,7 @@ class DropFlowerUseCase:
                 action_type=ActionType.DROP,
                 direction=orientation,
                 success=True,
-                message=f"Dropped flower (holding {board.robot.flowers_held})"
+                message=f"Dropped flower (holding {board.robot.flowers_held})",
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
@@ -44,20 +47,15 @@ class DropFlowerUseCase:
             return DropFlowerResult(
                 success=True,
                 board_state=board.to_dict(),
-                message=f"Flower dropped successfully (holding {board.robot.flowers_held})"
+                message=f"Flower dropped successfully (holding {board.robot.flowers_held})",
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.DROP,
-                direction=orientation,
-                success=False,
-                message=str(e)
+                action_type=ActionType.DROP, direction=orientation, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return DropFlowerResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

@@ -1,4 +1,3 @@
-import pytest
 from robot_flower_princess.domain.entities.position import Position
 
 

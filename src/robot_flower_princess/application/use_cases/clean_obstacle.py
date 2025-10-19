@@ -5,15 +5,18 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class CleanObstacleCommand:
     game_id: str
+
 
 @dataclass
 class CleanObstacleResult:
     success: bool
     board_state: dict
     message: str
+
 
 class CleanObstacleUseCase:
     def __init__(self, repository: GameRepository):
@@ -36,28 +39,21 @@ class CleanObstacleUseCase:
                 action_type=ActionType.CLEAN,
                 direction=orientation,
                 success=True,
-                message="Obstacle cleaned"
+                message="Obstacle cleaned",
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return CleanObstacleResult(
-                success=True,
-                board_state=board.to_dict(),
-                message="Obstacle cleaned successfully"
+                success=True, board_state=board.to_dict(), message="Obstacle cleaned successfully"
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.CLEAN,
-                direction=orientation,
-                success=False,
-                message=str(e)
+                action_type=ActionType.CLEAN, direction=orientation, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return CleanObstacleResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

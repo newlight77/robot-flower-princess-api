@@ -5,9 +5,11 @@ from ...infrastructure.ai.solver import GameSolver
 from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 
+
 @dataclass
 class AutoplayCommand:
     game_id: str
+
 
 @dataclass
 class AutoplayResult:
@@ -15,6 +17,7 @@ class AutoplayResult:
     actions_taken: int
     board_state: dict
     message: str
+
 
 class AutoplayUseCase:
     def __init__(self, repository: GameRepository):
@@ -39,45 +42,49 @@ class AutoplayUseCase:
             for action_type, direction in actions:
                 if action_type == "rotate":
                     from ...domain.services.game_service import GameService
+
                     GameService.rotate_robot(board, direction)
                     action = Action(
                         action_type=ActionType.ROTATE,
                         direction=direction,
                         success=True,
-                        message=f"AI: Rotated to {direction.value}"
+                        message=f"AI: Rotated to {direction.value}",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "move":
                     from ...domain.services.game_service import GameService
+
                     GameService.move_robot(board)
                     action = Action(
                         action_type=ActionType.MOVE,
                         direction=board.robot.orientation,
                         success=True,
-                        message="AI: Moved"
+                        message="AI: Moved",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "pick":
                     from ...domain.services.game_service import GameService
+
                     GameService.pick_flower(board)
                     action = Action(
                         action_type=ActionType.PICK,
                         direction=board.robot.orientation,
                         success=True,
-                        message="AI: Picked flower"
+                        message="AI: Picked flower",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "give":
                     from ...domain.services.game_service import GameService
+
                     GameService.give_flowers(board)
                     action = Action(
                         action_type=ActionType.GIVE,
                         direction=board.robot.orientation,
                         success=True,
-                        message="AI: Gave flowers"
+                        message="AI: Gave flowers",
                     )
                     history.add_action(action, board.to_dict())
 
@@ -86,13 +93,17 @@ class AutoplayUseCase:
 
             status = board.get_status().value
             success = status == "victory"
-            message = "AI completed the game successfully!" if success else "AI attempted to solve but couldn't complete"
+            message = (
+                "AI completed the game successfully!"
+                if success
+                else "AI attempted to solve but couldn't complete"
+            )
 
             return AutoplayResult(
                 success=success,
                 actions_taken=len(actions),
                 board_state=board.to_dict(),
-                message=message
+                message=message,
             )
 
         except Exception as e:
@@ -100,5 +111,5 @@ class AutoplayUseCase:
                 success=False,
                 actions_taken=0,
                 board_state=board.to_dict(),
-                message=f"AI failed: {str(e)}"
+                message=f"AI failed: {str(e)}",
             )

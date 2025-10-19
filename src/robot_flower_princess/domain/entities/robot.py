@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from .position import Position
 from ..value_objects.direction import Direction
 
+
 @dataclass
 class Robot:
     position: Position

@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 import random
-from typing import Optional
 from .position import Position
 from .robot import Robot
 from .cell import CellType
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
+
 
 @dataclass
 class Board:
@@ -115,7 +115,10 @@ class Board:
                 "flowers_held": self.robot.flowers_held,
                 "max_flowers": self.robot.max_flowers,
             },
-            "princess_position": {"row": self.princess_position.row, "col": self.princess_position.col},
+            "princess_position": {
+                "row": self.princess_position.row,
+                "col": self.princess_position.col,
+            },
             "flowers_remaining": len(self.flowers),
             "flowers_delivered": self.flowers_delivered,
             "total_flowers": self.initial_flower_count,

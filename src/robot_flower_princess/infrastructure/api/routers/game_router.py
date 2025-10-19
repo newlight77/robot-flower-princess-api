@@ -32,9 +32,7 @@ def create_game(
     """Create a new game with specified board size."""
     try:
         use_case = CreateGameUseCase(repository)
-        result = use_case.execute(
-            CreateGameCommand(rows=request.rows, cols=request.cols)
-        )
+        result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols))
         return GameStateResponse(
             id=result.game_id,
             board=result.board_state,
@@ -57,19 +55,13 @@ def get_games(
 
         # Convert dataclass GameSummary to Pydantic GameSummary
         from ..schemas.game_schema import GameSummary as PydanticGameSummary
+
         pydantic_games = [
-            PydanticGameSummary(
-                id=game.game_id,
-                status=game.status,
-                board=game.board
-            )
+            PydanticGameSummary(id=game.game_id, status=game.status, board=game.board)
             for game in result.games
         ]
 
-        return GamesResponse(
-            games=pydantic_games,
-            total=len(pydantic_games)
-        )
+        return GamesResponse(games=pydantic_games, total=len(pydantic_games))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -119,9 +111,7 @@ def rotate_robot(
     try:
         use_case = RotateRobotUseCase(repository)
         direction = Direction(request.direction)
-        result = use_case.execute(
-            RotateRobotCommand(game_id=game_id, direction=direction)
-        )
+        result = use_case.execute(RotateRobotCommand(game_id=game_id, direction=direction))
         return ActionResponse(
             success=result.success,
             id=game_id,
@@ -235,6 +225,7 @@ def autoplay(
     """Let AI solve the game automatically."""
     try:
         from ....application.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
+
         use_case = AutoplayUseCase(repository)
         result = use_case.execute(AutoplayCommand(game_id=game_id))
         return ActionResponse(

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CellType(str, Enum):
     EMPTY = "empty"
     ROBOT = "robot"

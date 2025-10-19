@@ -3,6 +3,7 @@ from typing import Optional, List
 from ...domain.entities.board import Board
 from ...domain.entities.game_history import GameHistory
 
+
 class GameRepository(ABC):
     """Port for game persistence."""
 

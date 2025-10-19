@@ -5,15 +5,18 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class GiveFlowersCommand:
     game_id: str
+
 
 @dataclass
 class GiveFlowersResult:
     success: bool
     board_state: dict
     message: str
+
 
 class GiveFlowersUseCase:
     def __init__(self, repository: GameRepository):
@@ -38,31 +41,19 @@ class GiveFlowersUseCase:
                 message = "Victory! All flowers delivered to the princess!"
 
             action = Action(
-                action_type=ActionType.GIVE,
-                direction=orientation,
-                success=True,
-                message=message
+                action_type=ActionType.GIVE, direction=orientation, success=True, message=message
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
-            return GiveFlowersResult(
-                success=True,
-                board_state=board.to_dict(),
-                message=message
-            )
+            return GiveFlowersResult(success=True, board_state=board.to_dict(), message=message)
         except GameException as e:
             action = Action(
-                action_type=ActionType.GIVE,
-                direction=orientation,
-                success=False,
-                message=str(e)
+                action_type=ActionType.GIVE, direction=orientation, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return GiveFlowersResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

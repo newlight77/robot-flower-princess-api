@@ -6,16 +6,19 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class RotateRobotCommand:
     game_id: str
     direction: Direction
+
 
 @dataclass
 class RotateRobotResult:
     success: bool
     board_state: dict
     message: str
+
 
 class RotateRobotUseCase:
     def __init__(self, repository: GameRepository):
@@ -37,7 +40,7 @@ class RotateRobotUseCase:
                 action_type=ActionType.ROTATE,
                 direction=command.direction,
                 success=True,
-                message=f"Rotated to face {command.direction.value}"
+                message=f"Rotated to face {command.direction.value}",
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
@@ -45,20 +48,18 @@ class RotateRobotUseCase:
             return RotateRobotResult(
                 success=True,
                 board_state=board.to_dict(),
-                message=f"Robot rotated to face {command.direction.value}"
+                message=f"Robot rotated to face {command.direction.value}",
             )
         except GameException as e:
             action = Action(
                 action_type=ActionType.ROTATE,
                 direction=command.direction,
                 success=False,
-                message=str(e)
+                message=str(e),
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return RotateRobotResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

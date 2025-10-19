@@ -1,10 +1,10 @@
 from typing import List, Optional, Tuple
 from collections import deque
-from copy import deepcopy
 from ...domain.entities.board import Board
 from ...domain.entities.position import Position
 from ...domain.value_objects.direction import Direction
 from ...domain.services.game_service import GameService
+
 
 class GameSolver:
     """AI solver for the game using BFS."""
@@ -20,8 +20,7 @@ class GameSolver:
         while board.flowers or board.robot.flowers_held > 0:
             # If holding flowers and need to deliver
             if board.robot.flowers_held > 0 and (
-                board.robot.flowers_held == board.robot.max_flowers or
-                len(board.flowers) == 0
+                board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0
             ):
                 # Navigate to princess
                 path = GameSolver._find_path(board, board.robot.position, board.princess_position)
@@ -48,8 +47,7 @@ class GameSolver:
             elif board.flowers and board.robot.can_pick():
                 # Find nearest flower
                 nearest_flower = min(
-                    board.flowers,
-                    key=lambda f: board.robot.position.manhattan_distance(f)
+                    board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)
                 )
 
                 # Navigate adjacent to flower
@@ -58,8 +56,7 @@ class GameSolver:
                     break
 
                 target = min(
-                    adjacent_positions,
-                    key=lambda p: board.robot.position.manhattan_distance(p)
+                    adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p)
                 )
 
                 path = GameSolver._find_path(board, board.robot.position, target)
@@ -105,9 +102,11 @@ class GameSolver:
                 if next_pos == goal:
                     return path + [next_pos]
 
-                if (board.is_valid_position(next_pos) and
-                    board.is_empty(next_pos) and
-                    next_pos not in visited):
+                if (
+                    board.is_valid_position(next_pos)
+                    and board.is_empty(next_pos)
+                    and next_pos not in visited
+                ):
                     visited.add(next_pos)
                     queue.append((next_pos, path + [next_pos]))
 

@@ -1,16 +1,15 @@
 from ..entities.board import Board
-from ..entities.position import Position
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
 from ..exceptions.game_exceptions import (
     InvalidMoveException,
-    InvalidActionException,
     GameOverException,
     InvalidPickException,
     InvalidDropException,
     InvalidGiveException,
     InvalidCleanException,
 )
+
 
 class GameService:
     """Domain service for game logic."""
@@ -51,7 +50,9 @@ class GameService:
             raise GameOverException("Game is already over")
 
         if not board.robot.can_pick():
-            raise InvalidPickException(f"Robot cannot hold more than {board.robot.max_flowers} flowers")
+            raise InvalidPickException(
+                f"Robot cannot hold more than {board.robot.max_flowers} flowers"
+            )
 
         # Get position in front of robot
         row_delta, col_delta = board.robot.orientation.get_delta()

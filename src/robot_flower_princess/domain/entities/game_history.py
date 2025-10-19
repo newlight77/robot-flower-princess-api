@@ -3,12 +3,14 @@ from typing import List
 from ..value_objects.action_type import ActionType
 from ..value_objects.direction import Direction
 
+
 @dataclass
 class Action:
     action_type: ActionType
     direction: Direction | None = None
     success: bool = True
     message: str = ""
+
 
 @dataclass
 class GameHistory:

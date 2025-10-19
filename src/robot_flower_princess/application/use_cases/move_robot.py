@@ -5,15 +5,18 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class MoveRobotCommand:
     game_id: str
+
 
 @dataclass
 class MoveRobotResult:
     success: bool
     board_state: dict
     message: str
+
 
 class MoveRobotUseCase:
     def __init__(self, repository: GameRepository):
@@ -38,31 +41,19 @@ class MoveRobotUseCase:
                 message = "Victory! All flowers delivered!"
 
             action = Action(
-                action_type=ActionType.MOVE,
-                direction=orientation,
-                success=True,
-                message=message
+                action_type=ActionType.MOVE, direction=orientation, success=True, message=message
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
-            return MoveRobotResult(
-                success=True,
-                board_state=board.to_dict(),
-                message=message
-            )
+            return MoveRobotResult(success=True, board_state=board.to_dict(), message=message)
         except GameException as e:
             action = Action(
-                action_type=ActionType.MOVE,
-                direction=orientation,
-                success=False,
-                message=str(e)
+                action_type=ActionType.MOVE, direction=orientation, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return MoveRobotResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

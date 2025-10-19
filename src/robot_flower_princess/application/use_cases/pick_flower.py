@@ -5,15 +5,18 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action
 from ...domain.exceptions.game_exceptions import GameException
 
+
 @dataclass
 class PickFlowerCommand:
     game_id: str
+
 
 @dataclass
 class PickFlowerResult:
     success: bool
     board_state: dict
     message: str
+
 
 class PickFlowerUseCase:
     def __init__(self, repository: GameRepository):
@@ -36,7 +39,7 @@ class PickFlowerUseCase:
                 action_type=ActionType.PICK,
                 direction=orientation,
                 success=True,
-                message=f"Picked flower (holding {board.robot.flowers_held})"
+                message=f"Picked flower (holding {board.robot.flowers_held})",
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
@@ -44,20 +47,15 @@ class PickFlowerUseCase:
             return PickFlowerResult(
                 success=True,
                 board_state=board.to_dict(),
-                message=f"Flower picked successfully (holding {board.robot.flowers_held})"
+                message=f"Flower picked successfully (holding {board.robot.flowers_held})",
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.PICK,
-                direction=orientation,
-                success=False,
-                message=str(e)
+                action_type=ActionType.PICK, direction=orientation, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
             return PickFlowerResult(
-                success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

@@ -39,7 +39,7 @@ def test_rotate_robot():
 
     response = client.post(f"/api/games/{game_id}/actions/rotate", json={"direction": "south"})
     assert response.status_code == 200
-    assert response.json()["success"] == "true"
+    assert response.json()["success"]
 
 
 def test_get_game_history():

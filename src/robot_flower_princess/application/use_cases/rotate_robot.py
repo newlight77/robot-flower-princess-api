@@ -3,7 +3,7 @@ from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.direction import Direction
 from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action
+from ...domain.entities.game_history import Action, GameHistory
 from ...domain.exceptions.game_exceptions import GameException
 
 
@@ -31,6 +31,8 @@ class RotateRobotUseCase:
             raise ValueError(f"Game {command.game_id} not found")
 
         history = self.repository.get_history(command.game_id)
+        if history is None:
+            history = GameHistory()
 
         try:
             GameService.rotate_robot(board, command.direction)

@@ -45,7 +45,7 @@ def create_game(
 @router.get("/", response_model=GamesResponse)
 def get_games(
     limit: int = 10,
-    status: str = None,
+    status: str = '',
     repository: GameRepository = Depends(get_game_repository),
 ) -> GamesResponse:
     """Get the last N games, optionally filtered by status."""
@@ -209,7 +209,7 @@ def clean_obstacle(
         result = use_case.execute(CleanObstacleCommand(game_id=game_id))
         return ActionResponse(
             success=result.success,
-            game_id=game_id,
+            id=game_id,
             board=result.board_state,
             message=result.message,
         )

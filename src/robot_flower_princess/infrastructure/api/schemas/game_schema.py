@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, List
 
 class CreateGameRequest(BaseModel):
     rows: int = Field(ge=3, le=50, description="Number of rows (3-50)")
@@ -22,3 +22,12 @@ class ActionResponse(BaseModel):
 class GameHistoryResponse(BaseModel):
     game_id: str
     history: dict
+
+class GameSummary(BaseModel):
+    game_id: str
+    status: str
+    board: dict
+
+class EndedGamesResponse(BaseModel):
+    games: List[GameSummary]
+    total: int

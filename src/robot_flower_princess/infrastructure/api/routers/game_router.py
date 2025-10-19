@@ -5,6 +5,7 @@ from ..schemas.game_schema import (
     GameStateResponse,
     ActionResponse,
     GameHistoryResponse,
+    EndedGamesResponse,
 )
 from ..dependencies import get_game_repository
 from ....application.ports.game_repository import GameRepository
@@ -17,6 +18,7 @@ from ....application.use_cases.pick_flower import PickFlowerUseCase, PickFlowerC
 from ....application.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
 from ....application.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
 from ....application.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
+from ....application.use_cases.get_ended_games import GetEndedGamesUseCase, GetEndedGamesQuery
 from ....domain.value_objects.direction import Direction
 
 router = APIRouter(prefix="/api/games", tags=["games"])
@@ -40,6 +42,23 @@ def create_game(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/", response_model=EndedGamesResponse)
+def get_ended_games(
+    limit: int = 10,
+    repository: GameRepository = Depends(get_game_repository),
+) -> EndedGamesResponse:
+    """Get the last N games that have ended (victory or game_over)."""
+    try:
+        use_case = GetEndedGamesUseCase(repository)
+        result = use_case.execute(GetEndedGamesQuery(limit=limit))
+        return EndedGamesResponse(
+            games=result.games,
+            total=len(result.games)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{game_id}", response_model=GameStateResponse)

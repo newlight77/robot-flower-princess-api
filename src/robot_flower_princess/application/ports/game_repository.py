@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 from ...domain.entities.board import Board
 from ...domain.entities.game_history import GameHistory
 
@@ -34,4 +34,9 @@ class GameRepository(ABC):
     @abstractmethod
     def get_history(self, game_id: str) -> Optional[GameHistory]:
         """Get game history."""
+        pass
+
+    @abstractmethod
+    def get_ended_games(self, limit: int = 10) -> List[tuple[str, Board]]:
+        """Get the last N games that have ended (victory or game_over)."""
         pass

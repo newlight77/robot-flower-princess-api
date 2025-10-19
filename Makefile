@@ -50,6 +50,15 @@ run:
 	poetry env activate
 	poetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
 
+docker-build: ## Build Docker image
+	docker build -t robot-flower-princess-api:latest .
+
+docker-run: ## Run Docker container
+	docker run -p 8000:80 robot-flower-princess-api:latest
+
+docker-stop: ## Stop Docker container
+	docker stop $(docker ps -q --filter ancestor=robot-flower-princess:latest)
+
 docker-up:
 	docker-compose up --build
 

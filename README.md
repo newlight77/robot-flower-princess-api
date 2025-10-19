@@ -49,6 +49,7 @@ docker-compose up --build
 # Setup
 pyenv local 3.13.0
 poetry install
+poetry env activate
 
 # Run
 make run
@@ -65,20 +66,20 @@ Once running, visit:
 ### Main Endpoints
 
 #### Game Management
-- `POST /api/v1/games` - Create a new game
-- `GET /api/v1/games/{game_id}` - Get game state
-- `GET /api/v1/games/{game_id}/history` - Get move history
+- `POST /api/games` - Create a new game
+- `GET /api/games/{game_id}` - Get game state
+- `GET /api/games/{game_id}/history` - Get move history
 
 #### Actions
-- `POST /api/v1/games/{game_id}/actions/rotate` - Rotate robot
-- `POST /api/v1/games/{game_id}/actions/move` - Move robot
-- `POST /api/v1/games/{game_id}/actions/pick` - Pick flower
-- `POST /api/v1/games/{game_id}/actions/drop` - Drop flower
-- `POST /api/v1/games/{game_id}/actions/give` - Give flowers to princess
-- `POST /api/v1/games/{game_id}/actions/clean` - Clean obstacle
+- `POST /api/games/{game_id}/actions/rotate` - Rotate robot
+- `POST /api/games/{game_id}/actions/move` - Move robot
+- `POST /api/games/{game_id}/actions/pick` - Pick flower
+- `POST /api/games/{game_id}/actions/drop` - Drop flower
+- `POST /api/games/{game_id}/actions/give` - Give flowers to princess
+- `POST /api/games/{game_id}/actions/clean` - Clean obstacle
 
 #### AI Player
-- `POST /api/v1/games/{game_id}/autoplay` - Let AI solve the game
+- `POST /api/games/{game_id}/autoplay` - Let AI solve the game
 
 ## 🧪 Testing
 
@@ -113,31 +114,31 @@ src/robot_flower_princess/
 
 ### Create a Game
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games" \
+curl -X POST "http://localhost:8000/api/games" \
   -H "Content-Type: application/json" \
   -d '{"rows": 10, "cols": 10}'
 ```
 
 ### Rotate Robot
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/rotate" \
+curl -X POST "http://localhost:8000/api/games/{game_id}/actions/rotate" \
   -H "Content-Type: application/json" \
   -d '{"direction": "south"}'
 ```
 
 ### Move Robot
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/move"
+curl -X POST "http://localhost:8000/api/games/{game_id}/actions/move"
 ```
 
 ### Auto-Play
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/autoplay"
+curl -X POST "http://localhost:8000/api/games/{game_id}/autoplay"
 ```
 
 ### Get History
 ```bash
-curl -X GET "http://localhost:8000/api/v1/games/{game_id}/history"
+curl -X GET "http://localhost:8000/api/games/{game_id}/history"
 ```
 
 ## 🤝 Contributing

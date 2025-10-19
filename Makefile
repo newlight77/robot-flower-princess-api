@@ -20,6 +20,12 @@ setup:
 	pyenv local 3.13.0
 	poetry install
 
+clean:
+	POETRY_LOCATION=`poetry env info -p`
+	echo "Poetry is $POETRY_LOCATION"
+	rm -rf "$POETRY_LOCATION"
+	poetry deactivate
+
 test:
 	poetry run pytest -v
 
@@ -35,6 +41,7 @@ format:
 	poetry run ruff check --fix src/ tests/
 
 run:
+	poetry env activate
 	poetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
 
 docker-up:

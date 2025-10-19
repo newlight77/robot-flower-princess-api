@@ -18,7 +18,7 @@ def test_health_check():
 
 
 def test_create_game():
-    response = client.post("/api/v1/games/", json={"rows": 5, "cols": 5})
+    response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     assert response.status_code == 201
     data = response.json()
     assert "game_id" in data
@@ -26,20 +26,20 @@ def test_create_game():
 
 
 def test_get_game_state():
-    create_response = client.post("/api/v1/games/", json={"rows": 5, "cols": 5})
+    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["game_id"]
 
-    response = client.get(f"/api/v1/games/{game_id}")
+    response = client.get(f"/api/games/{game_id}")
     assert response.status_code == 200
     assert response.json()["game_id"] == game_id
 
 
 def test_rotate_robot():
-    create_response = client.post("/api/v1/games/", json={"rows": 5, "cols": 5})
+    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["game_id"]
 
     response = client.post(
-        f"/api/v1/games/{game_id}/actions/rotate",
+        f"/api/games/{game_id}/actions/rotate",
         json={"direction": "south"}
     )
     assert response.status_code == 200
@@ -47,19 +47,19 @@ def test_rotate_robot():
 
 
 def test_get_game_history():
-    create_response = client.post("/api/v1/games/", json={"rows": 5, "cols": 5})
+    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["game_id"]
 
-    response = client.get(f"/api/v1/games/{game_id}/history")
+    response = client.get(f"/api/games/{game_id}/history")
     assert response.status_code == 200
     assert "history" in response.json()
 
 
 def test_autoplay():
-    create_response = client.post("/api/v1/games/", json={"rows": 5, "cols": 5})
+    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["game_id"]
 
-    response = client.post(f"/api/v1/games/{game_id}/autoplay")
+    response = client.post(f"/api/games/{game_id}/autoplay")
     assert response.status_code == 200
     data = response.json()
     assert "success" in data

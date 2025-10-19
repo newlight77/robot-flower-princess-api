@@ -19,7 +19,7 @@ from ....application.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowe
 from ....application.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
 from ....domain.value_objects.direction import Direction
 
-router = APIRouter(prefix="/api/v1/games", tags=["games"])
+router = APIRouter(prefix="/api/games", tags=["games"])
 
 
 @router.post("/", response_model=GameStateResponse, status_code=201)

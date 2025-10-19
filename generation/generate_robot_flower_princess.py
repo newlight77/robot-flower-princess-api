@@ -178,7 +178,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\
   CMD curl -f http://localhost:8000/health || exit 1
 
 # Run with uvicorn
-CMD ["uvicorn", "robot_flower_princess.infrastructure.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "robot_flower_princess..main:app", "--host", "0.0.0.0", "--port", "8000"]
 """,
 
     "docker-compose.yml": """version: '3.8'
@@ -194,7 +194,7 @@ services:
       - LOG_LEVEL=info
     volumes:
       - ./src:/app/src
-    command: uvicorn robot_flower_princess.infrastructure.api.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn robot_flower_princess..main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -235,7 +235,7 @@ format:
 \tpoetry run ruff check --fix src/ tests/
 
 run:
-\tpoetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
+\tpoetry run uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
 
 docker-up:
 \tdocker-compose up --build
@@ -364,7 +364,7 @@ poetry install
 # Run
 make run
 # or
-poetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## 📚 API Documentation
@@ -2202,7 +2202,7 @@ def test_board_victory():
 
     "tests/integration/test_api.py": """import pytest
 from fastapi.testclient import TestClient
-from robot_flower_princess.infrastructure.api.main import app
+from robot_flower_princess..main import app
 
 client = TestClient(app)
 

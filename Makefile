@@ -48,7 +48,7 @@ format:
 
 run:
 	poetry env activate
-	poetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
+	poetry run uvicorn robot_flower_princess.main:app --reload --host 0.0.0.0 --port 8000
 
 docker-build: ## Build Docker image
 	docker build -t robot-flower-princess-api:latest .

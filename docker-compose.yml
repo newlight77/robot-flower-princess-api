@@ -11,7 +11,7 @@ services:
       - LOG_LEVEL=info
     volumes:
       - ./src:/app/src
-    command: uvicorn robot_flower_princess.infrastructure.api.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn robot_flower_princess.main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

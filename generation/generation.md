@@ -392,7 +392,7 @@ make run
 
 ```bash
 poetry shell
-uvicorn robot_flower_princess.infrastructure.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 #### Option C: Using Docker
@@ -687,7 +687,7 @@ lsof -i :8000
 kill -9 <PID>
 
 # Or use a different port
-uvicorn robot_flower_princess.infrastructure.api.main:app --port 8080
+uvicorn robot_flower_princess..main:app --port 8080
 ```
 
 #### Issue 6: Docker Build Fails
@@ -737,7 +737,7 @@ Enable debug logging:
 echo "LOG_LEVEL=debug" >> .env
 
 # Run with debug output
-poetry run uvicorn robot_flower_princess.infrastructure.api.main:app --reload --log-level debug
+poetry run uvicorn robot_flower_princess..main:app --reload --log-level debug
 ```
 
 ### Getting Help

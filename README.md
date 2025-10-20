@@ -84,10 +84,20 @@ Once running, visit:
 ## 🧪 Testing
 
 ```bash
-make test          # Run all tests
-make test-cov      # Run with coverage
-make lint          # Run linters
-make format        # Format code
+make test                 # Run all tests
+make test-cov             # Run with coverage (legacy html in htmlcov/)
+make coverage-unit        # Run unit tests and write .coverage/coverage-unit.xml
+make coverage-integration # Run integration tests and write .coverage/coverage-integration.xml
+make coverage-e2e         # Run end-to-end test and write .coverage/coverage-e2e.xml
+make coverage-combine     # Merge coverage files and write .coverage/coverage-combined.xml + .coverage/coverage_html/
+make lint                 # Run linters
+make format               # Format code
+```
+
+After running `make coverage-combine` open the HTML report locally:
+
+```bash
+open .coverage/coverage_html/index.html
 ```
 
 ## 🏗️ Architecture

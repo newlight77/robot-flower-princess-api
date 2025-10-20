@@ -1,22 +1,19 @@
-from fastapi.testclient import TestClient
-from robot_flower_princess.main import app
-
-client = TestClient(app)
+import pytest
 
 
-def test_root_endpoint():
+def test_root_endpoint(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "message" in response.json()
 
 
-def test_health_check():
+def test_health_check(client):
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "healthy"
 
 
-def test_create_game():
+def test_create_game(client):
     response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     assert response.status_code == 201
     data = response.json()
@@ -24,7 +21,7 @@ def test_create_game():
     assert data["board"]["rows"] == 5
 
 
-def test_get_game_state():
+def test_get_game_state(client):
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["id"]
 
@@ -33,7 +30,7 @@ def test_get_game_state():
     assert response.json()["id"] == game_id
 
 
-def test_rotate_robot():
+def test_rotate_robot(client):
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["id"]
 
@@ -42,7 +39,7 @@ def test_rotate_robot():
     assert response.json()["success"]
 
 
-def test_get_game_history():
+def test_get_game_history(client):
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["id"]
 
@@ -51,7 +48,7 @@ def test_get_game_history():
     assert "history" in response.json()
 
 
-def test_autoplay():
+def test_autoplay(client):
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["id"]
 

@@ -1,36 +1,12 @@
-from fastapi.testclient import TestClient
-from robot_flower_princess.main import app
+import pytest
 
 from robot_flower_princess.infrastructure.api.dependencies import get_game_repository
-from robot_flower_princess.domain.entities.board import Board
 from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
 from robot_flower_princess.domain.value_objects.direction import Direction
-from robot_flower_princess.domain.entities.game_history import GameHistory
-
-client = TestClient(app)
 
 
-def save_board(game_id: str, board: Board):
-    repo = get_game_repository()
-    repo.save(game_id, board)
-    history = GameHistory()
-    history.add_action(action=None, board_state=board.to_dict())
-    repo.save_history(game_id, history)
 
-
-def make_empty_board(rows=3, cols=3) -> Board:
-    # build a small empty board with robot at center for deterministic actions
-    robot_pos = Position(1, 1)
-    robot = Robot(position=robot_pos, orientation=Direction.NORTH)
-    board = Board(rows=rows, cols=cols, robot=robot, princess_position=Position(2, 2))
-    # ensure empties
-    board.flowers = set()
-    board.obstacles = set()
-    return board
-
-
-def test_move_success():
+def test_move_success(client, save_board, make_empty_board):
     game_id = "det-move"
     board = make_empty_board()
     # robot at (1,1) facing north; moving north should go to (0,1)
@@ -46,7 +22,7 @@ def test_move_success():
         assert data["board"]["robot"]["position"] == {"row": 0, "col": 1}
 
 
-def test_pick_and_drop_and_give_success():
+def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
     game_id = "det-pick-drop-give"
     board = make_empty_board()
     # place a flower north of robot

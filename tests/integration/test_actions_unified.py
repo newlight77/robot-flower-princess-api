@@ -1,16 +1,7 @@
-from fastapi.testclient import TestClient
-from robot_flower_princess.main import app
-
-client = TestClient(app)
+import pytest
 
 
-def create_game(rows=5, cols=5):
-    resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
-    assert resp.status_code == 201
-    return resp.json()["id"], resp.json()["board"]
-
-
-def test_rotate_changes_orientation():
+def test_rotate_changes_orientation(client, create_game):
     game_id, board = create_game()
     old_orientation = board["robot"]["orientation"]
 
@@ -21,7 +12,7 @@ def test_rotate_changes_orientation():
     assert data["board"]["robot"]["orientation"] == "south"
 
 
-def test_clean_removes_obstacle():
+def test_clean_removes_obstacle(client, create_game):
     game_id, board = create_game()
     # find an obstacle adjacent to robot if possible
     robot_pos = board["robot"]["position"]

@@ -1,0 +1,71 @@
+from fastapi.testclient import TestClient
+from robot_flower_princess.main import app
+
+client = TestClient(app)
+
+
+def create_game(rows=5, cols=5):
+    resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
+    assert resp.status_code == 201
+    return resp.json()["id"], resp.json()["board"]
+
+
+def test_rotate_changes_orientation():
+    game_id, board = create_game()
+    old_orientation = board["robot"]["orientation"]
+
+    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": "south"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["board"]["robot"]["orientation"] == "south"
+
+
+def test_clean_removes_obstacle():
+    game_id, board = create_game()
+    # find an obstacle adjacent to robot if possible
+    robot_pos = board["robot"]["position"]
+    r, c = robot_pos["row"], robot_pos["col"]
+    grid = board["grid"]
+
+    # try neighbors (up, down, left, right)
+    neighbors = [
+        (r - 1, c),
+        (r + 1, c),
+        (r, c - 1),
+        (r, c + 1),
+    ]
+
+    found = False
+    for nr, nc in neighbors:
+        if 0 <= nr < board["rows"] and 0 <= nc < board["cols"]:
+            if grid[nr][nc] == "🗑️":
+                found = True
+                break
+
+    if not found:
+        # if no obstacle adjacent, perform a clean and assert success may be False
+        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean"})
+        assert resp.status_code == 200
+        # success could be True or False depending on adjacency; ensure response shape
+        assert "success" in resp.json()
+    else:
+        # there is an obstacle adjacent; rotate robot to face it then clean
+        # determine direction
+        if nr == r - 1 and nc == c:
+            direction = "north"
+        elif nr == r + 1 and nc == c:
+            direction = "south"
+        elif nr == r and nc == c - 1:
+            direction = "west"
+        else:
+            direction = "east"
+
+        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": direction})
+        assert resp.status_code == 200
+        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["success"] is True
+        new_grid = data["board"]["grid"]
+        assert new_grid[nr][nc] == "⬜"

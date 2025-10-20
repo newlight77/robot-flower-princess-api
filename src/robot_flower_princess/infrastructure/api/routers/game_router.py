@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
+from typing import Any, cast
 from ..schemas.game_schema import (
     CreateGameRequest,
     ActionRequest,
@@ -105,7 +106,23 @@ def get_game_history(
 @router.post("/{game_id}/actions", response_model=ActionResponse)
 def perform_action(
     game_id: str,
-    request: ActionRequest,
+    request: ActionRequest = Body(
+        ...,
+        examples=cast(
+            Any,
+            {
+                "rotate": {
+                    "summary": "Rotate robot",
+                    "value": {"action": "rotate", "direction": "south"},
+                },
+                "move": {"summary": "Move robot", "value": {"action": "move"}},
+                "pickFlower": {"summary": "Pick a flower", "value": {"action": "pickFlower"}},
+                "dropFlower": {"summary": "Drop a flower", "value": {"action": "dropFlower"}},
+                "giveFlower": {"summary": "Give flowers", "value": {"action": "giveFlower"}},
+                "clean": {"summary": "Clean obstacle", "value": {"action": "clean"}},
+            },
+        ),
+    ),
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.

@@ -2,13 +2,15 @@ from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action
+from ...domain.entities.game_history import Action, GameHistory
 from ...domain.exceptions.game_exceptions import GameException
+from ...domain.value_objects.direction import Direction
 
 
 @dataclass
 class DropFlowerCommand:
     game_id: str
+    direction: Direction
 
 
 @dataclass
@@ -29,15 +31,17 @@ class DropFlowerUseCase:
             raise ValueError(f"Game {command.game_id} not found")
 
         history = self.repository.get_history(command.game_id)
-        orientation = board.robot.orientation
+        if history is None:
+            history = GameHistory()
 
         try:
+            GameService.rotate_robot(board, command.direction)
             GameService.drop_flower(board)
             self.repository.save(command.game_id, board)
 
             action = Action(
                 action_type=ActionType.DROP,
-                direction=orientation,
+                direction=command.direction,
                 success=True,
                 message=f"Dropped flower (holding {board.robot.flowers_held})",
             )
@@ -51,7 +55,7 @@ class DropFlowerUseCase:
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.DROP, direction=orientation, success=False, message=str(e)
+                action_type=ActionType.DROP, direction=command.direction, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)

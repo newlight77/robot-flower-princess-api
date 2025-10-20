@@ -1755,7 +1755,7 @@ def move_robot(
     \"\"\"Move the robot in the direction it's facing.\"\"\"
     try:
         use_case = MoveRobotUseCase(repository)
-        result = use_case.execute(MoveRobotCommand(game_id=game_id))
+    result = use_case.execute(MoveRobotCommand(game_id=game_id, direction=Direction.SOUTH))
         return ActionResponse(
             success=result.success,
             game_id=game_id,
@@ -1774,7 +1774,7 @@ def pick_flower(
     \"\"\"Pick a flower from an adjacent cell.\"\"\"
     try:
         use_case = PickFlowerUseCase(repository)
-        result = use_case.execute(PickFlowerCommand(game_id=game_id))
+    result = use_case.execute(PickFlowerCommand(game_id=game_id, direction=Direction.SOUTH))
         return ActionResponse(
             success=result.success,
             game_id=game_id,
@@ -1793,7 +1793,7 @@ def drop_flower(
     \"\"\"Drop a flower on an adjacent empty cell.\"\"\"
     try:
         use_case = DropFlowerUseCase(repository)
-        result = use_case.execute(DropFlowerCommand(game_id=game_id))
+    result = use_case.execute(DropFlowerCommand(game_id=game_id, direction=Direction.SOUTH))
         return ActionResponse(
             success=result.success,
             game_id=game_id,
@@ -1812,7 +1812,7 @@ def give_flowers(
     \"\"\"Give flowers to the princess.\"\"\"
     try:
         use_case = GiveFlowersUseCase(repository)
-        result = use_case.execute(GiveFlowersCommand(game_id=game_id))
+    result = use_case.execute(GiveFlowersCommand(game_id=game_id, direction=Direction.SOUTH))
         return ActionResponse(
             success=result.success,
             game_id=game_id,
@@ -1831,7 +1831,7 @@ def clean_obstacle(
     \"\"\"Clean an obstacle in the direction faced.\"\"\"
     try:
         use_case = CleanObstacleUseCase(repository)
-        result = use_case.execute(CleanObstacleCommand(game_id=game_id))
+    result = use_case.execute(CleanObstacleCommand(game_id=game_id, direction=Direction.SOUTH))
         return ActionResponse(
             success=result.success,
             game_id=game_id,

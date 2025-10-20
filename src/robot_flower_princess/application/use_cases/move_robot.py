@@ -2,13 +2,15 @@ from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action
+from ...domain.entities.game_history import Action, GameHistory
 from ...domain.exceptions.game_exceptions import GameException
+from ...domain.value_objects.direction import Direction
 
 
 @dataclass
 class MoveRobotCommand:
     game_id: str
+    direction: Direction
 
 
 @dataclass
@@ -29,9 +31,12 @@ class MoveRobotUseCase:
             raise ValueError(f"Game {command.game_id} not found")
 
         history = self.repository.get_history(command.game_id)
-        orientation = board.robot.orientation
+        if history is None:
+            history = GameHistory()
 
+        # Apply the supplied direction first
         try:
+            GameService.rotate_robot(board, command.direction)
             GameService.move_robot(board)
             self.repository.save(command.game_id, board)
 
@@ -41,7 +46,7 @@ class MoveRobotUseCase:
                 message = "Victory! All flowers delivered!"
 
             action = Action(
-                action_type=ActionType.MOVE, direction=orientation, success=True, message=message
+                action_type=ActionType.MOVE, direction=command.direction, success=True, message=message
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
@@ -49,7 +54,7 @@ class MoveRobotUseCase:
             return MoveRobotResult(success=True, board_state=board.to_dict(), message=message)
         except GameException as e:
             action = Action(
-                action_type=ActionType.MOVE, direction=orientation, success=False, message=str(e)
+                action_type=ActionType.MOVE, direction=command.direction, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)

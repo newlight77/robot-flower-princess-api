@@ -72,7 +72,7 @@ Once running, visit:
 
 #### Actions
 The API now exposes a single unified actions endpoint.
-- `POST /api/games/{game_id}/actions` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction required only for rotate)
+-- `POST /api/games/{game_id}/actions` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction is required for all actions)
 
 #### AI Player
 - `POST /api/games/{game_id}/autoplay` - Let AI solve the game

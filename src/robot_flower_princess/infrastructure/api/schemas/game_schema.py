@@ -24,16 +24,8 @@ class ActionType(str, Enum):
 
 class ActionRequest(BaseModel):
     action: ActionType
-    # Optional direction only used when action == rotate
-    direction: Optional[Literal["north", "south", "east", "west"]] = None
-
-    @model_validator(mode="before")
-    def check_direction_for_rotate(cls, values):
-        action = values.get("action")
-        direction = values.get("direction")
-        if action == ActionType.rotate and not direction:
-            raise ValueError("'direction' is required when action is 'rotate'")
-        return values
+    # Direction is now required for all actions (frontend always provides direction)
+    direction: Literal["north", "south", "east", "west"]
 
 
 class GameStateResponse(BaseModel):

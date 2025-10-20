@@ -35,8 +35,11 @@ def test_clean_removes_obstacle(client, create_game):
                 break
 
     if not found:
-        # if no obstacle adjacent, perform a clean and assert success may be False
-        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean"})
+        # if no obstacle adjacent, perform a clean (frontend always sends direction)
+        current_dir = board["robot"]["orientation"]
+        resp = client.post(
+            f"/api/games/{game_id}/actions", json={"action": "clean", "direction": current_dir}
+        )
         assert resp.status_code == 200
         # success could be True or False depending on adjacency; ensure response shape
         assert "success" in resp.json()
@@ -54,7 +57,7 @@ def test_clean_removes_obstacle(client, create_game):
 
         resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": direction})
         assert resp.status_code == 200
-        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean"})
+        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean", "direction": direction})
         assert resp.status_code == 200
         data = resp.json()
         assert data["success"] is True

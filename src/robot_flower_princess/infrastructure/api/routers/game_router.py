@@ -115,11 +115,11 @@ def perform_action(
                     "summary": "Rotate robot",
                     "value": {"action": "rotate", "direction": "south"},
                 },
-                "move": {"summary": "Move robot", "value": {"action": "move"}},
-                "pickFlower": {"summary": "Pick a flower", "value": {"action": "pickFlower"}},
-                "dropFlower": {"summary": "Drop a flower", "value": {"action": "dropFlower"}},
-                "giveFlower": {"summary": "Give flowers", "value": {"action": "giveFlower"}},
-                "clean": {"summary": "Clean obstacle", "value": {"action": "clean"}},
+                "move": {"summary": "Move robot", "value": {"action": "move", "direction": "south"}},
+                "pickFlower": {"summary": "Pick a flower", "value": {"action": "pickFlower", "direction": "south"}},
+                "dropFlower": {"summary": "Drop a flower", "value": {"action": "dropFlower", "direction": "south"}},
+                "giveFlower": {"summary": "Give flowers", "value": {"action": "giveFlower", "direction": "south"}},
+                "clean": {"summary": "Clean obstacle", "value": {"action": "clean", "direction": "south"}},
             },
         ),
     ),
@@ -132,28 +132,27 @@ def perform_action(
     try:
         action = request.action
 
+        # direction required for all actions now
+        direction = Direction(request.direction)
+
         if action == ActionType.rotate:
-            # rotate expects a direction
-            if not request.direction:
-                raise ValueError("Missing direction for rotate action")
             use_case = RotateRobotUseCase(repository)
-            direction = Direction(request.direction)
             result = use_case.execute(RotateRobotCommand(game_id=game_id, direction=direction))
         elif action == ActionType.move:
             use_case = MoveRobotUseCase(repository)
-            result = use_case.execute(MoveRobotCommand(game_id=game_id))
+            result = use_case.execute(MoveRobotCommand(game_id=game_id, direction=direction))
         elif action == ActionType.pickFlower:
             use_case = PickFlowerUseCase(repository)
-            result = use_case.execute(PickFlowerCommand(game_id=game_id))
+            result = use_case.execute(PickFlowerCommand(game_id=game_id, direction=direction))
         elif action == ActionType.dropFlower:
             use_case = DropFlowerUseCase(repository)
-            result = use_case.execute(DropFlowerCommand(game_id=game_id))
+            result = use_case.execute(DropFlowerCommand(game_id=game_id, direction=direction))
         elif action == ActionType.giveFlower:
             use_case = GiveFlowersUseCase(repository)
-            result = use_case.execute(GiveFlowersCommand(game_id=game_id))
+            result = use_case.execute(GiveFlowersCommand(game_id=game_id, direction=direction))
         elif action == ActionType.clean:
             use_case = CleanObstacleUseCase(repository)
-            result = use_case.execute(CleanObstacleCommand(game_id=game_id))
+            result = use_case.execute(CleanObstacleCommand(game_id=game_id, direction=direction))
         else:
             raise ValueError(f"Unknown action: {action}")
 

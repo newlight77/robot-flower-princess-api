@@ -48,7 +48,7 @@ def test_rotate_use_case_success(repo):
 def test_move_use_case_missing_game(repo):
     use_case = MoveRobotUseCase(repo)
     with pytest.raises(ValueError):
-        use_case.execute(MoveRobotCommand(game_id="missing"))
+        use_case.execute(MoveRobotCommand(game_id="missing", direction=Direction.NORTH))
 
 
 def test_move_use_case_success(repo):
@@ -57,7 +57,7 @@ def test_move_use_case_success(repo):
     repo.save_history("g2", GameHistory())
 
     use_case = MoveRobotUseCase(repo)
-    res = use_case.execute(MoveRobotCommand(game_id="g2"))
+    res = use_case.execute(MoveRobotCommand(game_id="g2", direction=Direction.NORTH))
     assert isinstance(res.success, bool)
     assert "board_state" in res.__dict__
 
@@ -68,15 +68,15 @@ def test_pick_drop_give_use_cases(repo):
     repo.save_history("g3", GameHistory())
 
     pick_uc = PickFlowerUseCase(repo)
-    pick_res = pick_uc.execute(PickFlowerCommand(game_id="g3"))
+    pick_res = pick_uc.execute(PickFlowerCommand(game_id="g3", direction=Direction.NORTH))
     # pick may succeed or fail depending on board orientation/placement; ensure boolean
     assert isinstance(pick_res.success, bool)
 
     drop_uc = DropFlowerUseCase(repo)
-    drop_res = drop_uc.execute(DropFlowerCommand(game_id="g3"))
+    drop_res = drop_uc.execute(DropFlowerCommand(game_id="g3", direction=Direction.NORTH))
     assert isinstance(drop_res.success, bool)
 
     # give - likely fail unless robot adjacent to princess and holding flowers; just ensure it runs
     give_uc = GiveFlowersUseCase(repo)
-    give_res = give_uc.execute(GiveFlowersCommand(game_id="g3"))
+    give_res = give_uc.execute(GiveFlowersCommand(game_id="g3", direction=Direction.NORTH))
     assert isinstance(give_res.success, bool)

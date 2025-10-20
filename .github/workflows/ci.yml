@@ -11,10 +11,10 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
 
@@ -37,7 +37,7 @@ jobs:
           poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-unit.xml tests/unit
 
       - name: Upload unit coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-unit
           path: |
@@ -48,10 +48,10 @@ jobs:
     name: Integration tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
 
@@ -74,7 +74,7 @@ jobs:
           poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-integration.xml tests/integration
 
       - name: Upload integration coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-integration
           path: |
@@ -85,10 +85,10 @@ jobs:
     name: Component tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
 
@@ -111,7 +111,7 @@ jobs:
           poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-component.xml tests/component/test_autoplay_end_to_end.py
 
       - name: Upload component coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-component
           path: |
@@ -123,10 +123,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit, integration, component]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
 
@@ -142,7 +142,7 @@ jobs:
           poetry install --only dev --no-interaction --no-ansi
 
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
           path: coverage-artifacts
 
@@ -162,13 +162,13 @@ jobs:
           poetry run coverage html -d .coverage/coverage_html
 
       - name: Upload HTML coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage_html
           path: .coverage/coverage_html
 
       - name: Upload combined coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-combined
           path: .coverage/coverage-combined.xml
@@ -179,7 +179,7 @@ jobs:
       - coverage_quality
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -207,7 +207,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Build Docker image
       run: docker build -t robot-flower-princess:test .

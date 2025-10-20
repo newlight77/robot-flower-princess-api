@@ -4,7 +4,7 @@
 
 SHELL := /bin/sh
 
-.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-e2e coverage-combine clean clean-poetry 
+.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-e2e coverage-combine clean clean-poetry
 
 # Prefer `.venv/bin/python -m` if a local venv exists; otherwise prefer `poetry run` when poetry is installed
 VENV_PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || true)
@@ -45,6 +45,15 @@ test:
 test-cov:
 	poetry run pytest --cov=src/robot_flower_princess --cov-report=html --cov-report=term
 
+test-unit:
+	poetry run pytest tests/unit
+
+test-integration:
+	poetry run pytest tests/integration
+
+test-e2e:
+	poetry run pytest tests/e2e
+
 coverage-unit:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
 	@test -d .coverage || mkdir -p .coverage
@@ -58,7 +67,7 @@ coverage-integration:
 coverage-e2e:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
 	@test -d .coverage || mkdir -p .coverage
-	COVERAGE_FILE=.coverage/.coverage.e2e $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-e2e.xml tests/integration/test_autoplay_end_to_end.py
+COVERAGE_FILE=.coverage/.coverage.e2e $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-e2e.xml tests/e2e/test_autoplay_end_to_end.py
 
 coverage-combine:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
@@ -97,10 +106,10 @@ docker-down:
 
 
 clean-poetry:
- 	POETRY_LOCATION=`poetry env info -p` || true
- 	echo "Poetry is $$POETRY_LOCATION"
- 	rm -rf "$$POETRY_LOCATION" || true
- 	poetry env remove --all || true
+	POETRY_LOCATION=`poetry env info -p` || true
+	echo "Poetry is $$POETRY_LOCATION"
+	rm -rf "$$POETRY_LOCATION" || true
+	poetry env remove --all || true
 
 clean:
 	# Repo-level cleanup (pyc, caches, coverage files)

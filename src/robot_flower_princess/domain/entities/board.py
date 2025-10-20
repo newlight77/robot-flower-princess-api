@@ -5,6 +5,9 @@ from .robot import Robot
 from .cell import CellType
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
+from ...logging import get_logger
+
+logger = get_logger("Board")
 
 
 @dataclass
@@ -20,6 +23,7 @@ class Board:
 
     def __post_init__(self) -> None:
         self.initial_flower_count = len(self.flowers)
+        logger.debug("Board.__post_init__ rows=%s cols=%s initial_flowers=%s", self.rows, self.cols, self.initial_flower_count)
 
     @classmethod
     def create(cls, rows: int, cols: int) -> "Board":
@@ -62,6 +66,7 @@ class Board:
 
     def get_cell_type(self, position: Position) -> CellType:
         """Get the type of cell at the given position."""
+        logger.debug("get_cell_type position=%s", position)
         if position == self.robot.position:
             return CellType.ROBOT
         if position == self.princess_position:
@@ -74,20 +79,29 @@ class Board:
 
     def is_valid_position(self, position: Position) -> bool:
         """Check if a position is within board boundaries."""
-        return 0 <= position.row < self.rows and 0 <= position.col < self.cols
+        valid = 0 <= position.row < self.rows and 0 <= position.col < self.cols
+        logger.debug("is_valid_position position=%s valid=%s", position, valid)
+        return valid
 
     def is_empty(self, position: Position) -> bool:
         """Check if a position is empty."""
-        return self.get_cell_type(position) == CellType.EMPTY
+        empty = self.get_cell_type(position) == CellType.EMPTY
+        logger.debug("is_empty position=%s empty=%s", position, empty)
+        return empty
 
     def get_status(self) -> GameStatus:
         """Determine the current game status."""
-        if self.flowers_delivered == self.initial_flower_count and self.initial_flower_count > 0:
-            return GameStatus.VICTORY
-        return GameStatus.IN_PROGRESS
+        status = (
+            GameStatus.VICTORY
+            if self.flowers_delivered == self.initial_flower_count and self.initial_flower_count > 0
+            else GameStatus.IN_PROGRESS
+        )
+        logger.debug("get_status flowers_delivered=%s initial=%s status=%s", self.flowers_delivered, self.initial_flower_count, status)
+        return status
 
     def to_dict(self) -> dict:
         """Convert board to dictionary representation."""
+        logger.debug("to_dict rows=%s cols=%s", self.rows, self.cols)
         grid = []
         for r in range(self.rows):
             row = []

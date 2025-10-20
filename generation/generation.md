@@ -427,12 +427,12 @@ Open your browser to:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/games/{game_id}/actions/rotate` | Rotate robot to face direction |
-| `POST` | `/api/v1/games/{game_id}/actions/move` | Move robot forward |
-| `POST` | `/api/v1/games/{game_id}/actions/pick` | Pick up a flower |
-| `POST` | `/api/v1/games/{game_id}/actions/drop` | Drop a flower |
-| `POST` | `/api/v1/games/{game_id}/actions/give` | Give flowers to princess |
-| `POST` | `/api/v1/games/{game_id}/actions/clean` | Clean an obstacle |
+| `POST` | `/api/v1/games/{game_id}/action/rotate` | Rotate robot to face direction |
+| `POST` | `/api/v1/games/{game_id}/action/move` | Move robot forward |
+| `POST` | `/api/v1/games/{game_id}/action/pick` | Pick up a flower |
+| `POST` | `/api/v1/games/{game_id}/action/drop` | Drop a flower |
+| `POST` | `/api/v1/games/{game_id}/action/give` | Give flowers to princess |
+| `POST` | `/api/v1/games/{game_id}/action/clean` | Clean an obstacle |
 
 #### AI Features
 
@@ -480,7 +480,7 @@ curl -X POST "http://localhost:8000/api/v1/games/" \
 #### Rotate Robot
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/rotate" \
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/rotate" \
   -H "Content-Type: application/json" \
   -d '{"direction": "south"}'
 ```
@@ -488,19 +488,19 @@ curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/rotate" \
 #### Move Robot
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/move"
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/move"
 ```
 
 #### Pick Flower
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/pick"
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/pick"
 ```
 
 #### Give Flowers to Princess
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/give"
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/give"
 ```
 
 #### AI Autoplay

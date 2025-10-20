@@ -7,7 +7,7 @@ def test_move_with_helpers(client, make_empty_board, save_board):
     # place robot at center facing north
     save_board(game_id, board)
 
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "move", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"})
     assert resp.status_code == 200
     data = resp.json()
     # if move succeeded, robot moved to row 0, col 1
@@ -26,16 +26,16 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     save_board(game_id, board)
 
     # pick
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "pickFlower", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "pickFlower", "direction": "north"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
     assert data["board"]["robot"]["flowers_held"] > 0
 
     # rotate to south and drop
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
     assert resp.status_code == 200
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "dropFlower", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "dropFlower", "direction": "south"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
@@ -54,7 +54,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     b.robot.flowers_held = 1
     repo.save(game_id, b)
 
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "giveFlower", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "giveFlower", "direction": "south"})
     assert resp.status_code == 200
     data = resp.json()
     assert "success" in data
@@ -74,9 +74,9 @@ def test_clean_with_helpers(client, make_empty_board, save_board, place_obstacle
     save_board(game_id, board)
 
     # rotate to north and clean
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "north"})
     assert resp.status_code == 200
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "north"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True

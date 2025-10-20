@@ -5,6 +5,7 @@ from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action, GameHistory
 from ...domain.exceptions.game_exceptions import GameException
 from ...domain.value_objects.direction import Direction
+from ...logging import get_logger
 
 
 @dataclass
@@ -22,10 +23,13 @@ class PickFlowerResult:
 
 class PickFlowerUseCase:
     def __init__(self, repository: GameRepository):
+        self.logger = get_logger(self)
+        self.logger.debug("Initializing PickFlowerUseCase repository=%r", repository)
         self.repository = repository
 
     def execute(self, command: PickFlowerCommand) -> PickFlowerResult:
         """Pick a flower from an adjacent cell."""
+        self.logger.info("execute: PickFlowerCommand game_id=%s direction=%s", command.game_id, command.direction)
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")

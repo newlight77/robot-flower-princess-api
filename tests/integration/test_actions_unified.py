@@ -5,7 +5,7 @@ def test_rotate_changes_orientation(client, create_game):
     game_id, board = create_game()
     old_orientation = board["robot"]["orientation"]
 
-    resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
@@ -38,7 +38,7 @@ def test_clean_removes_obstacle(client, create_game):
         # if no obstacle adjacent, perform a clean (frontend always sends direction)
         current_dir = board["robot"]["orientation"]
         resp = client.post(
-            f"/api/games/{game_id}/actions", json={"action": "clean", "direction": current_dir}
+            f"/api/games/{game_id}/action", json={"action": "clean", "direction": current_dir}
         )
         assert resp.status_code == 200
         # success could be True or False depending on adjacency; ensure response shape
@@ -55,9 +55,9 @@ def test_clean_removes_obstacle(client, create_game):
         else:
             direction = "east"
 
-        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "rotate", "direction": direction})
+        resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": direction})
         assert resp.status_code == 200
-        resp = client.post(f"/api/games/{game_id}/actions", json={"action": "clean", "direction": direction})
+        resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": direction})
         assert resp.status_code == 200
         data = resp.json()
         assert data["success"] is True

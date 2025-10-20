@@ -9,6 +9,9 @@ from ..exceptions.game_exceptions import (
     InvalidGiveException,
     InvalidCleanException,
 )
+from ...logging import get_logger
+
+logger = get_logger("GameService")
 
 
 class GameService:
@@ -17,6 +20,7 @@ class GameService:
     @staticmethod
     def rotate_robot(board: Board, direction: Direction) -> None:
         """Rotate the robot to face a direction."""
+        logger.info("rotate_robot: board_id=%r direction=%s", getattr(board, 'id', None), direction)
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
 

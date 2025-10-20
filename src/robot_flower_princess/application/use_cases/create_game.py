@@ -3,6 +3,7 @@ import uuid
 from ..ports.game_repository import GameRepository
 from ...domain.entities.board import Board
 from ...domain.entities.game_history import GameHistory
+from ...logging import get_logger
 
 
 @dataclass
@@ -19,10 +20,13 @@ class CreateGameResult:
 
 class CreateGameUseCase:
     def __init__(self, repository: GameRepository):
+        self.logger = get_logger(self)
+        self.logger.debug("Initializing CreateGameUseCase repository=%r", repository)
         self.repository = repository
 
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         """Create a new game with the specified board size."""
+        self.logger.info("execute: CreateGameCommand rows=%s cols=%s", command.rows, command.cols)
         board = Board.create(rows=command.rows, cols=command.cols)
         game_id = str(uuid.uuid4())
 

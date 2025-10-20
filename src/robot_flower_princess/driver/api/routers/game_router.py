@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import Any, cast
+from ....logging import get_logger
+
 from ..schemas.game_schema import (
     CreateGameRequest,
     ActionRequest,
@@ -25,6 +27,7 @@ from ....domain.value_objects.direction import Direction
 
 router = APIRouter(prefix="/api/games", tags=["games"])
 
+logger = get_logger("game_router")
 
 @router.post("/", response_model=GameStateResponse, status_code=201)
 def create_game(
@@ -32,6 +35,9 @@ def create_game(
     repository: GameRepository = Depends(get_game_repository),
 ) -> GameStateResponse:
     """Create a new game with specified board size."""
+
+    logger.info("get_games: rows=%s cols=%s", request.rows, request.cols)
+
     try:
         use_case = CreateGameUseCase(repository)
         result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols))
@@ -51,6 +57,9 @@ def get_games(
     repository: GameRepository = Depends(get_game_repository),
 ) -> GamesResponse:
     """Get the last N games, optionally filtered by status."""
+
+    logger.info("get_games: limit=%s status=%s", limit, status)
+
     try:
         use_case = GetGamesUseCase(repository)
         result = use_case.execute(GetGamesQuery(limit=limit, status=status))
@@ -74,6 +83,9 @@ def get_game_state(
     repository: GameRepository = Depends(get_game_repository),
 ) -> GameStateResponse:
     """Get the current state of a game."""
+
+    logger.info("get_game_state: game_id=%s", game_id)
+
     try:
         use_case = GetGameStateUseCase(repository)
         result = use_case.execute(GetGameStateQuery(game_id=game_id))
@@ -92,6 +104,9 @@ def get_game_history(
     repository: GameRepository = Depends(get_game_repository),
 ) -> GameHistoryResponse:
     """Get the history of a game."""
+
+    logger.info("get_game_history: game_id=%s", game_id)
+
     try:
         use_case = GetGameHistoryUseCase(repository)
         result = use_case.execute(GetGameHistoryQuery(game_id=game_id))
@@ -103,10 +118,11 @@ def get_game_history(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions", response_model=ActionResponse)
+@router.post("/{game_id}/action", response_model=ActionResponse)
 def perform_action(
     game_id: str,
-    request: ActionRequest = Body(
+    request: ActionRequest
+      = Body(
         ...,
         examples=cast(
             Any,
@@ -122,13 +138,17 @@ def perform_action(
                 "clean": {"summary": "Clean obstacle", "value": {"action": "clean", "direction": "south"}},
             },
         ),
-    ),
+    )
+    ,
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.
 
     If action is 'rotate', provide a 'direction' field.
     """
+
+    logger.info("perform_action: game_id=%s and action=%s and direction=%s", game_id, request.action.name, request.direction)
+
     try:
         action = request.action
 
@@ -175,6 +195,9 @@ def autoplay(
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
     """Let AI solve the game automatically."""
+
+    logger.info("autoplay: game_id=%s", game_id)
+
     try:
         from ....application.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 

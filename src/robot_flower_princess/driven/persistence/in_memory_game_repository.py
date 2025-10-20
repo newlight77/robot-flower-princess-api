@@ -2,6 +2,9 @@ from typing import Optional, Dict, List
 from ...application.ports.game_repository import GameRepository
 from ...domain.entities.board import Board
 from ...domain.entities.game_history import GameHistory
+from ...logging import get_logger
+
+logger = get_logger("InMemoryGameRepository")
 
 
 class InMemoryGameRepository(GameRepository):
@@ -10,30 +13,39 @@ class InMemoryGameRepository(GameRepository):
     def __init__(self) -> None:
         self._games: Dict[str, Board] = {}
         self._histories: Dict[str, GameHistory] = {}
+        logger.debug("InMemoryGameRepository initialized")
 
     def save(self, game_id: str, board: Board) -> None:
+        logger.info("save game_id=%s", game_id)
         self._games[game_id] = board
 
     def get(self, game_id: str) -> Optional[Board]:
+        logger.debug("get game_id=%s found=%s", game_id, game_id in self._games)
         return self._games.get(game_id)
 
     def delete(self, game_id: str) -> None:
+        logger.info("delete game_id=%s", game_id)
         if game_id in self._games:
             del self._games[game_id]
         if game_id in self._histories:
             del self._histories[game_id]
 
     def exists(self, game_id: str) -> bool:
-        return game_id in self._games
+        exists = game_id in self._games
+        logger.debug("exists game_id=%s exists=%s", game_id, exists)
+        return exists
 
     def save_history(self, game_id: str, history: GameHistory) -> None:
+        logger.info("save_history game_id=%s entries=%s", game_id, len(history.actions) if history else 0)
         self._histories[game_id] = history
 
     def get_history(self, game_id: str) -> Optional[GameHistory]:
+        logger.debug("get_history game_id=%s found=%s", game_id, game_id in self._histories)
         return self._histories.get(game_id)
 
     def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Board]]:
         """Get the last N games, optionally filtered by status."""
+        logger.info("get_games limit=%s status=%s", limit, status)
         filtered_games = []
         for game_id, board in self._games.items():
             board_status = board.get_status()

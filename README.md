@@ -72,7 +72,7 @@ Once running, visit:
 
 #### Actions
 The API now exposes a single unified actions endpoint.
--- `POST /api/games/{game_id}/actions` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction is required for all actions)
+-- `POST /api/games/{game_id}/action` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction is required for all actions)
 
 #### AI Player
 - `POST /api/games/{game_id}/autoplay` - Let AI solve the game
@@ -127,14 +127,14 @@ curl -X POST "http://localhost:8000/api/games" \
 
 ### Rotate Robot
 ```bash
-curl -X POST "http://localhost:8000/api/games/{game_id}/actions/rotate" \
+curl -X POST "http://localhost:8000/api/games/{game_id}/action/rotate" \
   -H "Content-Type: application/json" \
   -d '{"direction": "south"}'
 ```
 
 ### Move Robot
 ```bash
-curl -X POST "http://localhost:8000/api/games/{game_id}/actions/move"
+curl -X POST "http://localhost:8000/api/games/{game_id}/action/move"
 ```
 
 ### Auto-Play

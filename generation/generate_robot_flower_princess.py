@@ -381,12 +381,12 @@ Once running, visit:
 - `GET /api/v1/games/{game_id}/history` - Get move history
 
 #### Actions
-- `POST /api/v1/games/{game_id}/actions/rotate` - Rotate robot
-- `POST /api/v1/games/{game_id}/actions/move` - Move robot
-- `POST /api/v1/games/{game_id}/actions/pick` - Pick flower
-- `POST /api/v1/games/{game_id}/actions/drop` - Drop flower
-- `POST /api/v1/games/{game_id}/actions/give` - Give flowers to princess
-- `POST /api/v1/games/{game_id}/actions/clean` - Clean obstacle
+- `POST /api/v1/games/{game_id}/action/rotate` - Rotate robot
+- `POST /api/v1/games/{game_id}/action/move` - Move robot
+- `POST /api/v1/games/{game_id}/action/pick` - Pick flower
+- `POST /api/v1/games/{game_id}/action/drop` - Drop flower
+- `POST /api/v1/games/{game_id}/action/give` - Give flowers to princess
+- `POST /api/v1/games/{game_id}/action/clean` - Clean obstacle
 
 #### AI Player
 - `POST /api/v1/games/{game_id}/autoplay` - Let AI solve the game
@@ -431,14 +431,14 @@ curl -X POST "http://localhost:8000/api/v1/games" \\
 
 ### Rotate Robot
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/rotate" \\
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/rotate" \\
   -H "Content-Type: application/json" \\
   -d '{"direction": "south"}'
 ```
 
 ### Move Robot
 ```bash
-curl -X POST "http://localhost:8000/api/v1/games/{game_id}/actions/move"
+curl -X POST "http://localhost:8000/api/v1/games/{game_id}/action/move"
 ```
 
 ### Auto-Play
@@ -1724,7 +1724,7 @@ def get_game_history(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/rotate", response_model=ActionResponse)
+@router.post("/{game_id}/action/rotate", response_model=ActionResponse)
 def rotate_robot(
     game_id: str,
     request: RotateRequest,
@@ -1747,7 +1747,7 @@ def rotate_robot(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/move", response_model=ActionResponse)
+@router.post("/{game_id}/action/move", response_model=ActionResponse)
 def move_robot(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
@@ -1766,7 +1766,7 @@ def move_robot(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/pick", response_model=ActionResponse)
+@router.post("/{game_id}/action/pick", response_model=ActionResponse)
 def pick_flower(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
@@ -1785,7 +1785,7 @@ def pick_flower(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/drop", response_model=ActionResponse)
+@router.post("/{game_id}/action/drop", response_model=ActionResponse)
 def drop_flower(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
@@ -1804,7 +1804,7 @@ def drop_flower(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/give", response_model=ActionResponse)
+@router.post("/{game_id}/action/give", response_model=ActionResponse)
 def give_flowers(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
@@ -1823,7 +1823,7 @@ def give_flowers(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/clean", response_model=ActionResponse)
+@router.post("/{game_id}/action/clean", response_model=ActionResponse)
 def clean_obstacle(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
@@ -2241,7 +2241,7 @@ def test_rotate_robot():
     game_id = create_response.json()["game_id"]
 
     response = client.post(
-        f"/api/v1/games/{game_id}/actions/rotate",
+        f"/api/v1/games/{game_id}/action/rotate",
         json={"direction": "south"}
     )
     assert response.status_code == 200

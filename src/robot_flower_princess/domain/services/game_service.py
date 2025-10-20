@@ -1,7 +1,7 @@
-from ..entities.board import Board
-from ..value_objects.direction import Direction
-from ..value_objects.game_status import GameStatus
-from ..exceptions.game_exceptions import (
+from ..core.entities.board import Board
+from ..core.value_objects.direction import Direction
+from ..core.value_objects.game_status import GameStatus
+from ..core.exceptions.game_exceptions import (
     InvalidMoveException,
     GameOverException,
     InvalidPickException,

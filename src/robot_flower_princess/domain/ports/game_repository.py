@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
-from ...domain.entities.board import Board
-from ...domain.entities.game_history import GameHistory
+
+from ..core.entities.board import Board
+from ..core.entities.game_history import GameHistory
 
 
 class GameRepository(ABC):

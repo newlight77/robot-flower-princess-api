@@ -3,7 +3,7 @@ from collections import deque
 from .board import Board
 from .position import Position
 from ..value_objects.direction import Direction
-from ..services.game_service import GameService
+from ...services.game_service import GameService
 
 
 class GameSolverPlayer:

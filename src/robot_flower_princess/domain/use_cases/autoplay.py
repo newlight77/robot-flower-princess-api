@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from copy import deepcopy
 from ..ports.game_repository import GameRepository
-from ...domain.entities.game_solver_player import GameSolverPlayer
-from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action, GameHistory
+from ..core.entities.game_solver_player import GameSolverPlayer
+from ..core.value_objects.action_type import ActionType
+from ..core.entities.game_history import Action, GameHistory
 from ...logging import get_logger
 
 

@@ -12,18 +12,18 @@ from ..schemas.game_schema import (
     GamesResponse,
 )
 from ....configurator.dependencies import get_game_repository
-from ....application.ports.game_repository import GameRepository
-from ....application.use_cases.create_game import CreateGameUseCase, CreateGameCommand
-from ....application.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
-from ....application.use_cases.get_game_history import GetGameHistoryUseCase, GetGameHistoryQuery
-from ....application.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
-from ....application.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
-from ....application.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
-from ....application.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
-from ....application.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
-from ....application.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
-from ....application.use_cases.get_games import GetGamesUseCase, GetGamesQuery
-from ....domain.value_objects.direction import Direction
+from ....domain.ports.game_repository import GameRepository
+from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
+from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
+from ....domain.use_cases.get_game_history import GetGameHistoryUseCase, GetGameHistoryQuery
+from ....domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
+from ....domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
+from ....domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
+from ....domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
+from ....domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
+from ....domain.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
+from ....domain.use_cases.get_games import GetGamesUseCase, GetGamesQuery
+from ....domain.core.value_objects.direction import Direction
 
 router = APIRouter(prefix="/api/games", tags=["games"])
 

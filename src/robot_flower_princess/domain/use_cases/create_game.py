@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 import uuid
 from ..ports.game_repository import GameRepository
-from ...domain.entities.board import Board
-from ...domain.entities.game_history import GameHistory
+from ..core.entities.board import Board
+from ..core.entities.game_history import GameHistory
 from ...logging import get_logger
 
 

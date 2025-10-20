@@ -5,7 +5,7 @@ from .robot import Robot
 from .cell import CellType
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
-from ...logging import get_logger
+from ....logging import get_logger
 
 logger = get_logger("Board")
 

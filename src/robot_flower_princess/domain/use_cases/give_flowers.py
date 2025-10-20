@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
-from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action, GameHistory
-from ...domain.exceptions.game_exceptions import GameException
-from ...domain.value_objects.direction import Direction
+from ..core.value_objects.action_type import ActionType
+from ..core.entities.game_history import Action, GameHistory
+from ..core.exceptions.game_exceptions import GameException
+from ..core.value_objects.direction import Direction
 from ...logging import get_logger
 
 

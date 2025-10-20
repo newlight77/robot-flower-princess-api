@@ -1,35 +1,35 @@
 from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
-from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action, GameHistory
-from ...domain.exceptions.game_exceptions import GameException
-from ...domain.value_objects.direction import Direction
+from ..core.value_objects.action_type import ActionType
+from ..core.entities.game_history import Action, GameHistory
+from ..core.exceptions.game_exceptions import GameException
+from ..core.value_objects.direction import Direction
 from ...logging import get_logger
 
 
 @dataclass
-class DropFlowerCommand:
+class PickFlowerCommand:
     game_id: str
     direction: Direction
 
 
 @dataclass
-class DropFlowerResult:
+class PickFlowerResult:
     success: bool
     board_state: dict
     message: str
 
 
-class DropFlowerUseCase:
+class PickFlowerUseCase:
     def __init__(self, repository: GameRepository):
         self.logger = get_logger(self)
-        self.logger.debug("Initializing DropFlowerUseCase repository=%r", repository)
+        self.logger.debug("Initializing PickFlowerUseCase repository=%r", repository)
         self.repository = repository
 
-    def execute(self, command: DropFlowerCommand) -> DropFlowerResult:
-        """Drop a flower on an adjacent empty cell."""
-        self.logger.info("execute: DropFlowerCommand game_id=%s direction=%s", command.game_id, command.direction)
+    def execute(self, command: PickFlowerCommand) -> PickFlowerResult:
+        """Pick a flower from an adjacent cell."""
+        self.logger.info("execute: PickFlowerCommand game_id=%s direction=%s", command.game_id, command.direction)
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -39,31 +39,32 @@ class DropFlowerUseCase:
             history = GameHistory()
 
         try:
+            # rotate robot to the requested direction first
             GameService.rotate_robot(board, command.direction)
-            GameService.drop_flower(board)
+            GameService.pick_flower(board)
             self.repository.save(command.game_id, board)
 
             action = Action(
-                action_type=ActionType.DROP,
+                action_type=ActionType.PICK,
                 direction=command.direction,
                 success=True,
-                message=f"Dropped flower (holding {board.robot.flowers_held})",
+                message=f"Picked flower (holding {board.robot.flowers_held})",
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
-            return DropFlowerResult(
+            return PickFlowerResult(
                 success=True,
                 board_state=board.to_dict(),
-                message=f"Flower dropped successfully (holding {board.robot.flowers_held})",
+                message=f"Flower picked successfully (holding {board.robot.flowers_held})",
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.DROP, direction=command.direction, success=False, message=str(e)
+                action_type=ActionType.PICK, direction=command.direction, success=False, message=str(e)
             )
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
-            return DropFlowerResult(
+            return PickFlowerResult(
                 success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
             )

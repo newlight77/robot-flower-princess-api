@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from copy import deepcopy
 from ..ports.game_repository import GameRepository
-from ...infrastructure.ai.solver import GameSolver
+from ...domain.entities.game_solver_player import GameSolverPlayer
 from ...domain.value_objects.action_type import ActionType
 from ...domain.entities.game_history import Action, GameHistory
 
@@ -38,7 +38,7 @@ class AutoplayUseCase:
 
         try:
             # Get solution from AI
-            actions = GameSolver.solve(board_copy)
+            actions = GameSolverPlayer.solve(board_copy)
 
             # Apply actions to original board
             from ...domain.services.game_service import GameService

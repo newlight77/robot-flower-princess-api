@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from robot_flower_princess.domain.entities.position import Position
 from robot_flower_princess.domain.entities.robot import Robot
 from robot_flower_princess.domain.entities.board import Board

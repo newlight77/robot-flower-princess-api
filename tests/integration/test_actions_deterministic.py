@@ -1,6 +1,6 @@
 import pytest
 
-from robot_flower_princess.infrastructure.api.dependencies import get_game_repository
+from robot_flower_princess.configurator.dependencies import get_game_repository
 from robot_flower_princess.domain.entities.position import Position
 from robot_flower_princess.domain.value_objects.direction import Direction
 

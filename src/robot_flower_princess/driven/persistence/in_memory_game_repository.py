@@ -32,7 +32,7 @@ class InMemoryGameRepository(GameRepository):
     def get_history(self, game_id: str) -> Optional[GameHistory]:
         return self._histories.get(game_id)
 
-    def get_games(self, limit: int = 10, status: str = None) -> List[tuple[str, Board]]:
+    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Board]]:
         """Get the last N games, optionally filtered by status."""
         filtered_games = []
         for game_id, board in self._games.items():

@@ -1,6 +1,6 @@
 from functools import lru_cache
-from ..persistence.in_memory_game_repository import InMemoryGameRepository
-from ...application.ports.game_repository import GameRepository
+from ..driven.persistence.in_memory_game_repository import InMemoryGameRepository
+from ..application.ports.game_repository import GameRepository
 
 
 @lru_cache()

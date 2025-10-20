@@ -9,7 +9,7 @@ from ..schemas.game_schema import (
     GameHistoryResponse,
     GamesResponse,
 )
-from ..dependencies import get_game_repository
+from ....configurator.dependencies import get_game_repository
 from ....application.ports.game_repository import GameRepository
 from ....application.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....application.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery

@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from robot_flower_princess.main import app
-from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import (
+from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 from robot_flower_princess.domain.entities.position import Position
@@ -26,7 +26,7 @@ def test_autoplay_end_to_end():
     repo.save_history(game_id, GameHistory())
 
     # Temporarily override the app dependency to use our repo
-    from robot_flower_princess.infrastructure.api.dependencies import get_game_repository
+    from robot_flower_princess.configurator.dependencies import get_game_repository
 
     # Save any existing override and set our test override
     original_override = app.dependency_overrides.get(get_game_repository)

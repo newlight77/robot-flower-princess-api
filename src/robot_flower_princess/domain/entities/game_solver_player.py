@@ -1,12 +1,12 @@
 from typing import List, Optional, Tuple
 from collections import deque
-from ...domain.entities.board import Board
-from ...domain.entities.position import Position
-from ...domain.value_objects.direction import Direction
-from ...domain.services.game_service import GameService
+from .board import Board
+from .position import Position
+from ..value_objects.direction import Direction
+from ..services.game_service import GameService
 
 
-class GameSolver:
+class GameSolverPlayer:
     """AI solver for the game using BFS."""
 
     @staticmethod
@@ -23,12 +23,12 @@ class GameSolver:
                 board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0
             ):
                 # Navigate to princess
-                path = GameSolver._find_path(board, board.robot.position, board.princess_position)
+                path = GameSolverPlayer._find_path(board, board.robot.position, board.princess_position)
                 if not path:
                     break
 
                 for next_pos in path:
-                    direction = GameSolver._get_direction(board.robot.position, next_pos)
+                    direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
                     actions.append(("rotate", direction))
                     GameService.rotate_robot(board, direction)
 
@@ -36,7 +36,7 @@ class GameSolver:
                     GameService.move_robot(board)
 
                 # Face princess and give flowers
-                direction = GameSolver._get_direction(board.robot.position, board.princess_position)
+                direction = GameSolverPlayer._get_direction(board.robot.position, board.princess_position)
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
 
@@ -51,7 +51,7 @@ class GameSolver:
                 )
 
                 # Navigate adjacent to flower
-                adjacent_positions = GameSolver._get_adjacent_positions(nearest_flower, board)
+                adjacent_positions = GameSolverPlayer._get_adjacent_positions(nearest_flower, board)
                 if not adjacent_positions:
                     break
 
@@ -59,12 +59,12 @@ class GameSolver:
                     adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p)
                 )
 
-                path = GameSolver._find_path(board, board.robot.position, target)
+                path = GameSolverPlayer._find_path(board, board.robot.position, target)
                 if not path:
                     break
 
                 for next_pos in path:
-                    direction = GameSolver._get_direction(board.robot.position, next_pos)
+                    direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
                     actions.append(("rotate", direction))
                     GameService.rotate_robot(board, direction)
 
@@ -72,7 +72,7 @@ class GameSolver:
                     GameService.move_robot(board)
 
                 # Face flower and pick it
-                direction = GameSolver._get_direction(board.robot.position, nearest_flower)
+                direction = GameSolverPlayer._get_direction(board.robot.position, nearest_flower)
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
 

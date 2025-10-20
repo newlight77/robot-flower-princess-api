@@ -1,6 +1,6 @@
 import pytest
 
-from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import (
+from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 from robot_flower_princess.domain.entities.position import Position

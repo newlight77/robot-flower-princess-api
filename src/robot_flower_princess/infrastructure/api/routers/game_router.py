@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from ..schemas.game_schema import (
     CreateGameRequest,
-    RotateRequest,
+    ActionRequest,
+    ActionType,
     GameStateResponse,
     ActionResponse,
     GameHistoryResponse,
@@ -101,17 +102,44 @@ def get_game_history(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/rotate", response_model=ActionResponse)
-def rotate_robot(
+@router.post("/{game_id}/actions", response_model=ActionResponse)
+def perform_action(
     game_id: str,
-    request: RotateRequest,
+    request: ActionRequest,
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
-    """Rotate the robot to face a direction."""
+    """Perform an action on the game. The request.action selects the operation.
+
+    If action is 'rotate', provide a 'direction' field.
+    """
     try:
-        use_case = RotateRobotUseCase(repository)
-        direction = Direction(request.direction)
-        result = use_case.execute(RotateRobotCommand(game_id=game_id, direction=direction))
+        action = request.action
+
+        if action == ActionType.rotate:
+            # rotate expects a direction
+            if not request.direction:
+                raise ValueError("Missing direction for rotate action")
+            use_case = RotateRobotUseCase(repository)
+            direction = Direction(request.direction)
+            result = use_case.execute(RotateRobotCommand(game_id=game_id, direction=direction))
+        elif action == ActionType.move:
+            use_case = MoveRobotUseCase(repository)
+            result = use_case.execute(MoveRobotCommand(game_id=game_id))
+        elif action == ActionType.pickFlower:
+            use_case = PickFlowerUseCase(repository)
+            result = use_case.execute(PickFlowerCommand(game_id=game_id))
+        elif action == ActionType.dropFlower:
+            use_case = DropFlowerUseCase(repository)
+            result = use_case.execute(DropFlowerCommand(game_id=game_id))
+        elif action == ActionType.giveFlower:
+            use_case = GiveFlowersUseCase(repository)
+            result = use_case.execute(GiveFlowersCommand(game_id=game_id))
+        elif action == ActionType.clean:
+            use_case = CleanObstacleUseCase(repository)
+            result = use_case.execute(CleanObstacleCommand(game_id=game_id))
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
         return ActionResponse(
             success=result.success,
             id=game_id,
@@ -122,99 +150,7 @@ def rotate_robot(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/{game_id}/actions/move", response_model=ActionResponse)
-def move_robot(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Move the robot in the direction it's facing."""
-    try:
-        use_case = MoveRobotUseCase(repository)
-        result = use_case.execute(MoveRobotCommand(game_id=game_id))
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            board=result.board_state,
-            message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
 
-
-@router.post("/{game_id}/actions/pick", response_model=ActionResponse)
-def pick_flower(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Pick a flower from an adjacent cell."""
-    try:
-        use_case = PickFlowerUseCase(repository)
-        result = use_case.execute(PickFlowerCommand(game_id=game_id))
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            board=result.board_state,
-            message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.post("/{game_id}/actions/drop", response_model=ActionResponse)
-def drop_flower(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Drop a flower on an adjacent empty cell."""
-    try:
-        use_case = DropFlowerUseCase(repository)
-        result = use_case.execute(DropFlowerCommand(game_id=game_id))
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            board=result.board_state,
-            message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.post("/{game_id}/actions/give", response_model=ActionResponse)
-def give_flowers(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Give flowers to the princess."""
-    try:
-        use_case = GiveFlowersUseCase(repository)
-        result = use_case.execute(GiveFlowersCommand(game_id=game_id))
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            board=result.board_state,
-            message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.post("/{game_id}/actions/clean", response_model=ActionResponse)
-def clean_obstacle(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Clean an obstacle in the direction faced."""
-    try:
-        use_case = CleanObstacleUseCase(repository)
-        result = use_case.execute(CleanObstacleCommand(game_id=game_id))
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            board=result.board_state,
-            message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.post("/{game_id}/autoplay", response_model=ActionResponse)

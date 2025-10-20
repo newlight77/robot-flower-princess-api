@@ -1,4 +1,4 @@
-from robot_flower_princess.domain.entities.position import Position
+from robot_flower_princess.domain.core.entities.position import Position
 
 
 def test_position_creation():

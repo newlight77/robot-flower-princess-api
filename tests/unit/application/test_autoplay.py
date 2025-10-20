@@ -2,13 +2,12 @@ import pytest
 from unittest.mock import patch
 
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.entities.board import Board
-from robot_flower_princess.domain.entities.game_history import GameHistory
-from robot_flower_princess.domain.value_objects.direction import Direction
-
-from robot_flower_princess.application.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
+from robot_flower_princess.domain.core.entities.position import Position
+from robot_flower_princess.domain.core.entities.robot import Robot
+from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.value_objects.direction import Direction
+from robot_flower_princess.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
 
 def make_small_board():
@@ -27,7 +26,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
     repo.save_history("a1", GameHistory())
 
     # stub solver to rotate north then move
-    with patch("robot_flower_princess.domain.entities.game_solver_player.GameSolverPlayer.solve", return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)]):
+    with patch("robot_flower_princess.domain.core.entities.game_solver_player.GameSolverPlayer.solve", return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)]):
         use_case = AutoplayUseCase(repo)
         res = use_case.execute(AutoplayCommand(game_id="a1"))
 
@@ -50,7 +49,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo.save("a2", board)
     repo.save_history("a2", GameHistory())
 
-    with patch("robot_flower_princess.domain.entities.game_solver_player.GameSolverPlayer.solve", side_effect=Exception("solver fail")):
+    with patch("robot_flower_princess.domain.core.entities.game_solver_player.GameSolverPlayer.solve", side_effect=Exception("solver fail")):
         use_case = AutoplayUseCase(repo)
         res = use_case.execute(AutoplayCommand(game_id="a2"))
 

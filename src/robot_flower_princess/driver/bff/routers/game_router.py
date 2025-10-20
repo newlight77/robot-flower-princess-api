@@ -199,7 +199,7 @@ def autoplay(
     logger.info("autoplay: game_id=%s", game_id)
 
     try:
-        from ....application.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
+        from ....domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
         use_case = AutoplayUseCase(repository)
         result = use_case.execute(AutoplayCommand(game_id=game_id))

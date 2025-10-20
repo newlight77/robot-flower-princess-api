@@ -3,11 +3,11 @@ from typing import Callable
 from fastapi.testclient import TestClient
 
 from robot_flower_princess.main import app
-from robot_flower_princess.domain.entities.board import Board
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.entities.game_history import GameHistory
-from robot_flower_princess.domain.value_objects.direction import Direction
+from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.position import Position
+from robot_flower_princess.domain.core.entities.robot import Robot
+from robot_flower_princess.domain.core.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.value_objects.direction import Direction
 from robot_flower_princess.configurator.dependencies import get_game_repository
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 
@@ -55,10 +55,10 @@ def save_board(repo):
 
 @pytest.fixture
 def make_empty_board():
-    from robot_flower_princess.domain.entities.board import Board
-    from robot_flower_princess.domain.entities.position import Position
-    from robot_flower_princess.domain.entities.robot import Robot
-    from robot_flower_princess.domain.value_objects.direction import Direction
+    from robot_flower_princess.domain.core.entities.board import Board
+    from robot_flower_princess.domain.core.entities.position import Position
+    from robot_flower_princess.domain.core.entities.robot import Robot
+    from robot_flower_princess.domain.core.value_objects.direction import Direction
 
     def _make(rows=3, cols=3):
         robot_pos = Position(1, 1)

@@ -1,16 +1,17 @@
 import pytest
 
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.value_objects.direction import Direction
-from robot_flower_princess.domain.entities.board import Board
-from robot_flower_princess.application.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
-from robot_flower_princess.application.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
-from robot_flower_princess.application.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
-from robot_flower_princess.application.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
-from robot_flower_princess.application.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
-from robot_flower_princess.domain.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.entities.position import Position
+from robot_flower_princess.domain.core.entities.robot import Robot
+from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.value_objects.direction import Direction
+
+from robot_flower_princess.domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
+from robot_flower_princess.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
+from robot_flower_princess.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
+from robot_flower_princess.domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
+from robot_flower_princess.domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
 
 
 @pytest.fixture

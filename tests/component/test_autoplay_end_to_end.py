@@ -3,11 +3,11 @@ from robot_flower_princess.main import app
 from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.value_objects.direction import Direction
-from robot_flower_princess.domain.entities.board import Board
-from robot_flower_princess.domain.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.entities.position import Position
+from robot_flower_princess.domain.core.entities.robot import Robot
+from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game_history import GameHistory
+from robot_flower_princess.domain.core.value_objects.direction import Direction
 
 client = TestClient(app)
 

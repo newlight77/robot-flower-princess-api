@@ -1,7 +1,7 @@
 import pytest
-from robot_flower_princess.domain.entities.board import Board
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.value_objects.game_status import GameStatus
+from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.position import Position
+from robot_flower_princess.domain.core.value_objects.game_status import GameStatus
 
 
 def test_board_creation():

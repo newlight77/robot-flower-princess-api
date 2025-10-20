@@ -8,8 +8,8 @@ from robot_flower_princess.domain.entities.position import Position
 from robot_flower_princess.domain.entities.robot import Robot
 from robot_flower_princess.domain.entities.game_history import GameHistory
 from robot_flower_princess.domain.value_objects.direction import Direction
-from robot_flower_princess.infrastructure.api.dependencies import get_game_repository
-from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.configurator.dependencies import get_game_repository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 
 
 @pytest.fixture(scope="session")

@@ -27,7 +27,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
     repo.save_history("a1", GameHistory())
 
     # stub solver to rotate north then move
-    with patch("robot_flower_princess.infrastructure.ai.solver.GameSolver.solve", return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)]):
+    with patch("robot_flower_princess.domain.entities.game_solver_player.GameSolverPlayer.solve", return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)]):
         use_case = AutoplayUseCase(repo)
         res = use_case.execute(AutoplayCommand(game_id="a1"))
 
@@ -50,7 +50,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo.save("a2", board)
     repo.save_history("a2", GameHistory())
 
-    with patch("robot_flower_princess.infrastructure.ai.solver.GameSolver.solve", side_effect=Exception("solver fail")):
+    with patch("robot_flower_princess.domain.entities.game_solver_player.GameSolverPlayer.solve", side_effect=Exception("solver fail")):
         use_case = AutoplayUseCase(repo)
         res = use_case.execute(AutoplayCommand(game_id="a2"))
 

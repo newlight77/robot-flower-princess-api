@@ -3,7 +3,7 @@ from copy import deepcopy
 from ..ports.game_repository import GameRepository
 from ...infrastructure.ai.solver import GameSolver
 from ...domain.value_objects.action_type import ActionType
-from ...domain.entities.game_history import Action
+from ...domain.entities.game_history import Action, GameHistory
 
 
 @dataclass
@@ -30,6 +30,8 @@ class AutoplayUseCase:
             raise ValueError(f"Game {command.game_id} not found")
 
         history = self.repository.get_history(command.game_id)
+        if history is None:
+            history = GameHistory()
 
         # Create a copy for the solver
         board_copy = deepcopy(board)
@@ -39,50 +41,48 @@ class AutoplayUseCase:
             actions = GameSolver.solve(board_copy)
 
             # Apply actions to original board
-            for action_type, direction in actions:
-                if action_type == "rotate":
-                    from ...domain.services.game_service import GameService
+            from ...domain.services.game_service import GameService
 
+            for action_type, direction in actions:
+                # Always rotate to the solver-provided direction first (if provided)
+                if direction is not None:
                     GameService.rotate_robot(board, direction)
+
+                if action_type == "rotate":
+                    dir_str = direction.value if direction is not None else "unknown"
                     action = Action(
                         action_type=ActionType.ROTATE,
                         direction=direction,
                         success=True,
-                        message=f"AI: Rotated to {direction.value}",
+                        message=f"AI: Rotated to {dir_str}",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "move":
-                    from ...domain.services.game_service import GameService
-
                     GameService.move_robot(board)
                     action = Action(
                         action_type=ActionType.MOVE,
-                        direction=board.robot.orientation,
+                        direction=direction or board.robot.orientation,
                         success=True,
                         message="AI: Moved",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "pick":
-                    from ...domain.services.game_service import GameService
-
                     GameService.pick_flower(board)
                     action = Action(
                         action_type=ActionType.PICK,
-                        direction=board.robot.orientation,
+                        direction=direction or board.robot.orientation,
                         success=True,
                         message="AI: Picked flower",
                     )
                     history.add_action(action, board.to_dict())
 
                 elif action_type == "give":
-                    from ...domain.services.game_service import GameService
-
                     GameService.give_flowers(board)
                     action = Action(
                         action_type=ActionType.GIVE,
-                        direction=board.robot.orientation,
+                        direction=direction or board.robot.orientation,
                         success=True,
                         message="AI: Gave flowers",
                     )

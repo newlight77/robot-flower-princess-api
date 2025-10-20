@@ -84,3 +84,32 @@ def sample_board():
     )
     board.initial_flower_count = len(flowers)
     return board
+
+
+@pytest.fixture
+def place_flower():
+    def _place(board: Board, pos: Position):
+        board.flowers.add(pos)
+        board.initial_flower_count = len(board.flowers)
+        return board
+
+    return _place
+
+
+@pytest.fixture
+def place_obstacle():
+    def _place(board: Board, pos: Position):
+        board.obstacles.add(pos)
+        return board
+
+    return _place
+
+
+@pytest.fixture
+def place_robot():
+    def _place(board: Board, pos: Position, orientation: Direction = Direction.NORTH):
+        board.robot.position = pos
+        board.robot.orientation = orientation
+        return board
+
+    return _place

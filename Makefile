@@ -4,7 +4,7 @@
 
 SHELL := /bin/sh
 
-.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-e2e coverage-combine clean clean-poetry
+.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-component coverage-combine clean clean-poetry
 
 # Prefer `.venv/bin/python -m` if a local venv exists; otherwise prefer `poetry run` when poetry is installed
 VENV_PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || true)
@@ -51,8 +51,8 @@ test-unit:
 test-integration:
 	poetry run pytest tests/integration
 
-test-e2e:
-	poetry run pytest tests/e2e
+test-component:
+	poetry run pytest tests/component
 
 coverage-unit:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
@@ -64,10 +64,10 @@ coverage-integration:
 	@test -d .coverage || mkdir -p .coverage
 	COVERAGE_FILE=.coverage/.coverage.integration $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-integration.xml tests/integration
 
-coverage-e2e:
+coverage-component:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
 	@test -d .coverage || mkdir -p .coverage
-COVERAGE_FILE=.coverage/.coverage.e2e $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-e2e.xml tests/e2e/test_autoplay_end_to_end.py
+	COVERAGE_FILE=.coverage/.coverage.component $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-component.xml tests/component/test_autoplay_end_to_end.py
 
 coverage-combine:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists

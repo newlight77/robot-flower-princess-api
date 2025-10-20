@@ -81,8 +81,8 @@ jobs:
             .coverage/coverage-integration.xml
             .coverage/.coverage.integration
 
-  e2e:
-    name: End-to-end tests
+  component:
+    name: Component tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -103,25 +103,25 @@ jobs:
           poetry install --only main --no-interaction --no-ansi
           poetry install --only dev --no-interaction --no-ansi
 
-      - name: Run end-to-end tests with coverage
+      - name: Run component tests with coverage
         env:
-          COVERAGE_FILE: .coverage/.coverage.e2e
+          COVERAGE_FILE: .coverage/.coverage.component
         run: |
           mkdir -p .coverage
-          poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-e2e.xml tests/e2e/test_autoplay_end_to_end.py
+          poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-component.xml tests/component/test_autoplay_end_to_end.py
 
-      - name: Upload e2e coverage artifacts
+      - name: Upload component coverage artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-e2e
+          name: coverage-component
           path: |
-            .coverage/coverage-e2e.xml
-            .coverage/.coverage.e2e
+            .coverage/coverage-component.xml
+            .coverage/.coverage.component
 
   coverage_quality:
     name: Coverage quality check
     runs-on: ubuntu-latest
-    needs: [unit, integration, e2e]
+    needs: [unit, integration, component]
     steps:
       - uses: actions/checkout@v4
 

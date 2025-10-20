@@ -71,12 +71,8 @@ Once running, visit:
 - `GET /api/games/{game_id}/history` - Get move history
 
 #### Actions
-- `POST /api/games/{game_id}/actions/rotate` - Rotate robot
-- `POST /api/games/{game_id}/actions/move` - Move robot
-- `POST /api/games/{game_id}/actions/pick` - Pick flower
-- `POST /api/games/{game_id}/actions/drop` - Drop flower
-- `POST /api/games/{game_id}/actions/give` - Give flowers to princess
-- `POST /api/games/{game_id}/actions/clean` - Clean obstacle
+The API now exposes a single unified actions endpoint.
+- `POST /api/games/{game_id}/actions` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction required only for rotate)
 
 #### AI Player
 - `POST /api/games/{game_id}/autoplay` - Let AI solve the game
@@ -88,7 +84,7 @@ make test                 # Run all tests
 make test-cov             # Run with coverage (legacy html in htmlcov/)
 make coverage-unit        # Run unit tests and write .coverage/coverage-unit.xml
 make coverage-integration # Run integration tests and write .coverage/coverage-integration.xml
-make coverage-e2e         # Run end-to-end test and write .coverage/coverage-e2e.xml
+make coverage-component   # Run component test and write .coverage/coverage-component.xml
 make coverage-combine     # Merge coverage files and write .coverage/coverage-combined.xml + .coverage/coverage_html/
 make lint                 # Run linters
 make format               # Format code

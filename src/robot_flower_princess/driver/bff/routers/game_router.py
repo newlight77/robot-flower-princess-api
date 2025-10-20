@@ -53,7 +53,7 @@ def create_game(
 @router.get("/", response_model=GamesResponse)
 def get_games(
     limit: int = 10,
-    status: str = "",
+    status: str = "in_progress",
     repository: GameRepository = Depends(get_game_repository),
 ) -> GamesResponse:
     """Get the last N games, optionally filtered by status."""

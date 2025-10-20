@@ -27,7 +27,8 @@ class GetGamesUseCase:
 
     def execute(self, query: GetGamesQuery) -> GetGamesResult:
         """Get the last N games, optionally filtered by status."""
-        games = self.repository.get_games(query.limit, query.status)
+        status = query.status if query.status is not None else ""
+        games = self.repository.get_games(query.limit, status)
 
         game_summaries = []
         for game_id, board in games:

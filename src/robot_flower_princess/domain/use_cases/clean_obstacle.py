@@ -19,6 +19,7 @@ class CleanObstacleResult:
     success: bool
     board_state: dict
     message: str
+    game_model: dict
 
 
 class CleanObstacleUseCase:
@@ -53,7 +54,7 @@ class CleanObstacleUseCase:
             self.repository.save_history(command.game_id, history)
 
             return CleanObstacleResult(
-                success=True, board_state=board.to_dict(), message="Obstacle cleaned successfully"
+                success=True, board_state=board.to_dict(), message="Obstacle cleaned successfully", game_model=board.to_game_model_dict()
             )
         except GameException as e:
             action = Action(
@@ -63,5 +64,5 @@ class CleanObstacleUseCase:
             self.repository.save_history(command.game_id, history)
 
             return CleanObstacleResult(
-                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
+                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}", game_model=board.to_game_model_dict()
             )

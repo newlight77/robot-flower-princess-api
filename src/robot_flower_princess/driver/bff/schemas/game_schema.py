@@ -7,6 +7,7 @@ from pydantic import model_validator
 class CreateGameRequest(BaseModel):
     rows: int = Field(ge=3, le=50, description="Number of rows (3-50)")
     cols: int = Field(ge=3, le=50, description="Number of columns (3-50)")
+    name: str = Field(default="", description="Optional game name")
 
 
 class RotateRequest(BaseModel):
@@ -30,8 +31,15 @@ class ActionRequest(BaseModel):
 
 class GameStateResponse(BaseModel):
     id: str
-    board: dict
+    status: str
     message: str = ""
+    board: dict
+    robot: dict
+    princess: dict
+    obstacles: dict
+    flowers: dict
+    created_at: str
+    updated_at: str
 
 
 class ActionResponse(BaseModel):
@@ -39,6 +47,8 @@ class ActionResponse(BaseModel):
     id: str
     board: dict
     message: str
+    # For the complete game model response
+    game_model: dict = None
 
 
 class GameHistoryResponse(BaseModel):
@@ -47,11 +57,16 @@ class GameHistoryResponse(BaseModel):
 
 
 class GameSummary(BaseModel):
-    id: str
-    status: str
     board: dict
+    robot: dict
+    princess: dict
+    obstacles: dict
+    flowers: dict
+    status: str
+    created_at: str
+    updated_at: str
 
 
 class GamesResponse(BaseModel):
-    games: List[GameSummary]
+    gamess: List[GameSummary]
     total: int

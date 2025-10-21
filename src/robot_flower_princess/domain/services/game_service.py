@@ -1,6 +1,7 @@
 from ..core.entities.board import Board
 from ..core.value_objects.direction import Direction
 from ..core.value_objects.game_status import GameStatus
+from ..core.value_objects.action_type import ActionType
 from ..core.exceptions.game_exceptions import (
     InvalidMoveException,
     GameOverException,
@@ -25,6 +26,8 @@ class GameService:
             raise GameOverException("Game is already over")
 
         board.robot.rotate(direction)
+        board.robot.add_executed_action(ActionType.ROTATE, direction)
+        board.update_timestamp()
 
     @staticmethod
     def move_robot(board: Board) -> None:
@@ -46,6 +49,8 @@ class GameService:
 
         # Execute move
         board.robot.move_to(new_position)
+        board.robot.add_executed_action(ActionType.MOVE, board.robot.orientation)
+        board.update_timestamp()
 
     @staticmethod
     def pick_flower(board: Board) -> None:
@@ -69,8 +74,10 @@ class GameService:
             raise InvalidPickException("No flower at target position")
 
         # Pick the flower
-        board.robot.pick_flower()
+        board.robot.pick_flower(target_position)
         board.flowers.remove(target_position)
+        board.robot.add_executed_action(ActionType.PICK, board.robot.orientation)
+        board.update_timestamp()
 
     @staticmethod
     def drop_flower(board: Board) -> None:
@@ -92,8 +99,10 @@ class GameService:
             raise InvalidDropException("Target cell is not empty")
 
         # Drop the flower
-        board.robot.drop_flower()
+        board.robot.drop_flower(target_position)
         board.flowers.add(target_position)
+        board.robot.add_executed_action(ActionType.DROP, board.robot.orientation)
+        board.update_timestamp()
 
     @staticmethod
     def give_flowers(board: Board) -> None:
@@ -111,12 +120,15 @@ class GameService:
         if not board.is_valid_position(target_position):
             raise InvalidGiveException("No princess in that direction")
 
-        if target_position != board.princess_position:
+        if target_position != board.princess.position:
             raise InvalidGiveException("Princess is not at target position")
 
         # Give flowers
-        delivered = board.robot.give_flowers()
+        delivered = board.robot.give_flowers(target_position)
         board.flowers_delivered += delivered
+        board.princess.receive_flowers(delivered)
+        board.robot.add_executed_action(ActionType.GIVE, board.robot.orientation)
+        board.update_timestamp()
 
     @staticmethod
     def clean_obstacle(board: Board) -> None:
@@ -139,3 +151,6 @@ class GameService:
 
         # Remove obstacle
         board.obstacles.remove(target_position)
+        board.robot.clean_obstacle(target_position)
+        board.robot.add_executed_action(ActionType.CLEAN, board.robot.orientation)
+        board.update_timestamp()

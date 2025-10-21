@@ -46,4 +46,17 @@ Can you help me create a python project with best practice with below guidelines
 * include ci workflow with github action
 * project name is Robot-Flower-Princess-Back
 
-At last, I would like to be able to download the full project packaged as a zip.
+Use the Game Model is followed.
+￼
+A game is created with name, rows and cols. When a game is created, the whole game model is returned in the response. With that model, the executed_actions the robot having as attribute represents the history of all actions.
+And post /game_id/action would execute that action on the robot and add it to executed actions, while applying the action on other elements such as obstacles with clean action, pick a flower, drop a flower, give a flower to a princess. Any action will taken effect on both the robot and the element it interact with.
+
+
+## Delivrable
+
+I would like to be able to download the full project packaged as a zip. You'll probably need to split the complete artefacts into 5 sub parts, one generator script par part:
+1. project structure & core
+2. Domain layer with ports, entities, value objects and use cases
+3. Data & persistence layer
+4. API router & main App
+5. Project package and setup scripts

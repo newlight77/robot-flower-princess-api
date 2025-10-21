@@ -1,0 +1,85 @@
+
+    {
+      "board": {
+        "rows": 3,
+        "cols": 3,
+        "grid": [
+          ["🤖", "⬜", "⬜"],
+          ["⬜", "🗑️", "⬜"],
+          ["⬜", "🌸", "👑"]
+        ]
+      },
+      "robot": {
+        "position": {
+          "row": 0,
+          "col": 0
+        },
+        "orientation": "east",
+        "flowers": {
+          "collected": [
+            {
+              "position": {
+                "row": 2,
+                "col": 1
+              }
+            }
+          ],
+          "delivered": [
+            {
+              "position": {
+                "row": 2,
+                "col": 1
+              }
+            }
+          ],
+          "collection_capacity": 12
+        },
+        "obstacles": {
+          "cleaned": [
+            {
+              "position": {
+                "row": 1,
+                "col": 1
+              }
+            }
+          ]
+        },
+        "executed_actions": [
+          {
+            "type": "rotate",
+            "direction": "east"
+          },
+          {
+            "type": "move",
+            "direction": "east"
+          },
+          {
+            "type": "move",
+            "direction": "south"
+          },
+          {
+            "type": "pickFlower",
+            "direction": "south"
+          }
+        ]
+      },
+      "princess":{
+        "position": {
+          "row": 4,
+          "col": 4
+        },
+        "flowers_received": 0,
+        "mood": "happy" | "sad" | "angry" | "neutral"
+      },
+      "obstacles": {
+        "remaining": 1,
+        "total": 1
+      },
+      "flowers": {
+        "remaining": 1,
+        "total": 1
+      },
+      "status": "in_progress" | "victory" | "game_over",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }

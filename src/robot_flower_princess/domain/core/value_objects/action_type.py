@@ -4,7 +4,7 @@ from enum import Enum
 class ActionType(str, Enum):
     ROTATE = "rotate"
     MOVE = "move"
-    PICK = "pick"
-    DROP = "drop"
-    GIVE = "give"
+    PICK = "pickFlower"
+    DROP = "dropFlower"
+    GIVE = "giveFlower"
     CLEAN = "clean"

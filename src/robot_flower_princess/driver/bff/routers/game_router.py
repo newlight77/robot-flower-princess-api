@@ -40,11 +40,19 @@ def create_game(
 
     try:
         use_case = CreateGameUseCase(repository)
-        result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols))
+        result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name))
+        game_model = result.game_model
         return GameStateResponse(
             id=result.game_id,
-            board=result.board_state,
+            status=game_model.get("status", "in_progress"),
             message="Game created successfully",
+            board=game_model["board"],
+            robot=game_model["robot"],
+            princess=game_model["princess"],
+            obstacles=game_model["obstacles"],
+            flowers=game_model["flowers"],
+            created_at=game_model["created_at"],
+            updated_at=game_model["updated_at"],
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -67,12 +75,24 @@ def get_games(
         # Convert dataclass GameSummary to Pydantic GameSummary
         from ..schemas.game_schema import GameSummary as PydanticGameSummary
 
-        pydantic_games = [
-            PydanticGameSummary(id=game.game_id, status=game.status, board=game.board)
-            for game in result.games
-        ]
+        pydantic_games = []
+        for game in result.games:
+            # Get the full game model from the repository
+            board = repository.get(game.game_id)
+            if board:
+                game_model = board.to_game_model_dict()
+                pydantic_games.append(PydanticGameSummary(
+                    board=game_model["board"],
+                    robot=game_model["robot"],
+                    princess=game_model["princess"],
+                    obstacles=game_model["obstacles"],
+                    flowers=game_model["flowers"],
+                    status=game_model["status"],
+                    created_at=game_model["created_at"],
+                    updated_at=game_model["updated_at"]
+                ))
 
-        return GamesResponse(games=pydantic_games, total=len(pydantic_games))
+        return GamesResponse(gamess=pydantic_games, total=len(pydantic_games))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -89,10 +109,23 @@ def get_game_state(
     try:
         use_case = GetGameStateUseCase(repository)
         result = use_case.execute(GetGameStateQuery(game_id=game_id))
+        # For get_game_state, we need to get the game model from the board
+        board = repository.get(game_id)
+        if board is None:
+            raise HTTPException(status_code=404, detail=f"Game {game_id} not found")
+
+        game_model = board.to_game_model_dict()
         return GameStateResponse(
             id=game_id,
-            board=result.board_state,
+            status=game_model.get("status", "in_progress"),
             message="Game state retrieved successfully",
+            board=game_model["board"],
+            robot=game_model["robot"],
+            princess=game_model["princess"],
+            obstacles=game_model["obstacles"],
+            flowers=game_model["flowers"],
+            created_at=game_model["created_at"],
+            updated_at=game_model["updated_at"],
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -181,6 +214,7 @@ def perform_action(
             id=game_id,
             board=result.board_state,
             message=result.message,
+            game_model=result.game_model,
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

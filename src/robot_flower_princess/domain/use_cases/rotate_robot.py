@@ -19,6 +19,7 @@ class RotateRobotResult:
     success: bool
     board_state: dict
     message: str
+    game_model: dict
 
 
 class RotateRobotUseCase:
@@ -55,6 +56,7 @@ class RotateRobotUseCase:
                 success=True,
                 board_state=board.to_dict(),
                 message=f"Robot rotated to face {command.direction.value}",
+                game_model=board.to_game_model_dict(),
             )
         except GameException as e:
             action = Action(
@@ -67,5 +69,8 @@ class RotateRobotUseCase:
             self.repository.save_history(command.game_id, history)
 
             return RotateRobotResult(
-                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}"
+                success=False,
+                board_state=board.to_dict(),
+                message=f"Game Over: {str(e)}",
+                game_model=board.to_game_model_dict(),
             )

@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 import random
+from datetime import datetime
 from .position import Position
 from .robot import Robot
+from .princess import Princess
 from .cell import CellType
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
@@ -15,11 +17,14 @@ class Board:
     rows: int
     cols: int
     robot: Robot
-    princess_position: Position
+    princess: Princess
     flowers: set[Position] = field(default_factory=set)
     obstacles: set[Position] = field(default_factory=set)
     initial_flower_count: int = 0
     flowers_delivered: int = 0
+    name: str = ""
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
 
     def __post_init__(self) -> None:
         self.initial_flower_count = len(self.flowers)
@@ -36,6 +41,7 @@ class Board:
 
         # Princess always at bottom-right
         princess_pos = Position(rows - 1, cols - 1)
+        princess = Princess(position=princess_pos)
 
         total_cells = rows * cols
         max_flowers = max(1, int(total_cells * 0.1))
@@ -59,7 +65,7 @@ class Board:
             rows=rows,
             cols=cols,
             robot=robot,
-            princess_position=princess_pos,
+            princess=princess,
             flowers=flowers,
             obstacles=obstacles,
         )
@@ -69,7 +75,7 @@ class Board:
         logger.debug("get_cell_type position=%s", position)
         if position == self.robot.position:
             return CellType.ROBOT
-        if position == self.princess_position:
+        if position == self.princess.position:
             return CellType.PRINCESS
         if position in self.flowers:
             return CellType.FLOWER
@@ -99,8 +105,17 @@ class Board:
         logger.debug("get_status flowers_delivered=%s initial=%s status=%s", self.flowers_delivered, self.initial_flower_count, status)
         return status
 
+    def update_timestamp(self) -> None:
+        """Update the updated_at timestamp."""
+        self.updated_at = datetime.now()
+
+    @property
+    def princess_position(self) -> Position:
+        """Backward compatibility property for princess position."""
+        return self.princess.position
+
     def to_dict(self) -> dict:
-        """Convert board to dictionary representation."""
+        """Convert board to dictionary representation for API compatibility."""
         logger.debug("to_dict rows=%s cols=%s", self.rows, self.cols)
         grid = []
         for r in range(self.rows):
@@ -130,11 +145,68 @@ class Board:
                 "max_flowers": self.robot.max_flowers,
             },
             "princess_position": {
-                "row": self.princess_position.row,
-                "col": self.princess_position.col,
+                "row": self.princess.position.row,
+                "col": self.princess.position.col,
             },
             "flowers_remaining": len(self.flowers),
             "flowers_delivered": self.flowers_delivered,
             "total_flowers": self.initial_flower_count,
             "status": self.get_status().value,
+        }
+
+    def to_game_model_dict(self) -> dict:
+        """Convert board to dictionary representation matching the game model JSON structure."""
+        logger.debug("to_game_model_dict rows=%s cols=%s", self.rows, self.cols)
+        grid = []
+        for r in range(self.rows):
+            row = []
+            for c in range(self.cols):
+                pos = Position(r, c)
+                cell = self.get_cell_type(pos)
+
+                emoji_map = {
+                    CellType.ROBOT: "🤖",
+                    CellType.PRINCESS: "👑",
+                    CellType.FLOWER: "🌸",
+                    CellType.OBSTACLE: "🗑️",
+                    CellType.EMPTY: "⬜",
+                }
+                row.append(emoji_map[cell])
+            grid.append(row)
+
+        return {
+            "board": {
+                "rows": self.rows,
+                "cols": self.cols,
+                "grid": grid,
+            },
+            "robot": {
+                "position": {"row": self.robot.position.row, "col": self.robot.position.col},
+                "orientation": self.robot.orientation.value,
+                "flowers": {
+                    "collected": self.robot.flowers_collected,
+                    "delivered": self.robot.flowers_delivered,
+                    "collection_capacity": self.robot.max_flowers,
+                },
+                "obstacles": {
+                    "cleaned": self.robot.obstacles_cleaned,
+                },
+                "executed_actions": self.robot.executed_actions,
+            },
+            "princess": {
+                "position": {"row": self.princess.position.row, "col": self.princess.position.col},
+                "flowers_received": self.princess.flowers_received,
+                "mood": self.princess.mood,
+            },
+            "obstacles": {
+                "remaining": len(self.obstacles),
+                "total": len(self.obstacles) + len(self.robot.obstacles_cleaned),
+            },
+            "flowers": {
+                "remaining": len(self.flowers),
+                "total": self.initial_flower_count,
+            },
+            "status": self.get_status().value,
+            "created_at": self.created_at.isoformat() + "Z",
+            "updated_at": self.updated_at.isoformat() + "Z",
         }

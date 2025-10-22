@@ -37,7 +37,20 @@ def create_game(client):
     def _create(rows=5, cols=5):
         resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
         assert resp.status_code == 201
-        return resp.json()["id"], resp.json()["board"]
+        data = resp.json()
+        # Create a board-like structure for backward compatibility
+        board_data = {
+            "rows": data["board"]["rows"],
+            "cols": data["board"]["cols"],
+            "grid": data["board"]["grid"],
+            "robot": data["robot"],
+            "princess_position": data["princess"]["position"],
+            "flowers_remaining": data["flowers"]["remaining"],
+            "flowers_delivered": 0,
+            "total_flowers": data["flowers"]["total"],
+            "status": data["status"]
+        }
+        return data["id"], board_data
 
     return _create
 

@@ -26,6 +26,34 @@ class Board:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
+    def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, **kwargs):
+        """Initialize Board with backward compatibility for princess_position."""
+        self.rows = rows
+        self.cols = cols
+        self.robot = robot
+
+        # Handle backward compatibility
+        if princess is not None:
+            self.princess = princess
+        elif princess_position is not None:
+            self.princess = Princess(position=princess_position)
+        else:
+            # Default princess position at bottom-right
+            self.princess = Princess(position=Position(rows - 1, cols - 1))
+
+        # Set other fields
+        self.flowers = kwargs.get('flowers', set())
+        self.obstacles = kwargs.get('obstacles', set())
+        self.initial_flower_count = kwargs.get('initial_flower_count', 0)
+        self.flowers_delivered = kwargs.get('flowers_delivered', 0)
+        self.name = kwargs.get('name', "")
+        self.created_at = kwargs.get('created_at', datetime.now())
+        self.updated_at = kwargs.get('updated_at', datetime.now())
+
+        # Set initial flower count if not provided
+        if self.initial_flower_count == 0:
+            self.initial_flower_count = len(self.flowers)
+
     def __post_init__(self) -> None:
         self.initial_flower_count = len(self.flowers)
         logger.debug("Board.__post_init__ rows=%s cols=%s initial_flowers=%s", self.rows, self.cols, self.initial_flower_count)
@@ -113,6 +141,11 @@ class Board:
     def princess_position(self) -> Position:
         """Backward compatibility property for princess position."""
         return self.princess.position
+
+    @princess_position.setter
+    def princess_position(self, value: Position) -> None:
+        """Set princess position for backward compatibility."""
+        self.princess.position = value
 
     def to_dict(self) -> dict:
         """Convert board to dictionary representation for API compatibility."""

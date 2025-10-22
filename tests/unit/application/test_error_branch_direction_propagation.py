@@ -3,7 +3,7 @@ from unittest.mock import patch
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 from robot_flower_princess.domain.core.exceptions.game_exceptions import GameException
@@ -18,7 +18,7 @@ from robot_flower_princess.domain.use_cases.clean_obstacle import CleanObstacleU
 
 def make_center_board():
     robot = Robot(position=Position(1, 1), orientation=Direction.EAST)
-    board = Board(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
     board.flowers = set()
     board.obstacles = set()
     board.initial_flower_count = 0

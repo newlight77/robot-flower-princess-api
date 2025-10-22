@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import uuid
 from ..ports.game_repository import GameRepository
-from ..core.entities.board import Board
+from ..core.entities.game import Game
 from ..core.entities.game_history import GameHistory
 from ...logging import get_logger
 
@@ -29,7 +29,7 @@ class CreateGameUseCase:
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         """Create a new game with the specified board size."""
         self.logger.info("execute: CreateGameCommand rows=%s cols=%s name=%s", command.rows, command.cols, command.name)
-        board: Board = Board.create(rows=command.rows, cols=command.cols)
+        board: Game = Game.create(rows=command.rows, cols=command.cols)
 
         # Set the game name if provided
         if command.name:

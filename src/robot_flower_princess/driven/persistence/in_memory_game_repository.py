@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 from ...domain.ports.game_repository import GameRepository
-from ...domain.core.entities.board import Board
+from ...domain.core.entities.game import Game
 from ...domain.core.entities.game_history import GameHistory
 from ...logging import get_logger
 
@@ -11,15 +11,15 @@ class InMemoryGameRepository(GameRepository):
     """In-memory implementation of game repository."""
 
     def __init__(self) -> None:
-        self._games: Dict[str, Board] = {}
+        self._games: Dict[str, Game] = {}
         self._histories: Dict[str, GameHistory] = {}
         logger.debug("InMemoryGameRepository initialized")
 
-    def save(self, game_id: str, board: Board) -> None:
+    def save(self, game_id: str, board: Game) -> None:
         logger.info("save game_id=%s", game_id)
         self._games[game_id] = board
 
-    def get(self, game_id: str) -> Optional[Board]:
+    def get(self, game_id: str) -> Optional[Game]:
         logger.debug("get game_id=%s found=%s", game_id, game_id in self._games)
         return self._games.get(game_id)
 
@@ -43,7 +43,7 @@ class InMemoryGameRepository(GameRepository):
         logger.debug("get_history game_id=%s found=%s", game_id, game_id in self._histories)
         return self._histories.get(game_id)
 
-    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Board]]:
+    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Game]]:
         """Get the last N games, optionally filtered by status."""
         logger.info("get_games limit=%s status=%s", limit, status)
         filtered_games = []

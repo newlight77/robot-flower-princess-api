@@ -212,18 +212,6 @@ def perform_action(
             board=result.board_state,
             message=result.message,
             game_model=result.game_model,
-
-            id=game_id,
-            status=game_model.get("status", "in_progress"),
-            message="Game state retrieved successfully",
-            board=game_model["board"],
-            robot=game_model["robot"],
-            princess=game_model["princess"],
-            obstacles=game_model["obstacles"],
-            flowers=game_model["flowers"],
-            created_at=game_model["created_at"],
-            updated_at=game_model["updated_at"],
-
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

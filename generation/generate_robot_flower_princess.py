@@ -599,7 +599,7 @@ from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
 
 @dataclass
-class Board:
+class Game:
     rows: int
     cols: int
     robot: Robot
@@ -613,10 +613,10 @@ class Board:
         self.initial_flower_count = len(self.flowers)
 
     @classmethod
-    def create(cls, rows: int, cols: int) -> "Board":
-        \"\"\"Factory method to create a new board with fixed positions.\"\"\"
+    def create(cls, rows: int, cols: int) -> "Game":
+        \"\"\"Factory method to create a new game with fixed positions.\"\"\"
         if rows < 3 or rows > 50 or cols < 3 or cols > 50:
-            raise ValueError("Board size must be between 3x3 and 50x50")
+            raise ValueError("Game size must be between 3x3 and 50x50")
 
         # Robot always at top-left
         robot_pos = Position(0, 0)
@@ -793,7 +793,7 @@ class InvalidCleanException(GameException):
 """,
 
     # Domain Layer - Services
-    "src/robot_flower_princess/domain/services/game_service.py": """from ..entities.board import Board
+    "src/robot_flower_princess/domain/services/game_service.py": """from ..entities.game import Game
 from ..entities.position import Position
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
@@ -811,7 +811,7 @@ class GameService:
     \"\"\"Domain service for game logic.\"\"\"
 
     @staticmethod
-    def rotate_robot(board: Board, direction: Direction) -> None:
+    def rotate_robot(board: Game, direction: Direction) -> None:
         \"\"\"Rotate the robot to face a direction.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -819,7 +819,7 @@ class GameService:
         board.robot.rotate(direction)
 
     @staticmethod
-    def move_robot(board: Board) -> None:
+    def move_robot(board: Game) -> None:
         \"\"\"Move the robot in the direction it's facing.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -840,7 +840,7 @@ class GameService:
         board.robot.move_to(new_position)
 
     @staticmethod
-    def pick_flower(board: Board) -> None:
+    def pick_flower(board: Game) -> None:
         \"\"\"Pick a flower from an adjacent cell.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -863,7 +863,7 @@ class GameService:
         board.flowers.remove(target_position)
 
     @staticmethod
-    def drop_flower(board: Board) -> None:
+    def drop_flower(board: Game) -> None:
         \"\"\"Drop a flower on an adjacent empty cell.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -886,7 +886,7 @@ class GameService:
         board.flowers.add(target_position)
 
     @staticmethod
-    def give_flowers(board: Board) -> None:
+    def give_flowers(board: Game) -> None:
         \"\"\"Give flowers to the princess.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -909,7 +909,7 @@ class GameService:
         board.flowers_delivered += delivered
 
     @staticmethod
-    def clean_obstacle(board: Board) -> None:
+    def clean_obstacle(board: Game) -> None:
         \"\"\"Clean an obstacle in the direction faced.\"\"\"
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -934,19 +934,19 @@ class GameService:
     # Application Layer - Ports
     "src/robot_flower_princess/application/ports/game_repository.py": """from abc import ABC, abstractmethod
 from typing import Optional
-from ...domain.entities.board import Board
+from ...domain.entities.game import Game
 from ...domain.entities.game_history import GameHistory
 
 class GameRepository(ABC):
     \"\"\"Port for game persistence.\"\"\"
 
     @abstractmethod
-    def save(self, game_id: str, board: Board) -> None:
+    def save(self, game_id: str, board: Game) -> None:
         \"\"\"Save a game board.\"\"\"
         pass
 
     @abstractmethod
-    def get(self, game_id: str) -> Optional[Board]:
+    def get(self, game_id: str) -> Optional[Game]:
         \"\"\"Retrieve a game board by ID.\"\"\"
         pass
 
@@ -975,7 +975,7 @@ class GameRepository(ABC):
     "src/robot_flower_princess/application/use_cases/create_game.py": """from dataclasses import dataclass
 import uuid
 from ..ports.game_repository import GameRepository
-from ...domain.entities.board import Board
+from ...domain.entities.game import Game
 from ...domain.entities.game_history import GameHistory
 
 @dataclass
@@ -994,7 +994,7 @@ class CreateGameUseCase:
 
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         \"\"\"Create a new game with the specified board size.\"\"\"
-        board = Board.create(rows=command.rows, cols=command.cols)
+        board = Game.create(rows=command.rows, cols=command.cols)
         game_id = str(uuid.uuid4())
 
         # Save board and initialize history
@@ -1574,20 +1574,20 @@ class AutoplayUseCase:
    # Infrastructure Layer - Persistence
     "src/robot_flower_princess/infrastructure/persistence/in_memory_game_repository.py": """from typing import Optional, Dict
 from ...application.ports.game_repository import GameRepository
-from ...domain.entities.board import Board
+from ...domain.entities.game import Game
 from ...domain.entities.game_history import GameHistory
 
 class InMemoryGameRepository(GameRepository):
     \"\"\"In-memory implementation of game repository.\"\"\"
 
     def __init__(self) -> None:
-        self._games: Dict[str, Board] = {}
+        self._games: Dict[str, Game] = {}
         self._histories: Dict[str, GameHistory] = {}
 
-    def save(self, game_id: str, board: Board) -> None:
+    def save(self, game_id: str, board: Game) -> None:
         self._games[game_id] = board
 
-    def get(self, game_id: str) -> Optional[Board]:
+    def get(self, game_id: str) -> Optional[Game]:
         return self._games.get(game_id)
 
     def delete(self, game_id: str) -> None:
@@ -1923,7 +1923,7 @@ settings = Settings()
     "src/robot_flower_princess/infrastructure/ai/solver.py": """from typing import List, Optional, Tuple
 from collections import deque
 from copy import deepcopy
-from ...domain.entities.board import Board
+from ...domain.entities.game import Game
 from ...domain.entities.position import Position
 from ...domain.value_objects.direction import Direction
 from ...domain.services.game_service import GameService
@@ -1932,7 +1932,7 @@ class GameSolver:
     \"\"\"AI solver for the game using BFS.\"\"\"
 
     @staticmethod
-    def solve(board: Board) -> List[Tuple[str, Optional[Direction]]]:
+    def solve(board: Game) -> List[Tuple[str, Optional[Direction]]]:
         \"\"\"
         Attempt to solve the game and return a list of actions.
         Returns a list of tuples: (action_type, direction)
@@ -2009,7 +2009,7 @@ class GameSolver:
         return actions
 
     @staticmethod
-    def _find_path(board: Board, start: Position, goal: Position) -> List[Position]:
+    def _find_path(board: Game, start: Position, goal: Position) -> List[Position]:
         \"\"\"Find path from start to goal using BFS.\"\"\"
         if start == goal:
             return []
@@ -2036,7 +2036,7 @@ class GameSolver:
         return []
 
     @staticmethod
-    def _get_adjacent_positions(pos: Position, board: Board) -> List[Position]:
+    def _get_adjacent_positions(pos: Position, board: Game) -> List[Position]:
         \"\"\"Get all valid adjacent empty positions.\"\"\"
         adjacent = []
         for direction in Direction:
@@ -2065,7 +2065,7 @@ class GameSolver:
     # Tests - conftest
     "tests/conftest.py": """import pytest
 from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import InMemoryGameRepository
-from robot_flower_princess.domain.entities.board import Board
+from robot_flower_princess.domain.entities.game import Game
 from robot_flower_princess.domain.entities.position import Position
 from robot_flower_princess.domain.entities.robot import Robot
 from robot_flower_princess.domain.value_objects.direction import Direction
@@ -2085,7 +2085,7 @@ def sample_board():
     flowers = {Position(1, 1)}
     obstacles = {Position(0, 1)}
 
-    board = Board(
+    board = Game(
         rows=3,
         cols=3,
         robot=robot,
@@ -2171,13 +2171,13 @@ def test_robot_give_flowers():
 """,
 
     "tests/unit/domain/test_board.py": """import pytest
-from robot_flower_princess.domain.entities.board import Board
+from robot_flower_princess.domain.entities.game import Game
 from robot_flower_princess.domain.entities.position import Position
 from robot_flower_princess.domain.value_objects.game_status import GameStatus
 
 
 def test_board_creation():
-    board = Board.create(rows=10, cols=10)
+    board = Game.create(rows=10, cols=10)
     assert board.rows == 10
     assert board.cols == 10
     assert board.robot.position == Position(0, 0)
@@ -2186,14 +2186,14 @@ def test_board_creation():
 
 def test_board_invalid_size():
     with pytest.raises(ValueError):
-        Board.create(rows=2, cols=5)
+        Game.create(rows=2, cols=5)
 
     with pytest.raises(ValueError):
-        Board.create(rows=51, cols=5)
+        Game.create(rows=51, cols=5)
 
 
 def test_board_victory():
-    board = Board.create(rows=5, cols=5)
+    board = Game.create(rows=5, cols=5)
     assert board.get_status() == GameStatus.IN_PROGRESS
 
     board.flowers_delivered = board.initial_flower_count

@@ -3,7 +3,7 @@ from unittest.mock import patch
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 from robot_flower_princess.domain.core.exceptions.game_exceptions import GameException
@@ -15,7 +15,7 @@ from robot_flower_princess.domain.use_cases.rotate_robot import RotateRobotUseCa
 
 def make_small_board():
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Board(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
+    board = Game(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
     board.flowers = set()
     board.obstacles = set()
     board.initial_flower_count = 0

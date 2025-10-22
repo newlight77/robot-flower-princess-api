@@ -9,11 +9,11 @@ from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
 from ....logging import get_logger
 
-logger = get_logger("Board")
+logger = get_logger("Game")
 
 
 @dataclass
-class Board:
+class Game:
     rows: int
     cols: int
     robot: Robot
@@ -27,7 +27,7 @@ class Board:
     updated_at: datetime = field(default_factory=datetime.now)
 
     def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, **kwargs):
-        """Initialize Board with backward compatibility for princess_position."""
+        """Initialize Game with backward compatibility for princess_position."""
         self.rows = rows
         self.cols = cols
         self.robot = robot
@@ -56,13 +56,13 @@ class Board:
 
     def __post_init__(self) -> None:
         self.initial_flower_count = len(self.flowers)
-        logger.debug("Board.__post_init__ rows=%s cols=%s initial_flowers=%s", self.rows, self.cols, self.initial_flower_count)
+        logger.debug("Game.__post_init__ rows=%s cols=%s initial_flowers=%s", self.rows, self.cols, self.initial_flower_count)
 
     @classmethod
-    def create(cls, rows: int, cols: int) -> "Board":
-        """Factory method to create a new board with fixed positions."""
+    def create(cls, rows: int, cols: int) -> "Game":
+        """Factory method to create a new game with fixed positions."""
         if rows < 3 or rows > 50 or cols < 3 or cols > 50:
-            raise ValueError("Board size must be between 3x3 and 50x50")
+            raise ValueError("Game size must be between 3x3 and 50x50")
 
         # Robot always at top-left
         robot_pos = Position(0, 0)
@@ -112,7 +112,7 @@ class Board:
         return CellType.EMPTY
 
     def is_valid_position(self, position: Position) -> bool:
-        """Check if a position is within board boundaries."""
+        """Check if a position is within game boundaries."""
         valid = 0 <= position.row < self.rows and 0 <= position.col < self.cols
         logger.debug("is_valid_position position=%s valid=%s", position, valid)
         return valid
@@ -148,7 +148,7 @@ class Board:
         self.princess.position = value
 
     def to_dict(self) -> dict:
-        """Convert board to dictionary representation for API compatibility."""
+        """Convert game to dictionary representation for API compatibility."""
         logger.debug("to_dict rows=%s cols=%s", self.rows, self.cols)
         grid = []
         for r in range(self.rows):

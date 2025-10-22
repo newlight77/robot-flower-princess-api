@@ -1,4 +1,4 @@
-from ..core.entities.board import Board
+from ..core.entities.game import Game
 from ..core.value_objects.direction import Direction
 from ..core.value_objects.game_status import GameStatus
 from ..core.value_objects.action_type import ActionType
@@ -19,7 +19,7 @@ class GameService:
     """Domain service for game logic."""
 
     @staticmethod
-    def rotate_robot(board: Board, direction: Direction) -> None:
+    def rotate_robot(board: Game, direction: Direction) -> None:
         """Rotate the robot to face a direction."""
         logger.info("rotate_robot: board_id=%r direction=%s", getattr(board, 'id', None), direction)
         if board.get_status() != GameStatus.IN_PROGRESS:
@@ -30,7 +30,7 @@ class GameService:
         board.update_timestamp()
 
     @staticmethod
-    def move_robot(board: Board) -> None:
+    def move_robot(board: Game) -> None:
         """Move the robot in the direction it's facing."""
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -53,7 +53,7 @@ class GameService:
         board.update_timestamp()
 
     @staticmethod
-    def pick_flower(board: Board) -> None:
+    def pick_flower(board: Game) -> None:
         """Pick a flower from an adjacent cell."""
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -80,7 +80,7 @@ class GameService:
         board.update_timestamp()
 
     @staticmethod
-    def drop_flower(board: Board) -> None:
+    def drop_flower(board: Game) -> None:
         """Drop a flower on an adjacent empty cell."""
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -105,7 +105,7 @@ class GameService:
         board.update_timestamp()
 
     @staticmethod
-    def give_flowers(board: Board) -> None:
+    def give_flowers(board: Game) -> None:
         """Give flowers to the princess."""
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
@@ -131,7 +131,7 @@ class GameService:
         board.update_timestamp()
 
     @staticmethod
-    def clean_obstacle(board: Board) -> None:
+    def clean_obstacle(board: Game) -> None:
         """Clean an obstacle in the direction faced."""
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")

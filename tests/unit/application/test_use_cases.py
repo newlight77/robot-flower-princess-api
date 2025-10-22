@@ -3,7 +3,7 @@ import pytest
 from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 
@@ -21,7 +21,7 @@ def repo():
 
 def make_board_with_flower():
     robot = Robot(position=Position(1, 1), orientation=Direction.NORTH)
-    board = Board(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
     # place a flower north of robot
     board.flowers = {Position(0, 1)}
     board.obstacles = set()

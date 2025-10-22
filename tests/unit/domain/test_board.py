@@ -1,11 +1,11 @@
 import pytest
-from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.value_objects.game_status import GameStatus
 
 
 def test_board_creation():
-    board = Board.create(rows=10, cols=10)
+    board = Game.create(rows=10, cols=10)
     assert board.rows == 10
     assert board.cols == 10
     assert board.robot.position == Position(0, 0)
@@ -14,14 +14,14 @@ def test_board_creation():
 
 def test_board_invalid_size():
     with pytest.raises(ValueError):
-        Board.create(rows=2, cols=5)
+        Game.create(rows=2, cols=5)
 
     with pytest.raises(ValueError):
-        Board.create(rows=51, cols=5)
+        Game.create(rows=51, cols=5)
 
 
 def test_board_victory():
-    board = Board.create(rows=5, cols=5)
+    board = Game.create(rows=5, cols=5)
     assert board.get_status() == GameStatus.IN_PROGRESS
 
     board.flowers_delivered = board.initial_flower_count

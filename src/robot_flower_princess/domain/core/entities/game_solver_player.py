@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 from collections import deque
-from .board import Board
+from .game import Game
 from .position import Position
 from ..value_objects.direction import Direction
 from ...services.game_service import GameService
@@ -10,7 +10,7 @@ class GameSolverPlayer:
     """AI solver for the game using BFS."""
 
     @staticmethod
-    def solve(board: Board) -> List[Tuple[str, Optional[Direction]]]:
+    def solve(board: Game) -> List[Tuple[str, Optional[Direction]]]:
         """
         Attempt to solve the game and return a list of actions.
         Returns a list of tuples: (action_type, direction)
@@ -84,7 +84,7 @@ class GameSolverPlayer:
         return actions
 
     @staticmethod
-    def _find_path(board: Board, start: Position, goal: Position) -> List[Position]:
+    def _find_path(board: Game, start: Position, goal: Position) -> List[Position]:
         """Find path from start to goal using BFS."""
         if start == goal:
             return []
@@ -113,7 +113,7 @@ class GameSolverPlayer:
         return []
 
     @staticmethod
-    def _get_adjacent_positions(pos: Position, board: Board) -> List[Position]:
+    def _get_adjacent_positions(pos: Position, board: Game) -> List[Position]:
         """Get all valid adjacent empty positions."""
         adjacent = []
         for direction in Direction:

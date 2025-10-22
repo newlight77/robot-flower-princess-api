@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from ..core.entities.board import Board
+from ..core.entities.game import Game
 from ..core.entities.game_history import GameHistory
 
 
@@ -9,12 +9,12 @@ class GameRepository(ABC):
     """Port for game persistence."""
 
     @abstractmethod
-    def save(self, game_id: str, board: Board) -> None:
+    def save(self, game_id: str, board: Game) -> None:
         """Save a game board."""
         pass
 
     @abstractmethod
-    def get(self, game_id: str) -> Optional[Board]:
+    def get(self, game_id: str) -> Optional[Game]:
         """Retrieve a game board by ID."""
         pass
 
@@ -39,6 +39,6 @@ class GameRepository(ABC):
         pass
 
     @abstractmethod
-    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Board]]:
+    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Game]]:
         """Get the last N games, optionally filtered by status."""
         pass

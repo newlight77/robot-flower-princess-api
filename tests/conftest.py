@@ -3,7 +3,7 @@ from typing import Callable
 from fastapi.testclient import TestClient
 
 from robot_flower_princess.main import app
-from robot_flower_princess.domain.core.entities.board import Board
+from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
@@ -68,7 +68,7 @@ def save_board(repo):
 
 @pytest.fixture
 def make_empty_board():
-    from robot_flower_princess.domain.core.entities.board import Board
+    from robot_flower_princess.domain.core.entities.game import Game
     from robot_flower_princess.domain.core.entities.position import Position
     from robot_flower_princess.domain.core.entities.robot import Robot
     from robot_flower_princess.domain.core.value_objects.direction import Direction
@@ -76,7 +76,7 @@ def make_empty_board():
     def _make(rows=3, cols=3):
         robot_pos = Position(1, 1)
         robot = Robot(position=robot_pos, orientation=Direction.NORTH)
-        board = Board(rows=rows, cols=cols, robot=robot, princess_position=Position(2, 2))
+        board = Game(rows=rows, cols=cols, robot=robot, princess_position=Position(2, 2))
         board.flowers = set()
         board.obstacles = set()
         return board
@@ -104,7 +104,7 @@ def seeded_board(save_board, make_empty_board):
     """Create and save a deterministic empty board in the repo and return its id and board.
 
     Returns:
-        (str, Board): tuple of game_id and board object
+        (str, Game): tuple of game_id and board object
     """
     def _seed(game_id: str = "seeded-board", rows: int = 3, cols: int = 3):
         board = make_empty_board(rows, cols)
@@ -128,7 +128,7 @@ def sample_board():
     flowers = {Position(1, 1)}
     obstacles = {Position(0, 1)}
 
-    board = Board(
+    board = Game(
         rows=3,
         cols=3,
         robot=robot,
@@ -142,7 +142,7 @@ def sample_board():
 
 @pytest.fixture
 def place_flower():
-    def _place(board: Board, pos: Position):
+    def _place(board: Game, pos: Position):
         board.flowers.add(pos)
         board.initial_flower_count = len(board.flowers)
         return board
@@ -152,7 +152,7 @@ def place_flower():
 
 @pytest.fixture
 def place_obstacle():
-    def _place(board: Board, pos: Position):
+    def _place(board: Game, pos: Position):
         board.obstacles.add(pos)
         return board
 
@@ -161,7 +161,7 @@ def place_obstacle():
 
 @pytest.fixture
 def place_robot():
-    def _place(board: Board, pos: Position, orientation: Direction = Direction.NORTH):
+    def _place(board: Game, pos: Position, orientation: Direction = Direction.NORTH):
         board.robot.position = pos
         board.robot.orientation = orientation
         return board

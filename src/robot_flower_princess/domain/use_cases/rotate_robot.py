@@ -39,7 +39,11 @@ class RotateRobotUseCase:
 
     def execute(self, command: RotateRobotCommand) -> RotateRobotResult:
         """Rotate the robot to face a direction."""
-        self.logger.info("execute: RotateRobotCommand game_id=%s direction=%s", command.game_id, command.direction)
+        self.logger.info(
+            "execute: RotateRobotCommand game_id=%s direction=%s",
+            command.game_id,
+            command.direction,
+        )
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -69,7 +73,7 @@ class RotateRobotUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Robot rotated to face {command.direction.value}"
+                message=f"Robot rotated to face {command.direction.value}",
             )
         except GameException as e:
             action = Action(
@@ -89,5 +93,5 @@ class RotateRobotUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Game Over: {str(e)}"
+                message=f"Game Over: {str(e)}",
             )

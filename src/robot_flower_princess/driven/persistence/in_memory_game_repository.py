@@ -36,7 +36,9 @@ class InMemoryGameRepository(GameRepository):
         return exists
 
     def save_history(self, game_id: str, history: GameHistory) -> None:
-        logger.info("save_history game_id=%s entries=%s", game_id, len(history.actions) if history else 0)
+        logger.info(
+            "save_history game_id=%s entries=%s", game_id, len(history.actions) if history else 0
+        )
         self._histories[game_id] = history
 
     def get_history(self, game_id: str) -> Optional[GameHistory]:

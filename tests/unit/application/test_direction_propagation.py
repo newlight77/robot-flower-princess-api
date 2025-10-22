@@ -1,5 +1,3 @@
-import pytest
-
 from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
@@ -13,8 +11,14 @@ from robot_flower_princess.domain.core.value_objects.action_type import ActionTy
 from robot_flower_princess.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from robot_flower_princess.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
 from robot_flower_princess.domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
-from robot_flower_princess.domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
-from robot_flower_princess.domain.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
+from robot_flower_princess.domain.use_cases.give_flowers import (
+    GiveFlowersUseCase,
+    GiveFlowersCommand,
+)
+from robot_flower_princess.domain.use_cases.clean_obstacle import (
+    CleanObstacleUseCase,
+    CleanObstacleCommand,
+)
 
 
 def make_center_board(rows=3, cols=3):

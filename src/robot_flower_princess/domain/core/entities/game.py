@@ -14,9 +14,18 @@ logger = get_logger("Game")
 
 
 class Game:
-    def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, game_id: str = "", **kwargs):
+    def __init__(
+        self,
+        rows: int,
+        cols: int,
+        robot: Robot,
+        princess: Princess = None,
+        princess_position: Position = None,
+        game_id: str = "",
+        **kwargs,
+    ):
         """Initialize Game with backward compatibility for princess_position."""
-        self.game_id = game_id or kwargs.get('game_id', "")
+        self.game_id = game_id or kwargs.get("game_id", "")
         self.board = Board(rows, cols)
         self.robot = robot
 
@@ -30,19 +39,24 @@ class Game:
             self.princess = Princess(position=Position(self.board.rows - 1, self.board.cols - 1))
 
         # Set other fields
-        self.flowers = kwargs.get('flowers', set())
-        self.obstacles = kwargs.get('obstacles', set())
-        self.initial_flower_count = kwargs.get('initial_flower_count', 0)
-        self.flowers_delivered = kwargs.get('flowers_delivered', 0)
-        self.name = kwargs.get('name', "")
-        self.created_at = kwargs.get('created_at', datetime.now())
-        self.updated_at = kwargs.get('updated_at', datetime.now())
+        self.flowers = kwargs.get("flowers", set())
+        self.obstacles = kwargs.get("obstacles", set())
+        self.initial_flower_count = kwargs.get("initial_flower_count", 0)
+        self.flowers_delivered = kwargs.get("flowers_delivered", 0)
+        self.name = kwargs.get("name", "")
+        self.created_at = kwargs.get("created_at", datetime.now())
+        self.updated_at = kwargs.get("updated_at", datetime.now())
 
         # Set initial flower count if not provided
         if self.initial_flower_count == 0:
             self.initial_flower_count = len(self.flowers)
 
-        logger.debug("Game.__init__ rows=%s cols=%s initial_flowers=%s", self.board.rows, self.board.cols, self.initial_flower_count)
+        logger.debug(
+            "Game.__init__ rows=%s cols=%s initial_flowers=%s",
+            self.board.rows,
+            self.board.cols,
+            self.initial_flower_count,
+        )
 
     @property
     def rows(self) -> int:
@@ -126,7 +140,12 @@ class Game:
             if self.flowers_delivered == self.initial_flower_count and self.initial_flower_count > 0
             else GameStatus.IN_PROGRESS
         )
-        logger.debug("get_status flowers_delivered=%s initial=%s status=%s", self.flowers_delivered, self.initial_flower_count, status)
+        logger.debug(
+            "get_status flowers_delivered=%s initial=%s status=%s",
+            self.flowers_delivered,
+            self.initial_flower_count,
+            status,
+        )
         return status
 
     def update_timestamp(self) -> None:
@@ -151,7 +170,7 @@ class Game:
             robot_pos=self.robot.position,
             princess_pos=self.princess.position,
             flowers=self.flowers,
-            obstacles=self.obstacles
+            obstacles=self.obstacles,
         )
 
         return {

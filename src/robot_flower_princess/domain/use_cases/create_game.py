@@ -41,7 +41,12 @@ class CreateGameUseCase:
 
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         """Create a new game with the specified board size."""
-        self.logger.info("execute: CreateGameCommand rows=%s cols=%s name=%s", command.rows, command.cols, command.name)
+        self.logger.info(
+            "execute: CreateGameCommand rows=%s cols=%s name=%s",
+            command.rows,
+            command.cols,
+            command.name,
+        )
         game: Game = Game.create(rows=command.rows, cols=command.cols)
 
         # Set the game name if provided
@@ -69,5 +74,5 @@ class CreateGameUseCase:
             status=game.get_status().value,
             message="Game created successfully",
             created_at=game.created_at,
-            updated_at=game.updated_at
+            updated_at=game.updated_at,
         )

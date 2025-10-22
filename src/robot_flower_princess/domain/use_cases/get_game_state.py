@@ -42,5 +42,5 @@ class GetGameStateUseCase:
             princess=board.princess,
             flowers=board.flowers,
             obstacles=board.obstacles,
-            status=board.get_status().value
+            status=board.get_status().value,
         )

@@ -36,7 +36,12 @@ class GetGamesUseCase:
         """Get the last N games, optionally filtered by status."""
         self.logger.info("execute: GetGamesQuery limit=%s status=%r", query.limit, query.status)
         status = query.status if query.status is not None else "in_progress"
-        self.logger.info("execute: GetGamesQuery limit=%s status=%r final status=%s", query.limit, query.status, status)
+        self.logger.info(
+            "execute: GetGamesQuery limit=%s status=%r final status=%s",
+            query.limit,
+            query.status,
+            status,
+        )
         games = self.repository.get_games(query.limit, status)
 
         game_summaries = []
@@ -47,7 +52,7 @@ class GetGamesUseCase:
                     status=game.get_status().value,
                     board=game.board,
                     created_at=game.created_at,
-                    updated_at=game.updated_at
+                    updated_at=game.updated_at,
                 )
             )
 

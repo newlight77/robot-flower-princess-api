@@ -27,9 +27,9 @@ class Robot:
             raise ValueError(f"Cannot hold more than {self.max_flowers} flowers")
         self.flowers_held += 1
         if flower_position:
-            self.flowers_collected.append({
-                "position": {"row": flower_position.row, "col": flower_position.col}
-            })
+            self.flowers_collected.append(
+                {"position": {"row": flower_position.row, "col": flower_position.col}}
+            )
 
     def drop_flower(self, drop_position: Position = None) -> None:
         if self.flowers_held == 0:
@@ -40,23 +40,20 @@ class Robot:
     def give_flowers(self, princess_position: Position = None) -> int:
         count = self.flowers_held
         if count > 0 and princess_position:
-            self.flowers_delivered.append({
-                "position": {"row": princess_position.row, "col": princess_position.col}
-            })
+            self.flowers_delivered.append(
+                {"position": {"row": princess_position.row, "col": princess_position.col}}
+            )
         self.flowers_held = 0
         return count
 
     def clean_obstacle(self, obstacle_position: Position) -> None:
-        self.obstacles_cleaned.append({
-            "position": {"row": obstacle_position.row, "col": obstacle_position.col}
-        })
+        self.obstacles_cleaned.append(
+            {"position": {"row": obstacle_position.row, "col": obstacle_position.col}}
+        )
 
     def add_executed_action(self, action_type: ActionType, direction: Direction) -> None:
         """Add an action to the executed actions history."""
-        self.executed_actions.append({
-            "type": action_type.value,
-            "direction": direction.value
-        })
+        self.executed_actions.append({"type": action_type.value, "direction": direction.value})
 
     def can_clean(self) -> bool:
         return self.flowers_held == 0

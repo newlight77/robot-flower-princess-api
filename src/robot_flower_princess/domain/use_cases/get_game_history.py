@@ -3,6 +3,7 @@ from ..ports.game_repository import GameRepository
 from ...logging import get_logger
 from ..core.entities.game_history import GameHistory
 
+
 @dataclass
 class GetGameHistoryQuery:
     game_id: str

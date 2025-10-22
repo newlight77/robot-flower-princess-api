@@ -1,17 +1,25 @@
 import pytest
 
-from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+    InMemoryGameRepository,
+)
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
 from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 
-from robot_flower_princess.domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
+from robot_flower_princess.domain.use_cases.rotate_robot import (
+    RotateRobotUseCase,
+    RotateRobotCommand,
+)
 from robot_flower_princess.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from robot_flower_princess.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
 from robot_flower_princess.domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
-from robot_flower_princess.domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
+from robot_flower_princess.domain.use_cases.give_flowers import (
+    GiveFlowersUseCase,
+    GiveFlowersCommand,
+)
 
 
 @pytest.fixture
@@ -60,9 +68,9 @@ def test_move_use_case_success(repo):
     use_case = MoveRobotUseCase(repo)
     res = use_case.execute(MoveRobotCommand(game_id="g2", direction=Direction.NORTH))
     assert isinstance(res.success, bool)
-    assert hasattr(res, 'board')
-    assert hasattr(res, 'robot')
-    assert hasattr(res, 'princess')
+    assert hasattr(res, "board")
+    assert hasattr(res, "robot")
+    assert hasattr(res, "princess")
 
 
 def test_pick_drop_give_use_cases(repo):

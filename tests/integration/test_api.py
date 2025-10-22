@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_root_endpoint(client):
     response = client.get("/")
     assert response.status_code == 200
@@ -34,7 +31,9 @@ def test_rotate_robot(client):
     create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
     game_id = create_response.json()["id"]
 
-    response = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
+    response = client.post(
+        f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"}
+    )
     assert response.status_code == 200
     assert response.json()["success"]
 

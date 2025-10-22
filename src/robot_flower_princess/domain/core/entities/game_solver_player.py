@@ -23,7 +23,9 @@ class GameSolverPlayer:
                 board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0
             ):
                 # Navigate to princess
-                path = GameSolverPlayer._find_path(board, board.robot.position, board.princess_position)
+                path = GameSolverPlayer._find_path(
+                    board, board.robot.position, board.princess_position
+                )
                 if not path:
                     break
 
@@ -36,7 +38,9 @@ class GameSolverPlayer:
                     GameService.move_robot(board)
 
                 # Face princess and give flowers
-                direction = GameSolverPlayer._get_direction(board.robot.position, board.princess_position)
+                direction = GameSolverPlayer._get_direction(
+                    board.robot.position, board.princess_position
+                )
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
 

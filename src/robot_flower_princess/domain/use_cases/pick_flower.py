@@ -39,7 +39,9 @@ class PickFlowerUseCase:
 
     def execute(self, command: PickFlowerCommand) -> PickFlowerResult:
         """Pick a flower from an adjacent cell."""
-        self.logger.info("execute: PickFlowerCommand game_id=%s direction=%s", command.game_id, command.direction)
+        self.logger.info(
+            "execute: PickFlowerCommand game_id=%s direction=%s", command.game_id, command.direction
+        )
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -71,11 +73,14 @@ class PickFlowerUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Flower picked successfully (holding {board.robot.flowers_held})"
+                message=f"Flower picked successfully (holding {board.robot.flowers_held})",
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.PICK, direction=command.direction, success=False, message=str(e)
+                action_type=ActionType.PICK,
+                direction=command.direction,
+                success=False,
+                message=str(e),
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
@@ -88,5 +93,5 @@ class PickFlowerUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Game Over: {str(e)}"
+                message=f"Game Over: {str(e)}",
             )

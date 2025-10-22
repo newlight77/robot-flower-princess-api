@@ -39,7 +39,11 @@ class GiveFlowersUseCase:
 
     def execute(self, command: GiveFlowersCommand) -> GiveFlowersResult:
         """Give flowers to the princess."""
-        self.logger.info("execute: GiveFlowersCommand game_id=%s direction=%s", command.game_id, command.direction)
+        self.logger.info(
+            "execute: GiveFlowersCommand game_id=%s direction=%s",
+            command.game_id,
+            command.direction,
+        )
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -59,7 +63,10 @@ class GiveFlowersUseCase:
                 message = "Victory! All flowers delivered to the princess!"
 
             action = Action(
-                action_type=ActionType.GIVE, direction=command.direction, success=True, message=message
+                action_type=ActionType.GIVE,
+                direction=command.direction,
+                success=True,
+                message=message,
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
@@ -72,11 +79,14 @@ class GiveFlowersUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=status,
-                message=message
+                message=message,
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.GIVE, direction=command.direction, success=False, message=str(e)
+                action_type=ActionType.GIVE,
+                direction=command.direction,
+                success=False,
+                message=str(e),
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
@@ -89,5 +99,5 @@ class GiveFlowersUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Game Over: {str(e)}"
+                message=f"Game Over: {str(e)}",
             )

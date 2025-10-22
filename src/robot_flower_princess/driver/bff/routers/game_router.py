@@ -34,6 +34,7 @@ router = APIRouter(prefix="/api/games", tags=["games"])
 
 logger = get_logger("game_router")
 
+
 @router.post("/", response_model=GameStateResponse, status_code=201)
 def create_game(
     request: CreateGameRequest,
@@ -45,14 +46,16 @@ def create_game(
 
     try:
         use_case = CreateGameUseCase(repository)
-        result: CreateGameResult = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name))
+        result: CreateGameResult = use_case.execute(
+            CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name)
+        )
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(
             robot_pos=result.robot.position,
             princess_pos=result.princess.position,
             flowers=result.flowers,
-            obstacles=result.obstacles
+            obstacles=result.obstacles,
         )
 
         return GameStateResponse(
@@ -74,7 +77,10 @@ def create_game(
                 "executed_actions": result.robot.executed_actions,
             },
             princess={
-                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "position": {
+                    "row": result.princess.position.row,
+                    "col": result.princess.position.col,
+                },
                 "flowers_received": result.princess.flowers_received,
                 "mood": result.princess.mood,
             },
@@ -119,41 +125,49 @@ def get_games(
                     robot_pos=game.robot.position,
                     princess_pos=game.princess.position,
                     flowers=game.flowers,
-                    obstacles=game.obstacles
+                    obstacles=game.obstacles,
                 )
-                pydantic_games.append(PydanticGameSummary(
-                    id=game_summary.game_id,
-                    status=game_summary.status,
-                    created_at=game_summary.created_at.isoformat() + "Z",
-                    updated_at=game_summary.updated_at.isoformat() + "Z",
-                    board=board_dict,
-                    robot={
-                        "position": {"row": game.robot.position.row, "col": game.robot.position.col},
-                        "orientation": game.robot.orientation.value,
-                        "flowers": {
-                            "collected": game.robot.flowers_collected,
-                            "delivered": game.robot.flowers_delivered,
-                            "collection_capacity": game.robot.max_flowers,
+                pydantic_games.append(
+                    PydanticGameSummary(
+                        id=game_summary.game_id,
+                        status=game_summary.status,
+                        created_at=game_summary.created_at.isoformat() + "Z",
+                        updated_at=game_summary.updated_at.isoformat() + "Z",
+                        board=board_dict,
+                        robot={
+                            "position": {
+                                "row": game.robot.position.row,
+                                "col": game.robot.position.col,
+                            },
+                            "orientation": game.robot.orientation.value,
+                            "flowers": {
+                                "collected": game.robot.flowers_collected,
+                                "delivered": game.robot.flowers_delivered,
+                                "collection_capacity": game.robot.max_flowers,
+                            },
+                            "obstacles": {
+                                "cleaned": game.robot.obstacles_cleaned,
+                            },
+                            "executed_actions": game.robot.executed_actions,
                         },
-                        "obstacles": {
-                            "cleaned": game.robot.obstacles_cleaned,
+                        princess={
+                            "position": {
+                                "row": game.princess.position.row,
+                                "col": game.princess.position.col,
+                            },
+                            "flowers_received": game.princess.flowers_received,
+                            "mood": game.princess.mood,
                         },
-                        "executed_actions": game.robot.executed_actions,
-                    },
-                    princess={
-                        "position": {"row": game.princess.position.row, "col": game.princess.position.col},
-                        "flowers_received": game.princess.flowers_received,
-                        "mood": game.princess.mood,
-                    },
-                    obstacles={
-                        "remaining": len(game.obstacles),
-                        "total": len(game.obstacles) + len(game.robot.obstacles_cleaned),
-                    },
-                    flowers={
-                        "remaining": len(game.flowers),
-                        "total": game.initial_flower_count,
-                    },
-                ))
+                        obstacles={
+                            "remaining": len(game.obstacles),
+                            "total": len(game.obstacles) + len(game.robot.obstacles_cleaned),
+                        },
+                        flowers={
+                            "remaining": len(game.flowers),
+                            "total": game.initial_flower_count,
+                        },
+                    )
+                )
 
         return GamesResponse(gamess=pydantic_games, total=len(pydantic_games))
     except Exception as e:
@@ -180,7 +194,7 @@ def get_game_state(
             robot_pos=result.robot.position,
             princess_pos=result.princess.position,
             flowers=result.flowers,
-            obstacles=result.obstacles
+            obstacles=result.obstacles,
         )
 
         # Get the full game object to access created_at and updated_at
@@ -205,7 +219,10 @@ def get_game_state(
                 "executed_actions": result.robot.executed_actions,
             },
             princess={
-                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "position": {
+                    "row": result.princess.position.row,
+                    "col": result.princess.position.col,
+                },
                 "flowers_received": result.princess.flowers_received,
                 "mood": result.princess.mood,
             },
@@ -247,8 +264,7 @@ def get_game_history(
 @router.post("/{game_id}/action", response_model=ActionResponse)
 def perform_action(
     game_id: str,
-    request: ActionRequest
-      = Body(
+    request: ActionRequest = Body(
         ...,
         examples=cast(
             Any,
@@ -257,15 +273,29 @@ def perform_action(
                     "summary": "Rotate robot",
                     "value": {"action": "rotate", "direction": "south"},
                 },
-                "move": {"summary": "Move robot", "value": {"action": "move", "direction": "south"}},
-                "pickFlower": {"summary": "Pick a flower", "value": {"action": "pickFlower", "direction": "south"}},
-                "dropFlower": {"summary": "Drop a flower", "value": {"action": "dropFlower", "direction": "south"}},
-                "giveFlower": {"summary": "Give flowers", "value": {"action": "giveFlower", "direction": "south"}},
-                "clean": {"summary": "Clean obstacle", "value": {"action": "clean", "direction": "south"}},
+                "move": {
+                    "summary": "Move robot",
+                    "value": {"action": "move", "direction": "south"},
+                },
+                "pickFlower": {
+                    "summary": "Pick a flower",
+                    "value": {"action": "pickFlower", "direction": "south"},
+                },
+                "dropFlower": {
+                    "summary": "Drop a flower",
+                    "value": {"action": "dropFlower", "direction": "south"},
+                },
+                "giveFlower": {
+                    "summary": "Give flowers",
+                    "value": {"action": "giveFlower", "direction": "south"},
+                },
+                "clean": {
+                    "summary": "Clean obstacle",
+                    "value": {"action": "clean", "direction": "south"},
+                },
             },
         ),
-    )
-    ,
+    ),
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.
@@ -273,7 +303,12 @@ def perform_action(
     If action is 'rotate', provide a 'direction' field.
     """
 
-    logger.info("perform_action: game_id=%s and action=%s and direction=%s", game_id, request.action.name, request.direction)
+    logger.info(
+        "perform_action: game_id=%s and action=%s and direction=%s",
+        game_id,
+        request.action.name,
+        request.direction,
+    )
 
     try:
         action = request.action
@@ -307,7 +342,7 @@ def perform_action(
             robot_pos=result.robot.position,
             princess_pos=result.princess.position,
             flowers=result.flowers,
-            obstacles=result.obstacles
+            obstacles=result.obstacles,
         )
 
         return ActionResponse(
@@ -329,7 +364,10 @@ def perform_action(
                 "executed_actions": result.robot.executed_actions,
             },
             princess={
-                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "position": {
+                    "row": result.princess.position.row,
+                    "col": result.princess.position.col,
+                },
                 "flowers_received": result.princess.flowers_received,
                 "mood": result.princess.mood,
             },
@@ -345,7 +383,6 @@ def perform_action(
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
 
 
 @router.post("/{game_id}/autoplay", response_model=ActionResponse)
@@ -368,7 +405,7 @@ def autoplay(
             robot_pos=result.robot.position,
             princess_pos=result.princess.position,
             flowers=result.flowers,
-            obstacles=result.obstacles
+            obstacles=result.obstacles,
         )
 
         return ActionResponse(
@@ -390,7 +427,10 @@ def autoplay(
                 "executed_actions": result.robot.executed_actions,
             },
             princess={
-                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "position": {
+                    "row": result.princess.position.row,
+                    "col": result.princess.position.col,
+                },
                 "flowers_received": result.princess.flowers_received,
                 "mood": result.princess.mood,
             },

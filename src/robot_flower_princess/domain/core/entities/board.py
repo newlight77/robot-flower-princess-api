@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from .position import Position
-from .cell import CellType
 
 
 @dataclass
 class Board:
     """Represents the game board grid."""
+
     rows: int
     cols: int
 
@@ -18,7 +18,13 @@ class Board:
         """Check if a position is within board boundaries."""
         return 0 <= position.row < self.rows and 0 <= position.col < self.cols
 
-    def get_grid(self, robot_pos: Position, princess_pos: Position, flowers: set[Position], obstacles: set[Position]) -> list[list[str]]:
+    def get_grid(
+        self,
+        robot_pos: Position,
+        princess_pos: Position,
+        flowers: set[Position],
+        obstacles: set[Position],
+    ) -> list[list[str]]:
         """Generate the grid representation with emojis."""
         grid = []
         for r in range(self.rows):
@@ -41,14 +47,19 @@ class Board:
             grid.append(row)
         return grid
 
-    def to_dict(self, robot_pos: Position = None, princess_pos: Position = None,
-                flowers: set[Position] = None, obstacles: set[Position] = None) -> dict:
+    def to_dict(
+        self,
+        robot_pos: Position = None,
+        princess_pos: Position = None,
+        flowers: set[Position] = None,
+        obstacles: set[Position] = None,
+    ) -> dict:
         """Convert board to dictionary representation."""
         grid = self.get_grid(
             robot_pos or Position(0, 0),
             princess_pos or Position(self.rows - 1, self.cols - 1),
             flowers or set(),
-            obstacles or set()
+            obstacles or set(),
         )
 
         return {

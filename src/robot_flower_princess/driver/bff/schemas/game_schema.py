@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Literal, List, Optional
+from typing import Literal, List
 from enum import Enum
-from pydantic import model_validator
 
 
 class CreateGameRequest(BaseModel):

@@ -9,7 +9,9 @@ from robot_flower_princess.domain.core.entities.robot import Robot
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 from robot_flower_princess.configurator.dependencies import get_game_repository
-from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+    InMemoryGameRepository,
+)
 
 
 @pytest.fixture(scope="session")
@@ -48,7 +50,7 @@ def create_game(client):
             "flowers_remaining": data["flowers"]["remaining"],
             "flowers_delivered": 0,
             "total_flowers": data["flowers"]["total"],
-            "status": data["status"]
+            "status": data["status"],
         }
         return data["id"], board_data
 
@@ -91,6 +93,7 @@ def seeded_game(client) -> Callable[..., str]:
     Returns:
         str: game id created via POST /api/games/
     """
+
     def _seed(rows: int = 5, cols: int = 5) -> str:
         resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
         assert resp.status_code == 201
@@ -106,6 +109,7 @@ def seeded_board(save_board, make_empty_board):
     Returns:
         (str, Game): tuple of game_id and board object
     """
+
     def _seed(game_id: str = "seeded-board", rows: int = 3, cols: int = 3):
         board = make_empty_board(rows, cols)
         save_board(game_id, board)

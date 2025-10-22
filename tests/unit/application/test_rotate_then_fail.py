@@ -1,16 +1,20 @@
 from unittest.mock import patch
 
-from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+    InMemoryGameRepository,
+)
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
 from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 from robot_flower_princess.domain.core.exceptions.game_exceptions import GameException
-from robot_flower_princess.domain.core.value_objects.action_type import ActionType
 
 from robot_flower_princess.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
-from robot_flower_princess.domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
+from robot_flower_princess.domain.use_cases.rotate_robot import (
+    RotateRobotUseCase,
+    RotateRobotCommand,
+)
 
 
 def make_small_board():
@@ -29,7 +33,10 @@ def test_rotate_then_move_failure_records_both_entries():
     repo.save_history("r1", GameHistory())
 
     # Patch move to raise after rotate is applied
-    with patch("robot_flower_princess.domain.use_cases.move_robot.GameService.move_robot", side_effect=GameException("blocked")):
+    with patch(
+        "robot_flower_princess.domain.use_cases.move_robot.GameService.move_robot",
+        side_effect=GameException("blocked"),
+    ):
         # Apply rotate then move via commands
         rot_uc = RotateRobotUseCase(repo)
         rot_uc.execute(RotateRobotCommand(game_id="r1", direction=Direction.NORTH))
@@ -45,3 +52,15 @@ def test_rotate_then_move_failure_records_both_entries():
     assert history.actions[-2].direction == Direction.NORTH
     assert history.actions[-1].action_type.value == "move"
     assert history.actions[-1].direction == Direction.NORTH
+    assert history.actions[-1].success is False
+    assert history.actions[-1].message == "blocked"
+
+    assert res.success is False
+    assert res.robot.orientation.value == Direction.NORTH
+    assert res.robot.position.row == 0
+    assert res.robot.position.col == 0
+    assert res.princess.position.row == 1
+    assert res.princess.position.col == 1
+    assert res.flowers == set()
+    assert res.obstacles == set()
+    assert res.status == "in_progress"

@@ -39,7 +39,11 @@ class CleanObstacleUseCase:
 
     def execute(self, command: CleanObstacleCommand) -> CleanObstacleResult:
         """Clean an obstacle in the direction faced."""
-        self.logger.info("execute: CleanObstacleCommand game_id=%s direction=%s", command.game_id, command.direction)
+        self.logger.info(
+            "execute: CleanObstacleCommand game_id=%s direction=%s",
+            command.game_id,
+            command.direction,
+        )
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -70,11 +74,14 @@ class CleanObstacleUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message="Obstacle cleaned successfully"
+                message="Obstacle cleaned successfully",
             )
         except GameException as e:
             action = Action(
-                action_type=ActionType.CLEAN, direction=command.direction, success=False, message=str(e)
+                action_type=ActionType.CLEAN,
+                direction=command.direction,
+                success=False,
+                message=str(e),
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
@@ -87,5 +94,5 @@ class CleanObstacleUseCase:
                 flowers=board.flowers,
                 obstacles=board.obstacles,
                 status=board.get_status().value,
-                message=f"Game Over: {str(e)}"
+                message=f"Game Over: {str(e)}",
             )

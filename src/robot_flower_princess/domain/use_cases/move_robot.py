@@ -56,7 +56,7 @@ class MoveRobotUseCase:
             history.add_action(action, board.to_dict())
             self.repository.save_history(command.game_id, history)
 
-            return MoveRobotResult(success=True, board_state=board.to_dict(), message=message, game_model=board.to_game_model_dict())
+            return MoveRobotResult(success=True, board=board.to_dict(), message=message)
         except GameException as e:
             action = Action(
                 action_type=ActionType.MOVE, direction=command.direction, success=False, message=str(e)
@@ -65,5 +65,7 @@ class MoveRobotUseCase:
             self.repository.save_history(command.game_id, history)
 
             return MoveRobotResult(
-                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}", game_model=board.to_game_model_dict()
+                success=False,
+                board=board.to_dict(),
+                message=f"Game Over: {str(e)}"
             )

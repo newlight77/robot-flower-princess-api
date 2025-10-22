@@ -56,9 +56,8 @@ class PickFlowerUseCase:
 
             return PickFlowerResult(
                 success=True,
-                board_state=board.to_dict(),
-                message=f"Flower picked successfully (holding {board.robot.flowers_held})",
-                game_model=board.to_game_model_dict(),
+                board=board.to_dict(),
+                message=f"Flower picked successfully (holding {board.robot.flowers_held})"
             )
         except GameException as e:
             action = Action(
@@ -68,5 +67,7 @@ class PickFlowerUseCase:
             self.repository.save_history(command.game_id, history)
 
             return PickFlowerResult(
-                success=False, board_state=board.to_dict(), message=f"Game Over: {str(e)}", game_model=board.to_game_model_dict()
+                success=False,
+                board=board.to_dict(),
+                message=f"Game Over: {str(e)}"
             )

@@ -26,4 +26,4 @@ class GetGameStateUseCase:
         if board is None:
             raise ValueError(f"Game {query.game_id} not found")
 
-        return GetGameStateResult(board_state=board.to_dict())
+        return GetGameStateResult(board=board.to_dict())

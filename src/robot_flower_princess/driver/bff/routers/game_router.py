@@ -41,16 +41,12 @@ def create_game(
     try:
         use_case = CreateGameUseCase(repository)
         result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name))
-        game_model = result.game_model
+        game_model = result.board
         return GameStateResponse(
             id=result.game_id,
-            status=game_model.get("status", "in_progress"),
-            message="Game created successfully",
+            message=result.message,
+            # status=game_model.get("status", "in_progress"),
             board=game_model["board"],
-            robot=game_model["robot"],
-            princess=game_model["princess"],
-            obstacles=game_model["obstacles"],
-            flowers=game_model["flowers"],
             created_at=game_model["created_at"],
             updated_at=game_model["updated_at"],
         )
@@ -80,16 +76,17 @@ def get_games(
             # Get the full game model from the repository
             board = repository.get(game.game_id)
             if board:
-                game_model = board.to_game_model_dict()
+                game_model = board.to_dict()
                 pydantic_games.append(PydanticGameSummary(
+                    id=game.game_id,
+                    status=game_model["status"],
+                    created_at=game_model["created_at"],
+                    updated_at=game_model["updated_at"],
                     board=game_model["board"],
                     robot=game_model["robot"],
                     princess=game_model["princess"],
-                    obstacles=game_model["obstacles"],
                     flowers=game_model["flowers"],
-                    status=game_model["status"],
-                    created_at=game_model["created_at"],
-                    updated_at=game_model["updated_at"]
+                    obstacles=game_model["obstacles"],
                 ))
 
         return GamesResponse(gamess=pydantic_games, total=len(pydantic_games))
@@ -114,7 +111,7 @@ def get_game_state(
         if board is None:
             raise HTTPException(status_code=404, detail=f"Game {game_id} not found")
 
-        game_model = board.to_game_model_dict()
+        game_model = board.to_dict()
         return GameStateResponse(
             id=game_id,
             status=game_model.get("status", "in_progress"),
@@ -215,6 +212,18 @@ def perform_action(
             board=result.board_state,
             message=result.message,
             game_model=result.game_model,
+
+            id=game_id,
+            status=game_model.get("status", "in_progress"),
+            message="Game state retrieved successfully",
+            board=game_model["board"],
+            robot=game_model["robot"],
+            princess=game_model["princess"],
+            obstacles=game_model["obstacles"],
+            flowers=game_model["flowers"],
+            created_at=game_model["created_at"],
+            updated_at=game_model["updated_at"],
+
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

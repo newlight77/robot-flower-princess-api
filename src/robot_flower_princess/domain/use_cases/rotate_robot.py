@@ -54,9 +54,8 @@ class RotateRobotUseCase:
 
             return RotateRobotResult(
                 success=True,
-                board_state=board.to_dict(),
-                message=f"Robot rotated to face {command.direction.value}",
-                game_model=board.to_game_model_dict(),
+                board=board.to_dict(),
+                message=f"Robot rotated to face {command.direction.value}"
             )
         except GameException as e:
             action = Action(
@@ -70,7 +69,6 @@ class RotateRobotUseCase:
 
             return RotateRobotResult(
                 success=False,
-                board_state=board.to_dict(),
-                message=f"Game Over: {str(e)}",
-                game_model=board.to_game_model_dict(),
+                board=board.to_dict(),
+                message=f"Game Over: {str(e)}"
             )

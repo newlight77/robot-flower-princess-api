@@ -29,7 +29,7 @@ class CreateGameUseCase:
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         """Create a new game with the specified board size."""
         self.logger.info("execute: CreateGameCommand rows=%s cols=%s name=%s", command.rows, command.cols, command.name)
-        board = Board.create(rows=command.rows, cols=command.cols)
+        board: Board = Board.create(rows=command.rows, cols=command.cols)
 
         # Set the game name if provided
         if command.name:
@@ -42,11 +42,11 @@ class CreateGameUseCase:
         # Save board and initialize history
         self.repository.save(game_id, board)
         history = GameHistory()
-        history.add_action(action=None, board_state=board.to_dict())
+        history.add_action(action=None, board=board.to_dict())
         self.repository.save_history(game_id, history)
 
         return CreateGameResult(
             game_id=game_id,
-            board_state=board.to_dict(),
-            game_model=board.to_game_model_dict()
+            board=board.to_dict(),
+            message="Game created successfully"
         )

@@ -106,7 +106,7 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=success,
                 actions_taken=len(actions),
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=message,
             )
 
@@ -114,6 +114,6 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=False,
                 actions_taken=0,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"AI failed: {str(e)}",
             )

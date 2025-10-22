@@ -60,7 +60,7 @@ def save_board(repo):
     def _save(game_id, board):
         repo.save(game_id, board)
         history = GameHistory()
-        history.add_action(action=None, board_state=board.to_dict())
+        history.add_action(action=None, board=board.to_dict())
         repo.save_history(game_id, history)
 
     return _save

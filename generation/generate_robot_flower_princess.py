@@ -1002,13 +1002,13 @@ class CreateGameUseCase:
         history = GameHistory()
         history.add_action(
             action=None,
-            board_state=board.to_dict()
+            board=board.to_dict()
         )
         self.repository.save_history(game_id, history)
 
         return CreateGameResult(
             game_id=game_id,
-            board_state=board.to_dict()
+            board=board.to_dict()
         )
 """,
 
@@ -1034,7 +1034,7 @@ class GetGameStateUseCase:
             raise ValueError(f"Game {query.game_id} not found")
 
         return GetGameStateResult(
-            board_state=board.to_dict()
+            board=board.to_dict()
         )
 """,
 
@@ -1110,7 +1110,7 @@ class RotateRobotUseCase:
 
             return RotateRobotResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Robot rotated to face {command.direction.value}"
             )
         except GameException as e:
@@ -1125,7 +1125,7 @@ class RotateRobotUseCase:
 
             return RotateRobotResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1180,7 +1180,7 @@ class MoveRobotUseCase:
 
             return MoveRobotResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=message
             )
         except GameException as e:
@@ -1195,7 +1195,7 @@ class MoveRobotUseCase:
 
             return MoveRobotResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1245,7 +1245,7 @@ class PickFlowerUseCase:
 
             return PickFlowerResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Flower picked successfully (holding {board.robot.flowers_held})"
             )
         except GameException as e:
@@ -1260,7 +1260,7 @@ class PickFlowerUseCase:
 
             return PickFlowerResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1310,7 +1310,7 @@ class DropFlowerUseCase:
 
             return DropFlowerResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Flower dropped successfully (holding {board.robot.flowers_held})"
             )
         except GameException as e:
@@ -1325,7 +1325,7 @@ class DropFlowerUseCase:
 
             return DropFlowerResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1380,7 +1380,7 @@ class GiveFlowersUseCase:
 
             return GiveFlowersResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=message
             )
         except GameException as e:
@@ -1395,7 +1395,7 @@ class GiveFlowersUseCase:
 
             return GiveFlowersResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1445,7 +1445,7 @@ class CleanObstacleUseCase:
 
             return CleanObstacleResult(
                 success=True,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message="Obstacle cleaned successfully"
             )
         except GameException as e:
@@ -1460,7 +1460,7 @@ class CleanObstacleUseCase:
 
             return CleanObstacleResult(
                 success=False,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"Game Over: {str(e)}"
             )
 """,
@@ -1558,7 +1558,7 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=success,
                 actions_taken=len(actions),
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=message
             )
 
@@ -1566,7 +1566,7 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=False,
                 actions_taken=0,
-                board_state=board.to_dict(),
+                board=board.to_dict(),
                 message=f"AI failed: {str(e)}"
             )
 """,

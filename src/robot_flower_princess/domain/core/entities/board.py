@@ -168,46 +168,6 @@ class Board:
             grid.append(row)
 
         return {
-            "rows": self.rows,
-            "cols": self.cols,
-            "grid": grid,
-            "robot": {
-                "position": {"row": self.robot.position.row, "col": self.robot.position.col},
-                "orientation": self.robot.orientation.value,
-                "flowers_held": self.robot.flowers_held,
-                "max_flowers": self.robot.max_flowers,
-            },
-            "princess_position": {
-                "row": self.princess.position.row,
-                "col": self.princess.position.col,
-            },
-            "flowers_remaining": len(self.flowers),
-            "flowers_delivered": self.flowers_delivered,
-            "total_flowers": self.initial_flower_count,
-            "status": self.get_status().value,
-        }
-
-    def to_game_model_dict(self) -> dict:
-        """Convert board to dictionary representation matching the game model JSON structure."""
-        logger.debug("to_game_model_dict rows=%s cols=%s", self.rows, self.cols)
-        grid = []
-        for r in range(self.rows):
-            row = []
-            for c in range(self.cols):
-                pos = Position(r, c)
-                cell = self.get_cell_type(pos)
-
-                emoji_map = {
-                    CellType.ROBOT: "🤖",
-                    CellType.PRINCESS: "👑",
-                    CellType.FLOWER: "🌸",
-                    CellType.OBSTACLE: "🗑️",
-                    CellType.EMPTY: "⬜",
-                }
-                row.append(emoji_map[cell])
-            grid.append(row)
-
-        return {
             "board": {
                 "rows": self.rows,
                 "cols": self.cols,

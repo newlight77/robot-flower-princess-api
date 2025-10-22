@@ -1,6 +1,4 @@
 from .game import Game
-
-# Backward compatibility alias
-Board = Game
+from .board import Board
 
 __all__ = ["Game", "Board"]

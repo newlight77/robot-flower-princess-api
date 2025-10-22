@@ -1,10 +1,10 @@
-from dataclasses import dataclass, field
 import random
 from datetime import datetime
 
 from .position import Position
 from .robot import Robot
 from .princess import Princess
+from .board import Board
 from .cell import CellType
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
@@ -13,23 +13,11 @@ from ....logging import get_logger
 logger = get_logger("Game")
 
 
-@dataclass
 class Game:
-    game_id: str
-    name: str = ""
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
-    robot: Robot
-    princess: Princess
-    flowers: set[Position] = field(default_factory=set)
-    obstacles: set[Position] = field(default_factory=set)
-    initial_flower_count: int = 0
-    flowers_delivered: int = 0
-
-    def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, **kwargs):
+    def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, game_id: str = "", **kwargs):
         """Initialize Game with backward compatibility for princess_position."""
-        self.rows = rows
-        self.cols = cols
+        self.game_id = game_id or kwargs.get('game_id', "")
+        self.board = Board(rows, cols)
         self.robot = robot
 
         # Handle backward compatibility
@@ -39,7 +27,7 @@ class Game:
             self.princess = Princess(position=princess_position)
         else:
             # Default princess position at bottom-right
-            self.princess = Princess(position=Position(rows - 1, cols - 1))
+            self.princess = Princess(position=Position(self.board.rows - 1, self.board.cols - 1))
 
         # Set other fields
         self.flowers = kwargs.get('flowers', set())
@@ -54,9 +42,17 @@ class Game:
         if self.initial_flower_count == 0:
             self.initial_flower_count = len(self.flowers)
 
-    def __post_init__(self) -> None:
-        self.initial_flower_count = len(self.flowers)
-        logger.debug("Game.__post_init__ rows=%s cols=%s initial_flowers=%s", self.rows, self.cols, self.initial_flower_count)
+        logger.debug("Game.__init__ rows=%s cols=%s initial_flowers=%s", self.board.rows, self.board.cols, self.initial_flower_count)
+
+    @property
+    def rows(self) -> int:
+        """Get board rows for backward compatibility."""
+        return self.board.rows
+
+    @property
+    def cols(self) -> int:
+        """Get board cols for backward compatibility."""
+        return self.board.cols
 
     @classmethod
     def create(cls, rows: int, cols: int) -> "Game":
@@ -113,7 +109,7 @@ class Game:
 
     def is_valid_position(self, position: Position) -> bool:
         """Check if a position is within game boundaries."""
-        valid = 0 <= position.row < self.rows and 0 <= position.col < self.cols
+        valid = self.board.is_valid_position(position)
         logger.debug("is_valid_position position=%s valid=%s", position, valid)
         return valid
 
@@ -149,30 +145,17 @@ class Game:
 
     def to_dict(self) -> dict:
         """Convert game to dictionary representation for API compatibility."""
-        logger.debug("to_dict rows=%s cols=%s", self.rows, self.cols)
-        grid = []
-        for r in range(self.rows):
-            row = []
-            for c in range(self.cols):
-                pos = Position(r, c)
-                cell = self.get_cell_type(pos)
+        logger.debug("to_dict rows=%s cols=%s", self.board.rows, self.board.cols)
 
-                emoji_map = {
-                    CellType.ROBOT: "🤖",
-                    CellType.PRINCESS: "👑",
-                    CellType.FLOWER: "🌸",
-                    CellType.OBSTACLE: "🗑️",
-                    CellType.EMPTY: "⬜",
-                }
-                row.append(emoji_map[cell])
-            grid.append(row)
+        board_dict = self.board.to_dict(
+            robot_pos=self.robot.position,
+            princess_pos=self.princess.position,
+            flowers=self.flowers,
+            obstacles=self.obstacles
+        )
 
         return {
-            "board": {
-                "rows": self.rows,
-                "cols": self.cols,
-                "grid": grid,
-            },
+            "board": board_dict,
             "robot": {
                 "position": {"row": self.robot.position.row, "col": self.robot.position.col},
                 "orientation": self.robot.orientation.value,

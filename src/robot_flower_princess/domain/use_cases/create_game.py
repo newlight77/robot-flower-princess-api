@@ -29,24 +29,24 @@ class CreateGameUseCase:
     def execute(self, command: CreateGameCommand) -> CreateGameResult:
         """Create a new game with the specified board size."""
         self.logger.info("execute: CreateGameCommand rows=%s cols=%s name=%s", command.rows, command.cols, command.name)
-        board: Game = Game.create(rows=command.rows, cols=command.cols)
+        game: Game = Game.create(rows=command.rows, cols=command.cols)
 
         # Set the game name if provided
         if command.name:
-            board.name = command.name
+            game.name = command.name
         else:
-            board.name = f"Game-{command.rows}x{command.cols}"
+            game.name = f"Game-{command.rows}x{command.cols}"
 
         game_id = str(uuid.uuid4())
 
-        # Save board and initialize history
-        self.repository.save(game_id, board)
+        # Save game and initialize history
+        self.repository.save(game_id, game)
         history = GameHistory()
-        history.add_action(action=None, board=board.to_dict())
+        history.add_action(action=None, game_state=game.to_dict())
         self.repository.save_history(game_id, history)
 
         return CreateGameResult(
             game_id=game_id,
-            board=board.to_dict(),
+            board=game.board.to_dict(),
             message="Game created successfully"
         )

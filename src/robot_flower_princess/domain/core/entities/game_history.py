@@ -15,13 +15,13 @@ class Action:
 @dataclass
 class GameHistory:
     actions: List[Action] = field(default_factory=list)
-    board_states: List[dict] = field(default_factory=list)
+    game_states: List[dict] = field(default_factory=list)
 
-    def add_action(self, action: Action | None, board_state: dict) -> None:
-        """Record an action and the resulting board state."""
+    def add_action(self, action: Action | None, game_state: dict) -> None:
+        """Record an action and the resulting game state."""
         if action:
             self.actions.append(action)
-        self.board_states.append(board_state)
+        self.game_states.append(game_state)
 
     def to_dict(self) -> dict:
         """Convert history to dictionary."""
@@ -36,5 +36,5 @@ class GameHistory:
                 }
                 for action in self.actions
             ],
-            "board_states": self.board_states,
+            "game_states": self.game_states,
         }

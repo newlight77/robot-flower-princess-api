@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import random
 from datetime import datetime
+
 from .position import Position
 from .robot import Robot
 from .princess import Princess
@@ -14,17 +15,16 @@ logger = get_logger("Game")
 
 @dataclass
 class Game:
-    rows: int
-    cols: int
+    game_id: str
+    name: str = ""
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
     robot: Robot
     princess: Princess
     flowers: set[Position] = field(default_factory=set)
     obstacles: set[Position] = field(default_factory=set)
     initial_flower_count: int = 0
     flowers_delivered: int = 0
-    name: str = ""
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
 
     def __init__(self, rows: int, cols: int, robot: Robot, princess: Princess = None, princess_position: Position = None, **kwargs):
         """Initialize Game with backward compatibility for princess_position."""

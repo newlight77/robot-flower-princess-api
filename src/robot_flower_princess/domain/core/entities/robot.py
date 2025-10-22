@@ -60,3 +60,19 @@ class Robot:
 
     def can_pick(self) -> bool:
         return self.flowers_held < self.max_flowers
+
+    def to_dict(self) -> dict:
+        """Convert robot to dictionary representation for API."""
+        return {
+            "position": {"row": self.position.row, "col": self.position.col},
+            "orientation": self.orientation.value,
+            "flowers": {
+                "collected": self.flowers_collected,
+                "delivered": self.flowers_delivered,
+                "collection_capacity": self.max_flowers,
+            },
+            "obstacles": {
+                "cleaned": self.obstacles_cleaned,
+            },
+            "executed_actions": self.executed_actions,
+        }

@@ -24,3 +24,11 @@ class Princess:
             self.mood = "happy"
         else:
             self.mood = "happy"  # Very happy with many flowers
+
+    def to_dict(self) -> dict:
+        """Convert princess to dictionary representation."""
+        return {
+            "position": {"row": self.position.row, "col": self.position.col},
+            "flowers_received": self.flowers_received,
+            "mood": self.mood,
+        }

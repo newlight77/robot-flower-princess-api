@@ -15,3 +15,13 @@ class Position:
     def manhattan_distance(self, other: "Position") -> int:
         """Calculate Manhattan distance to another position."""
         return abs(self.row - other.row) + abs(self.col - other.col)
+
+    def to_dict(self) -> dict:
+        """Convert position to dictionary representation."""
+        return {
+            "row": self.row,
+            "col": self.col,
+        }
+
+    def from_dict(cls, dict: dict) -> "Position":
+        return cls(row=dict["row"], col=dict["col"])

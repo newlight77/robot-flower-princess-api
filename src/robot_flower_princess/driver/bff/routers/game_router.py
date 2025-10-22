@@ -35,6 +35,22 @@ router = APIRouter(prefix="/api/games", tags=["games"])
 logger = get_logger("game_router")
 
 
+def obstacles_to_dict(obstacles: set, robot) -> dict:
+    """Convert obstacles set to API dict format."""
+    return {
+        "remaining": len(obstacles),
+        "total": len(obstacles) + len(robot.obstacles_cleaned),
+    }
+
+
+def flowers_to_dict(flowers: set, total: int = None) -> dict:
+    """Convert flowers set to API dict format."""
+    return {
+        "remaining": len(flowers),
+        "total": total if total is not None else len(flowers),
+    }
+
+
 @router.post("/", response_model=GameStateResponse, status_code=201)
 def create_game(
     request: CreateGameRequest,
@@ -63,35 +79,10 @@ def create_game(
             message=result.message,
             status=result.status,
             board=board_dict,
-            robot={
-                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
-                "orientation": result.robot.orientation.value,
-                "flowers": {
-                    "collected": result.robot.flowers_collected,
-                    "delivered": result.robot.flowers_delivered,
-                    "collection_capacity": result.robot.max_flowers,
-                },
-                "obstacles": {
-                    "cleaned": result.robot.obstacles_cleaned,
-                },
-                "executed_actions": result.robot.executed_actions,
-            },
-            princess={
-                "position": {
-                    "row": result.princess.position.row,
-                    "col": result.princess.position.col,
-                },
-                "flowers_received": result.princess.flowers_received,
-                "mood": result.princess.mood,
-            },
-            obstacles={
-                "remaining": len(result.obstacles),
-                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
-            },
-            flowers={
-                "remaining": len(result.flowers),
-                "total": len(result.flowers),
-            },
+            robot=result.robot.to_dict(),
+            princess=result.princess.to_dict(),
+            obstacles=obstacles_to_dict(result.obstacles, result.robot),
+            flowers=flowers_to_dict(result.flowers),
             created_at=result.created_at.isoformat() + "Z",
             updated_at=result.updated_at.isoformat() + "Z",
         )
@@ -134,38 +125,10 @@ def get_games(
                         created_at=game_summary.created_at.isoformat() + "Z",
                         updated_at=game_summary.updated_at.isoformat() + "Z",
                         board=board_dict,
-                        robot={
-                            "position": {
-                                "row": game.robot.position.row,
-                                "col": game.robot.position.col,
-                            },
-                            "orientation": game.robot.orientation.value,
-                            "flowers": {
-                                "collected": game.robot.flowers_collected,
-                                "delivered": game.robot.flowers_delivered,
-                                "collection_capacity": game.robot.max_flowers,
-                            },
-                            "obstacles": {
-                                "cleaned": game.robot.obstacles_cleaned,
-                            },
-                            "executed_actions": game.robot.executed_actions,
-                        },
-                        princess={
-                            "position": {
-                                "row": game.princess.position.row,
-                                "col": game.princess.position.col,
-                            },
-                            "flowers_received": game.princess.flowers_received,
-                            "mood": game.princess.mood,
-                        },
-                        obstacles={
-                            "remaining": len(game.obstacles),
-                            "total": len(game.obstacles) + len(game.robot.obstacles_cleaned),
-                        },
-                        flowers={
-                            "remaining": len(game.flowers),
-                            "total": game.initial_flower_count,
-                        },
+                        robot=game.robot.to_dict(),
+                        princess=game.princess.to_dict(),
+                        obstacles=obstacles_to_dict(game.obstacles, game.robot),
+                        flowers=flowers_to_dict(game.flowers, game.initial_flower_count),
                     )
                 )
 
@@ -205,35 +168,10 @@ def get_game_state(
             status=result.status,
             message="Game state retrieved successfully",
             board=board_dict,
-            robot={
-                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
-                "orientation": result.robot.orientation.value,
-                "flowers": {
-                    "collected": result.robot.flowers_collected,
-                    "delivered": result.robot.flowers_delivered,
-                    "collection_capacity": result.robot.max_flowers,
-                },
-                "obstacles": {
-                    "cleaned": result.robot.obstacles_cleaned,
-                },
-                "executed_actions": result.robot.executed_actions,
-            },
-            princess={
-                "position": {
-                    "row": result.princess.position.row,
-                    "col": result.princess.position.col,
-                },
-                "flowers_received": result.princess.flowers_received,
-                "mood": result.princess.mood,
-            },
-            obstacles={
-                "remaining": len(result.obstacles),
-                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
-            },
-            flowers={
-                "remaining": len(result.flowers),
-                "total": len(result.flowers),
-            },
+            robot=result.robot.to_dict(),
+            princess=result.princess.to_dict(),
+            obstacles=obstacles_to_dict(result.obstacles, result.robot),
+            flowers=flowers_to_dict(result.flowers),
             created_at=game.created_at.isoformat() + "Z",
             updated_at=game.updated_at.isoformat() + "Z",
         )
@@ -350,35 +288,10 @@ def perform_action(
             id=game_id,
             status=result.status,
             board=board_dict,
-            robot={
-                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
-                "orientation": result.robot.orientation.value,
-                "flowers": {
-                    "collected": result.robot.flowers_collected,
-                    "delivered": result.robot.flowers_delivered,
-                    "collection_capacity": result.robot.max_flowers,
-                },
-                "obstacles": {
-                    "cleaned": result.robot.obstacles_cleaned,
-                },
-                "executed_actions": result.robot.executed_actions,
-            },
-            princess={
-                "position": {
-                    "row": result.princess.position.row,
-                    "col": result.princess.position.col,
-                },
-                "flowers_received": result.princess.flowers_received,
-                "mood": result.princess.mood,
-            },
-            obstacles={
-                "remaining": len(result.obstacles),
-                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
-            },
-            flowers={
-                "remaining": len(result.flowers),
-                "total": len(result.flowers),
-            },
+            robot=result.robot.to_dict(),
+            princess=result.princess.to_dict(),
+            obstacles=obstacles_to_dict(result.obstacles, result.robot),
+            flowers=flowers_to_dict(result.flowers),
             message=result.message,
         )
     except ValueError as e:
@@ -413,35 +326,10 @@ def autoplay(
             id=game_id,
             status=result.status,
             board=board_dict,
-            robot={
-                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
-                "orientation": result.robot.orientation.value,
-                "flowers": {
-                    "collected": result.robot.flowers_collected,
-                    "delivered": result.robot.flowers_delivered,
-                    "collection_capacity": result.robot.max_flowers,
-                },
-                "obstacles": {
-                    "cleaned": result.robot.obstacles_cleaned,
-                },
-                "executed_actions": result.robot.executed_actions,
-            },
-            princess={
-                "position": {
-                    "row": result.princess.position.row,
-                    "col": result.princess.position.col,
-                },
-                "flowers_received": result.princess.flowers_received,
-                "mood": result.princess.mood,
-            },
-            obstacles={
-                "remaining": len(result.obstacles),
-                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
-            },
-            flowers={
-                "remaining": len(result.flowers),
-                "total": len(result.flowers),
-            },
+            robot=result.robot.to_dict(),
+            princess=result.princess.to_dict(),
+            obstacles=obstacles_to_dict(result.obstacles, result.robot),
+            flowers=flowers_to_dict(result.flowers),
             message=f"{result.message} (Actions taken: {result.actions_taken})",
         )
     except ValueError as e:

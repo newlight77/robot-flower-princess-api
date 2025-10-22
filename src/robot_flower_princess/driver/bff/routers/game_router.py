@@ -22,8 +22,13 @@ from ....domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerComman
 from ....domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
 from ....domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCommand
 from ....domain.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
-from ....domain.use_cases.get_games import GetGamesUseCase, GetGamesQuery
+from ....domain.use_cases.get_games import GetGamesResult, GetGamesUseCase, GetGamesQuery
 from ....domain.core.value_objects.direction import Direction
+from ....domain.use_cases.autoplay import AutoplayResult
+from ....domain.use_cases.create_game import CreateGameResult
+from ....domain.use_cases.get_game_state import GetGameStateResult
+from ....domain.use_cases.get_game_history import GetGameHistoryResult
+
 
 router = APIRouter(prefix="/api/games", tags=["games"])
 
@@ -40,15 +45,49 @@ def create_game(
 
     try:
         use_case = CreateGameUseCase(repository)
-        result = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name))
-        game = result
+        result: CreateGameResult = use_case.execute(CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name))
+
+        # Convert Board, Robot, Princess objects to dicts for the API response
+        board_dict = result.board.to_dict(
+            robot_pos=result.robot.position,
+            princess_pos=result.princess.position,
+            flowers=result.flowers,
+            obstacles=result.obstacles
+        )
+
         return GameStateResponse(
             id=result.game_id,
             message=result.message,
-            status=game.status,
-            board=game.board,
-            created_at=game.created_at,
-            updated_at=game.updated_at,
+            status=result.status,
+            board=board_dict,
+            robot={
+                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
+                "orientation": result.robot.orientation.value,
+                "flowers": {
+                    "collected": result.robot.flowers_collected,
+                    "delivered": result.robot.flowers_delivered,
+                    "collection_capacity": result.robot.max_flowers,
+                },
+                "obstacles": {
+                    "cleaned": result.robot.obstacles_cleaned,
+                },
+                "executed_actions": result.robot.executed_actions,
+            },
+            princess={
+                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "flowers_received": result.princess.flowers_received,
+                "mood": result.princess.mood,
+            },
+            obstacles={
+                "remaining": len(result.obstacles),
+                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
+            },
+            flowers={
+                "remaining": len(result.flowers),
+                "total": len(result.flowers),
+            },
+            created_at=result.created_at.isoformat() + "Z",
+            updated_at=result.updated_at.isoformat() + "Z",
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -66,26 +105,54 @@ def get_games(
 
     try:
         use_case = GetGamesUseCase(repository)
-        result = use_case.execute(GetGamesQuery(limit=limit, status=status))
+        result: GetGamesResult = use_case.execute(GetGamesQuery(limit=limit, status=status))
 
         # Convert dataclass GameSummary to Pydantic GameSummary
         from ..schemas.game_schema import GameSummary as PydanticGameSummary
 
         pydantic_games = []
-        for game in result.games:
-            # Get the full game model from the repository
-            game = repository.get(game.game_id)
+        for game_summary in result.games:
+            # Get the full game from the repository to access all fields
+            game = repository.get(game_summary.game_id)
             if game:
+                board_dict = game_summary.board.to_dict(
+                    robot_pos=game.robot.position,
+                    princess_pos=game.princess.position,
+                    flowers=game.flowers,
+                    obstacles=game.obstacles
+                )
                 pydantic_games.append(PydanticGameSummary(
-                    id=game.game_id,
-                    status=game.status,
-                    created_at=game.created_at.isoformat() + "Z",
-                    updated_at=game.updated_at.isoformat() + "Z",
-                    board=game.to_dict(),
-                    robot=game.robot.to_dict(),
-                    princess=game.princess.to_dict(),
-                    flowers=game.flowers.to_dict(),
-                    obstacles=game.obstacles.to_dict(),
+                    id=game_summary.game_id,
+                    status=game_summary.status,
+                    created_at=game_summary.created_at.isoformat() + "Z",
+                    updated_at=game_summary.updated_at.isoformat() + "Z",
+                    board=board_dict,
+                    robot={
+                        "position": {"row": game.robot.position.row, "col": game.robot.position.col},
+                        "orientation": game.robot.orientation.value,
+                        "flowers": {
+                            "collected": game.robot.flowers_collected,
+                            "delivered": game.robot.flowers_delivered,
+                            "collection_capacity": game.robot.max_flowers,
+                        },
+                        "obstacles": {
+                            "cleaned": game.robot.obstacles_cleaned,
+                        },
+                        "executed_actions": game.robot.executed_actions,
+                    },
+                    princess={
+                        "position": {"row": game.princess.position.row, "col": game.princess.position.col},
+                        "flowers_received": game.princess.flowers_received,
+                        "mood": game.princess.mood,
+                    },
+                    obstacles={
+                        "remaining": len(game.obstacles),
+                        "total": len(game.obstacles) + len(game.robot.obstacles_cleaned),
+                    },
+                    flowers={
+                        "remaining": len(game.flowers),
+                        "total": game.initial_flower_count,
+                    },
                 ))
 
         return GamesResponse(gamess=pydantic_games, total=len(pydantic_games))
@@ -104,21 +171,52 @@ def get_game_state(
 
     try:
         use_case = GetGameStateUseCase(repository)
-        result = use_case.execute(GetGameStateQuery(game_id=game_id))
-        game = result
-        if game is None:
+        result: GetGameStateResult = use_case.execute(GetGameStateQuery(game_id=game_id))
+        if result is None:
             raise HTTPException(status_code=404, detail=f"Game {game_id} not found")
 
-        # game_model = board.to_dict()
+        # Convert Board, Robot, Princess objects to dicts for the API response
+        board_dict = result.board.to_dict(
+            robot_pos=result.robot.position,
+            princess_pos=result.princess.position,
+            flowers=result.flowers,
+            obstacles=result.obstacles
+        )
+
+        # Get the full game object to access created_at and updated_at
+        game = repository.get(game_id)
+
         return GameStateResponse(
             id=game_id,
-            status=game.status,
+            status=result.status,
             message="Game state retrieved successfully",
-            board=game.to_dict(),
-            robot=game.robot.to_dict(),
-            princess=game.princess.to_dict(),
-            obstacles=game.obstacles.to_dict(),
-            flowers=game.flowers.to_dict(),
+            board=board_dict,
+            robot={
+                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
+                "orientation": result.robot.orientation.value,
+                "flowers": {
+                    "collected": result.robot.flowers_collected,
+                    "delivered": result.robot.flowers_delivered,
+                    "collection_capacity": result.robot.max_flowers,
+                },
+                "obstacles": {
+                    "cleaned": result.robot.obstacles_cleaned,
+                },
+                "executed_actions": result.robot.executed_actions,
+            },
+            princess={
+                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "flowers_received": result.princess.flowers_received,
+                "mood": result.princess.mood,
+            },
+            obstacles={
+                "remaining": len(result.obstacles),
+                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
+            },
+            flowers={
+                "remaining": len(result.flowers),
+                "total": len(result.flowers),
+            },
             created_at=game.created_at.isoformat() + "Z",
             updated_at=game.updated_at.isoformat() + "Z",
         )
@@ -137,10 +235,10 @@ def get_game_history(
 
     try:
         use_case = GetGameHistoryUseCase(repository)
-        result = use_case.execute(GetGameHistoryQuery(game_id=game_id))
+        result: GetGameHistoryResult = use_case.execute(GetGameHistoryQuery(game_id=game_id))
         return GameHistoryResponse(
             id=game_id,
-            history=result.history,
+            history=result.history.to_dict(),
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -204,15 +302,45 @@ def perform_action(
         else:
             raise ValueError(f"Unknown action: {action}")
 
+        # Convert Board, Robot, Princess objects to dicts for the API response
+        board_dict = result.board.to_dict(
+            robot_pos=result.robot.position,
+            princess_pos=result.princess.position,
+            flowers=result.flowers,
+            obstacles=result.obstacles
+        )
+
         return ActionResponse(
             success=result.success,
             id=game_id,
             status=result.status,
-            board=result.board.to_dict(),
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=result.obstacles.to_dict(),
-            flowers=result.flowers.to_dict(),
+            board=board_dict,
+            robot={
+                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
+                "orientation": result.robot.orientation.value,
+                "flowers": {
+                    "collected": result.robot.flowers_collected,
+                    "delivered": result.robot.flowers_delivered,
+                    "collection_capacity": result.robot.max_flowers,
+                },
+                "obstacles": {
+                    "cleaned": result.robot.obstacles_cleaned,
+                },
+                "executed_actions": result.robot.executed_actions,
+            },
+            princess={
+                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "flowers_received": result.princess.flowers_received,
+                "mood": result.princess.mood,
+            },
+            obstacles={
+                "remaining": len(result.obstacles),
+                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
+            },
+            flowers={
+                "remaining": len(result.flowers),
+                "total": len(result.flowers),
+            },
             message=result.message,
         )
     except ValueError as e:
@@ -233,16 +361,47 @@ def autoplay(
         from ....domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
         use_case = AutoplayUseCase(repository)
-        result = use_case.execute(AutoplayCommand(game_id=game_id))
+        result: AutoplayResult = use_case.execute(AutoplayCommand(game_id=game_id))
+
+        # Convert Board, Robot, Princess objects to dicts for the API response
+        board_dict = result.board.to_dict(
+            robot_pos=result.robot.position,
+            princess_pos=result.princess.position,
+            flowers=result.flowers,
+            obstacles=result.obstacles
+        )
+
         return ActionResponse(
             success=result.success,
             id=game_id,
             status=result.status,
-            board=result.board.to_dict(),
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=result.obstacles.to_dict(),
-            flowers=result.flowers.to_dict(),
+            board=board_dict,
+            robot={
+                "position": {"row": result.robot.position.row, "col": result.robot.position.col},
+                "orientation": result.robot.orientation.value,
+                "flowers": {
+                    "collected": result.robot.flowers_collected,
+                    "delivered": result.robot.flowers_delivered,
+                    "collection_capacity": result.robot.max_flowers,
+                },
+                "obstacles": {
+                    "cleaned": result.robot.obstacles_cleaned,
+                },
+                "executed_actions": result.robot.executed_actions,
+            },
+            princess={
+                "position": {"row": result.princess.position.row, "col": result.princess.position.col},
+                "flowers_received": result.princess.flowers_received,
+                "mood": result.princess.mood,
+            },
+            obstacles={
+                "remaining": len(result.obstacles),
+                "total": len(result.obstacles) + len(result.robot.obstacles_cleaned),
+            },
+            flowers={
+                "remaining": len(result.flowers),
+                "total": len(result.flowers),
+            },
             message=f"{result.message} (Actions taken: {result.actions_taken})",
         )
     except ValueError as e:

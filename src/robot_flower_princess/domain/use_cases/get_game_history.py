@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...logging import get_logger
-
+from ..core.entities.game_history import GameHistory
 
 @dataclass
 class GetGameHistoryQuery:
@@ -10,7 +10,7 @@ class GetGameHistoryQuery:
 
 @dataclass
 class GetGameHistoryResult:
-    history: dict
+    history: GameHistory
 
 
 class GetGameHistoryUseCase:
@@ -26,4 +26,4 @@ class GetGameHistoryUseCase:
         if history is None:
             raise ValueError(f"Game {query.game_id} not found")
 
-        return GetGameHistoryResult(history=history.to_dict())
+        return GetGameHistoryResult(history=history)

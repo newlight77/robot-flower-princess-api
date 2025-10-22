@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
+from datetime import datetime
 from ..ports.game_repository import GameRepository
+from ..core.entities.board import Board
 from ...logging import get_logger
 
 
@@ -14,7 +16,9 @@ class GetGamesQuery:
 class GameSummary:
     game_id: str
     status: str
-    board: dict
+    board: Board
+    created_at: datetime
+    updated_at: datetime
 
 
 @dataclass
@@ -36,9 +40,15 @@ class GetGamesUseCase:
         games = self.repository.get_games(query.limit, status)
 
         game_summaries = []
-        for game_id, board in games:
+        for game_id, game in games:
             game_summaries.append(
-                GameSummary(game_id=game_id, status=board.get_status().value, board=board.to_dict())
+                GameSummary(
+                    game_id=game_id,
+                    status=game.get_status().value,
+                    board=game.board,
+                    created_at=game.created_at,
+                    updated_at=game.updated_at
+                )
             )
 
         return GetGamesResult(games=game_summaries)

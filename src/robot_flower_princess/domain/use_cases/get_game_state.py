@@ -1,5 +1,10 @@
 from dataclasses import dataclass
+from typing import Set
 from ..ports.game_repository import GameRepository
+from ..core.entities.board import Board
+from ..core.entities.robot import Robot
+from ..core.entities.princess import Princess
+from ..core.entities.position import Position
 from ...logging import get_logger
 
 
@@ -10,7 +15,12 @@ class GetGameStateQuery:
 
 @dataclass
 class GetGameStateResult:
-    board_state: dict
+    board: Board
+    robot: Robot
+    princess: Princess
+    flowers: Set[Position]
+    obstacles: Set[Position]
+    status: str
 
 
 class GetGameStateUseCase:
@@ -26,4 +36,11 @@ class GetGameStateUseCase:
         if board is None:
             raise ValueError(f"Game {query.game_id} not found")
 
-        return GetGameStateResult(board=board.to_dict())
+        return GetGameStateResult(
+            board=board.board,
+            robot=board.robot,
+            princess=board.princess,
+            flowers=board.flowers,
+            obstacles=board.obstacles,
+            status=board.get_status().value
+        )

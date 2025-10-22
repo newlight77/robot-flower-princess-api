@@ -9,7 +9,7 @@ def test_rotate_changes_orientation(client, create_game):
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert data["board"]["robot"]["orientation"] == "south"
+    assert data["robot"]["orientation"] == "south"
 
 
 def test_clean_removes_obstacle(client, create_game):

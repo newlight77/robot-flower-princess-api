@@ -43,7 +43,7 @@ def test_rotate_use_case_success(repo):
     use_case = RotateRobotUseCase(repo)
     res = use_case.execute(RotateRobotCommand(game_id="g1", direction=Direction.SOUTH))
     assert res.success is True
-    assert res.board_state["robot"]["orientation"] == "south"
+    assert res.robot.orientation == Direction.SOUTH
 
 
 def test_move_use_case_missing_game(repo):
@@ -60,7 +60,9 @@ def test_move_use_case_success(repo):
     use_case = MoveRobotUseCase(repo)
     res = use_case.execute(MoveRobotCommand(game_id="g2", direction=Direction.NORTH))
     assert isinstance(res.success, bool)
-    assert "board_state" in res.__dict__
+    assert hasattr(res, 'board')
+    assert hasattr(res, 'robot')
+    assert hasattr(res, 'princess')
 
 
 def test_pick_drop_give_use_cases(repo):

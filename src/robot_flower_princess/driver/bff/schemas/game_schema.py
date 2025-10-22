@@ -45,10 +45,13 @@ class GameStateResponse(BaseModel):
 class ActionResponse(BaseModel):
     success: bool
     id: str
+    status: str
     board: dict
+    robot: dict
+    princess: dict
+    obstacles: dict
+    flowers: dict
     message: str
-    # For the complete game model response
-    game_model: dict = None
 
 
 class GameHistoryResponse(BaseModel):
@@ -57,6 +60,7 @@ class GameHistoryResponse(BaseModel):
 
 
 class GameSummary(BaseModel):
+    id: str
     board: dict
     robot: dict
     princess: dict

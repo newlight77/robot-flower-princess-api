@@ -16,8 +16,12 @@ class GameSolverPlayer:
         Returns a list of tuples: (action_type, direction)
         """
         actions = []
+        max_iterations = 1000  # Prevent infinite loops
 
-        while board.flowers or board.robot.flowers_held > 0:
+        iteration = 0
+        while (board.flowers or board.robot.flowers_held > 0) and iteration < max_iterations:
+            iteration += 1
+
             # If holding flowers and need to deliver
             if board.robot.flowers_held > 0 and (
                 board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0
@@ -26,8 +30,12 @@ class GameSolverPlayer:
                 path = GameSolverPlayer._find_path(
                     board, board.robot.position, board.princess_position
                 )
+
                 if not path:
-                    break
+                    # Try to clean an obstacle blocking the path to princess
+                    if not GameSolverPlayer._clean_blocking_obstacle(board, board.princess_position, actions):
+                        break
+                    continue
 
                 for next_pos in path:
                     direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
@@ -57,7 +65,17 @@ class GameSolverPlayer:
                 # Navigate adjacent to flower
                 adjacent_positions = GameSolverPlayer._get_adjacent_positions(nearest_flower, board)
                 if not adjacent_positions:
-                    break
+                    # No empty adjacent positions - flower might be surrounded by obstacles
+                    # Try to clean an obstacle adjacent to the flower
+                    if not GameSolverPlayer._clean_obstacle_near_flower(board, nearest_flower, actions):
+                        # Can't clean around this flower, try another one
+                        if len(board.flowers) > 1:
+                            # Skip this flower and try another
+                            board.flowers.remove(nearest_flower)
+                            board.flowers.add(nearest_flower)  # Add it back for later
+                            continue
+                        break
+                    continue
 
                 target = min(
                     adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p)
@@ -65,7 +83,10 @@ class GameSolverPlayer:
 
                 path = GameSolverPlayer._find_path(board, board.robot.position, target)
                 if not path:
-                    break
+                    # Try to clean an obstacle blocking the path
+                    if not GameSolverPlayer._clean_blocking_obstacle(board, target, actions):
+                        break
+                    continue
 
                 for next_pos in path:
                     direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
@@ -141,3 +162,128 @@ class GameSolverPlayer:
             return Direction.EAST
         else:
             return Direction.WEST
+
+    @staticmethod
+    def _clean_blocking_obstacle(board: Game, target: Position, actions: List) -> bool:
+        """
+        Try to clean an obstacle that's blocking the path to the target.
+        Returns True if an obstacle was cleaned, False otherwise.
+        """
+        # Can't clean while holding flowers
+        if board.robot.flowers_held > 0:
+            return False
+
+        # Find obstacles that might be blocking the path
+        # Use BFS to find reachable obstacles
+        queue = deque([board.robot.position])
+        visited = {board.robot.position}
+        reachable_obstacles = []
+
+        while queue:
+            current = queue.popleft()
+
+            for direction in Direction:
+                row_delta, col_delta = direction.get_delta()
+                next_pos = current.move(row_delta, col_delta)
+
+                if not board.is_valid_position(next_pos):
+                    continue
+
+                # Found an obstacle we can reach
+                if next_pos in board.obstacles and current not in board.obstacles:
+                    reachable_obstacles.append((next_pos, current))
+                    continue
+
+                # Continue searching through empty cells
+                if board.is_empty(next_pos) and next_pos not in visited:
+                    visited.add(next_pos)
+                    queue.append(next_pos)
+
+        if not reachable_obstacles:
+            return False
+
+        # Find the obstacle closest to the target
+        best_obstacle = min(
+            reachable_obstacles,
+            key=lambda x: x[0].manhattan_distance(target)
+        )
+        obstacle_pos, adjacent_pos = best_obstacle
+
+        # Navigate to adjacent position
+        path = GameSolverPlayer._find_path(board, board.robot.position, adjacent_pos)
+        if not path:
+            return False
+
+        for next_pos in path:
+            direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
+            actions.append(("rotate", direction))
+            GameService.rotate_robot(board, direction)
+
+            actions.append(("move", None))
+            GameService.move_robot(board)
+
+        # Face obstacle and clean it
+        direction = GameSolverPlayer._get_direction(board.robot.position, obstacle_pos)
+        actions.append(("rotate", direction))
+        GameService.rotate_robot(board, direction)
+
+        actions.append(("clean", None))
+        GameService.clean_obstacle(board)
+
+        return True
+
+    @staticmethod
+    def _clean_obstacle_near_flower(board: Game, flower_pos: Position, actions: List) -> bool:
+        """
+        Try to clean an obstacle adjacent to a flower.
+        Returns True if an obstacle was cleaned, False otherwise.
+        """
+        # Can't clean while holding flowers
+        if board.robot.flowers_held > 0:
+            return False
+
+        # Find obstacles adjacent to the flower
+        adjacent_obstacles = []
+        for direction in Direction:
+            row_delta, col_delta = direction.get_delta()
+            adj_pos = flower_pos.move(row_delta, col_delta)
+            if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
+                adjacent_obstacles.append(adj_pos)
+
+        if not adjacent_obstacles:
+            return False
+
+        # Try to clean the closest obstacle
+        for obstacle_pos in sorted(adjacent_obstacles, key=lambda p: board.robot.position.manhattan_distance(p)):
+            # Find a position adjacent to the obstacle we can reach
+            for direction in Direction:
+                row_delta, col_delta = direction.get_delta()
+                robot_pos = obstacle_pos.move(row_delta, col_delta)
+
+                if not board.is_valid_position(robot_pos) or not board.is_empty(robot_pos):
+                    continue
+
+                # Try to navigate there
+                path = GameSolverPlayer._find_path(board, board.robot.position, robot_pos)
+                if not path:
+                    continue
+
+                for next_pos in path:
+                    direction = GameSolverPlayer._get_direction(board.robot.position, next_pos)
+                    actions.append(("rotate", direction))
+                    GameService.rotate_robot(board, direction)
+
+                    actions.append(("move", None))
+                    GameService.move_robot(board)
+
+                # Face obstacle and clean it
+                direction = GameSolverPlayer._get_direction(board.robot.position, obstacle_pos)
+                actions.append(("rotate", direction))
+                GameService.rotate_robot(board, direction)
+
+                actions.append(("clean", None))
+                GameService.clean_obstacle(board)
+
+                return True
+
+        return False

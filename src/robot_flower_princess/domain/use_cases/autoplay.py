@@ -102,6 +102,16 @@ class AutoplayUseCase:
                     )
                     history.add_action(action)
 
+                elif action_type == "clean":
+                    GameService.clean_obstacle(board)
+                    action = Action(
+                        action_type=ActionType.CLEAN,
+                        direction=direction or board.robot.orientation,
+                        success=True,
+                        message="AI: Cleaned obstacle",
+                    )
+                    history.add_action(action)
+
             self.repository.save(command.game_id, board)
             self.repository.save_history(command.game_id, history)
 

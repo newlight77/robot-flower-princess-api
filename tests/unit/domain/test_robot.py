@@ -42,6 +42,41 @@ def test_robot_give_flowers():
     robot.pick_flower()
     robot.pick_flower()
 
-    delivered = robot.give_flowers()
+    princess_pos = Position(0, 1)
+    delivered = robot.give_flowers(princess_pos)
     assert delivered == 2
     assert robot.flowers_held == 0
+    # Verify that flowers_delivered list has one entry per flower delivered
+    assert len(robot.flowers_delivered) == 2
+    assert all(
+        entry["position"]["row"] == princess_pos.row
+        and entry["position"]["col"] == princess_pos.col
+        for entry in robot.flowers_delivered
+    )
+
+
+def test_robot_give_flowers_multiple_times():
+    """Test that giving flowers multiple times accumulates correctly in the delivered list."""
+    robot = Robot(position=Position(0, 0))
+    princess_pos = Position(0, 1)
+
+    # First delivery: 2 flowers
+    robot.pick_flower()
+    robot.pick_flower()
+    delivered1 = robot.give_flowers(princess_pos)
+    assert delivered1 == 2
+    assert len(robot.flowers_delivered) == 2
+
+    # Second delivery: 3 flowers
+    robot.pick_flower()
+    robot.pick_flower()
+    robot.pick_flower()
+    delivered2 = robot.give_flowers(princess_pos)
+    assert delivered2 == 3
+    assert len(robot.flowers_delivered) == 5  # Total: 2 + 3 = 5
+
+    # Third delivery: 1 flower
+    robot.pick_flower()
+    delivered3 = robot.give_flowers(princess_pos)
+    assert delivered3 == 1
+    assert len(robot.flowers_delivered) == 6  # Total: 2 + 3 + 1 = 6

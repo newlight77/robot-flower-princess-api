@@ -40,9 +40,11 @@ class Robot:
     def give_flowers(self, princess_position: Position = None) -> int:
         count = self.flowers_held
         if count > 0 and princess_position:
-            self.flowers_delivered.append(
-                {"position": {"row": princess_position.row, "col": princess_position.col}}
-            )
+            # Add one entry per flower delivered
+            for _ in range(count):
+                self.flowers_delivered.append(
+                    {"position": {"row": princess_position.row, "col": princess_position.col}}
+                )
         self.flowers_held = 0
         return count
 

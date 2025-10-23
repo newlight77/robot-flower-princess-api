@@ -92,6 +92,16 @@ class AutoplayUseCase:
                     )
                     history.add_action(action)
 
+                elif action_type == "drop":
+                    GameService.drop_flower(board)
+                    action = Action(
+                        action_type=ActionType.DROP,
+                        direction=direction or board.robot.orientation,
+                        success=True,
+                        message="AI: Dropped flower",
+                    )
+                    history.add_action(action)
+
                 elif action_type == "give":
                     GameService.give_flowers(board)
                     action = Action(

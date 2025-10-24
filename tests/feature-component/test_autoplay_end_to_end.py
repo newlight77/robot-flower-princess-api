@@ -157,6 +157,7 @@ def test_autoplay_normal_delivery_clear_path():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     from robot_flower_princess.configurator.dependencies import get_game_repository
+
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
 
@@ -190,8 +191,12 @@ def test_autoplay_blocked_path_drop_and_clean():
     board.flowers = {Position(0, 1)}
     # Wall of obstacles blocking path
     board.obstacles = {
-        Position(1, 1), Position(1, 2), Position(1, 3),
-        Position(2, 1), Position(2, 2), Position(2, 3),
+        Position(1, 1),
+        Position(1, 2),
+        Position(1, 3),
+        Position(2, 1),
+        Position(2, 2),
+        Position(2, 3),
     }
     board.initial_flower_count = len(board.flowers)
 
@@ -200,6 +205,7 @@ def test_autoplay_blocked_path_drop_and_clean():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     from robot_flower_princess.configurator.dependencies import get_game_repository
+
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
 
@@ -210,8 +216,8 @@ def test_autoplay_blocked_path_drop_and_clean():
         final_board = repo.get(game_id)
         # Should have cleaned at least one obstacle or dropped flowers
         assert (
-            len(final_board.obstacles) < 6 or  # Cleaned at least one
-            len(final_board.flowers) > 0  # Dropped flower back
+            len(final_board.obstacles) < 6  # Cleaned at least one
+            or len(final_board.flowers) > 0  # Dropped flower back
         )
 
     finally:
@@ -236,7 +242,8 @@ def test_autoplay_no_adjacent_space_to_princess():
     board.flowers = {Position(0, 1)}
     # Obstacles surround princess
     board.obstacles = {
-        Position(2, 2), Position(2, 3),  # Above princess
+        Position(2, 2),
+        Position(2, 3),  # Above princess
         Position(3, 2),  # Left of princess
     }
     board.initial_flower_count = len(board.flowers)
@@ -246,6 +253,7 @@ def test_autoplay_no_adjacent_space_to_princess():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     from robot_flower_princess.configurator.dependencies import get_game_repository
+
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
 
@@ -256,8 +264,8 @@ def test_autoplay_no_adjacent_space_to_princess():
         final_board = repo.get(game_id)
         # Should have cleaned obstacle near princess or made progress
         assert (
-            len(final_board.obstacles) < 3 or  # Cleaned at least one
-            final_board.robot.flowers_held == 0  # Dropped flowers
+            len(final_board.obstacles) < 3  # Cleaned at least one
+            or final_board.robot.flowers_held == 0  # Dropped flowers
         )
 
     finally:
@@ -287,6 +295,7 @@ def test_autoplay_navigate_adjacent_to_princess():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     from robot_flower_princess.configurator.dependencies import get_game_repository
+
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
 

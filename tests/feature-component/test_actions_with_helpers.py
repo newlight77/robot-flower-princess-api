@@ -1,4 +1,3 @@
-
 def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place_flower):
     game_id = "helper-pick"
     board = make_empty_board()

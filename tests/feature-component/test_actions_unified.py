@@ -1,4 +1,3 @@
-
 def test_clean_removes_obstacle(client, create_game):
     game_id, board = create_game()
     # find an obstacle adjacent to robot if possible

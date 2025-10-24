@@ -4,7 +4,7 @@
 
 SHELL := /bin/sh
 
-.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-component coverage-combine clean clean-poetry
+.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage-unit coverage-integration coverage-feature-component coverage-combine clean clean-poetry
 
 # Prefer `.venv/bin/python -m` if a local venv exists; otherwise prefer `poetry run` when poetry is installed
 VENV_PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || true)
@@ -42,7 +42,7 @@ setup:
 test:
 	poetry run pytest -v
 
-test-all: test-unit test-integration test-component
+test-all: test-unit test-integration test-feature-component
 
 test-cov:
 	poetry run pytest --cov=src/robot_flower_princess --cov-report=html --cov-report=term
@@ -53,10 +53,10 @@ test-unit:
 test-integration:
 	poetry run pytest tests/integration
 
-test-component:
-	poetry run pytest tests/component
+test-feature-component:
+	poetry run pytest tests/feature-component
 
-coverage: coverage-unit coverage-integration coverage-component coverage-combine
+coverage: coverage-unit coverage-integration coverage-feature-component coverage-combine
 
 coverage-unit:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
@@ -70,11 +70,11 @@ coverage-integration:
 	${RUN} pytest --cov=src --cov-report=xml:coverage/integration/coverage-integration.xml --cov-report=html:coverage/integration/coverage-integration.html --cov-report=lcov:coverage/integration/coverage-integration.lcov tests/integration
 	@mv .coverage coverage/integration/coverage-integration.cov
 
-coverage-component:
+coverage-feature-component:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
-	@test -d coverage/component || mkdir -p coverage/component
-	${RUN} pytest --cov=src --cov-report=xml:coverage/component/coverage-component.xml --cov-report=html:coverage/component/coverage-component.html --cov-report=lcov:coverage/component/coverage-component.lcov tests/component
-	@mv .coverage coverage/component/coverage-component.cov
+	@test -d coverage/feature-component || mkdir -p coverage/feature-component
+	${RUN} pytest --cov=src --cov-report=xml:coverage/feature-component/coverage-feature-component.xml --cov-report=html:coverage/feature-component/coverage-feature-component.html --cov-report=lcov:coverage/feature-component/coverage-feature-component.lcov tests/feature-component
+	@mv .coverage coverage/feature-component/coverage-feature-component.cov
 
 coverage-combine:
 	@echo "combine all .coverage.* files into one and create XML + HTML"

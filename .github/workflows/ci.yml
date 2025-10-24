@@ -86,8 +86,8 @@ jobs:
             coverage/integration/coverage-integration.xml
             coverage/integration/coverage-integration.html
 
-  component:
-    name: Component tests
+  feature-component:
+    name: Feature-Component tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -108,27 +108,27 @@ jobs:
           poetry install --only main --no-interaction --no-ansi
           poetry install --only dev --no-interaction --no-ansi
 
-      - name: Run component tests with coverage
+      - name: Run feature-component tests with coverage
         run: |
-          mkdir -p coverage/component
-          pytest -q --cov=src --cov-report=xml:coverage/component/coverage-component.xml --cov-report=html:coverage/component/coverage-component.html --cov-report=lcov:coverage/component/coverage-component.lcov tests/component/test_autoplay_end_to_end.py
-          mv .coverage coverage/component/coverage-component.cov
-          ls -la coverage/component || true
-          test -f coverage/component/coverage-component.cov && echo "✓ Coverage database file created" || echo "✗ WARNING: Coverage database file not found!"
-      - name: Upload component coverage artifacts
+          mkdir -p coverage/feature-component
+          pytest -q --cov=src --cov-report=xml:coverage/feature-component/coverage-feature-component.xml --cov-report=html:coverage/feature-component/coverage-feature-component.html --cov-report=lcov:coverage/feature-component/coverage-feature-component.lcov tests/feature-component
+          mv .coverage coverage/feature-component/coverage-feature-component.cov
+          ls -la coverage/feature-component || true
+          test -f coverage/feature-component/coverage-feature-component.cov && echo "✓ Coverage database file created" || echo "✗ WARNING: Coverage database file not found!"
+      - name: Upload feature-component coverage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-component
+          name: coverage-feature-component
           path: |
-            coverage/component/coverage-component.cov
-            coverage/component/coverage-component.lcov
-            coverage/component/coverage-component.xml
-            coverage/component/coverage-component.html
+            coverage/feature-component/coverage-feature-component.cov
+            coverage/feature-component/coverage-feature-component.lcov
+            coverage/feature-component/coverage-feature-component.xml
+            coverage/feature-component/coverage-feature-component.html
 
   coverage_quality:
     name: Coverage quality check
     runs-on: ubuntu-latest
-    needs: [unit, integration, component]
+    needs: [unit, integration, feature-component]
     steps:
       - uses: actions/checkout@v5
 
@@ -161,15 +161,15 @@ jobs:
           mkdir -p coverage || true
           mv coverage-artifacts/coverage-unit coverage/unit || true
           mv coverage-artifacts/coverage-integration coverage/integration || true
-          mv coverage-artifacts/coverage-component coverage/component || true
+          mv coverage-artifacts/coverage-feature-component coverage/feature-component || true
 
           test -d coverage/unit/ && echo "✓ Coverage unit directory found" || echo "✗ WARNING: Coverage unit directory not found!"
           test -d coverage/integration/ && echo "✓ Coverage integration directory found" || echo "✗ WARNING: Coverage integration directory not found!"
-          test -d coverage/component/ && echo "✓ Coverage component directory found" || echo "✗ WARNING: Coverage component directory not found!"
+          test -d coverage/feature-component/ && echo "✓ Coverage feature-component directory found" || echo "✗ WARNING: Coverage feature-component directory not found!"
 
           # ls -laR coverage/unit/ || true
           # ls -laR coverage/integration/ || true
-          # ls -laR coverage/component/ || true
+          # ls -laR coverage/feature-component/ || true
 
           coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
           coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov
@@ -194,10 +194,10 @@ jobs:
             coverage/integration/coverage-integration.lcov
             coverage/integration/coverage-integration.xml
             coverage/integration/coverage-integration.html
-            coverage/component/coverage-component.cov
-            coverage/component/coverage-component.lcov
-            coverage/component/coverage-component.xml
-            coverage/component/coverage-component.html
+            coverage/feature-component/coverage-feature-component.cov
+            coverage/feature-component/coverage-feature-component.lcov
+            coverage/feature-component/coverage-feature-component.xml
+            coverage/feature-component/coverage-feature-component.html
             coverage/coverage.combined
             coverage/coverage-combined.lcov
             coverage/coverage-combined.xml

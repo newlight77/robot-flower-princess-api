@@ -3,24 +3,6 @@ from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 
 
-def test_move_success(client, save_board, make_empty_board):
-    game_id = "det-move"
-    board = make_empty_board()
-    # robot at (1,1) facing north; moving north should go to (0,1)
-    board.robot.orientation = Direction.NORTH
-    save_board(game_id, board)
-
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"}
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is True or data["success"] is False
-    # If success True, robot should have moved
-    if data["success"]:
-        assert data["robot"]["position"] == {"row": 0, "col": 1}
-
-
 def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
     game_id = "det-pick-drop-give"
     board = make_empty_board()

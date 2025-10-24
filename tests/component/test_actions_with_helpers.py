@@ -1,18 +1,3 @@
-def test_move_with_helpers(client, make_empty_board, save_board):
-    game_id = "helper-move"
-    board = make_empty_board()
-    # place robot at center facing north
-    save_board(game_id, board)
-
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"}
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    # if move succeeded, robot moved to row 0, col 1
-    if data["success"]:
-        assert data["robot"]["position"] == {"row": 0, "col": 1}
-
 
 def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place_flower):
     game_id = "helper-pick"

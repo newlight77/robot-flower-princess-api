@@ -125,7 +125,7 @@ jobs:
             coverage/feature-component/coverage-feature-component.xml
             coverage/feature-component/coverage-feature-component.html
 
-  coverage_quality:
+  code-coverage:
     name: Coverage quality check
     runs-on: ubuntu-latest
     needs: [unit, integration, feature-component]
@@ -206,7 +206,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     needs:
-      - coverage_quality
+      - code-coverage
 
     steps:
     - uses: actions/checkout@v5

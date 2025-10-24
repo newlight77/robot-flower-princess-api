@@ -42,6 +42,8 @@ setup:
 test:
 	poetry run pytest -v
 
+test-all: test-unit test-integration test-component
+
 test-cov:
 	poetry run pytest --cov=src/robot_flower_princess --cov-report=html --cov-report=term
 
@@ -54,28 +56,33 @@ test-integration:
 test-component:
 	poetry run pytest tests/component
 
+coverage: coverage-unit coverage-integration coverage-component coverage-combine
+
 coverage-unit:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
-	@test -d .coverage || mkdir -p .coverage
-	COVERAGE_FILE=.coverage/.coverage.unit $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-unit.xml tests/unit
+	@test -d coverage/unit || mkdir -p coverage/unit
+	${RUN} pytest --cov=src --cov-report=xml:coverage/unit/coverage-unit.xml --cov-report=html:coverage/unit/coverage-unit.html --cov-report=lcov:coverage/unit/coverage-unit.lcov tests/unit
+	@mv .coverage coverage/unit/coverage-unit.cov
 
 coverage-integration:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
-	@test -d .coverage || mkdir -p .coverage
-	COVERAGE_FILE=.coverage/.coverage.integration $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-integration.xml tests/integration
+	@test -d coverage/integration || mkdir -p coverage/integration
+	${RUN} pytest --cov=src --cov-report=xml:coverage/integration/coverage-integration.xml --cov-report=html:coverage/integration/coverage-integration.html --cov-report=lcov:coverage/integration/coverage-integration.lcov tests/integration
+	@mv .coverage coverage/integration/coverage-integration.cov
 
 coverage-component:
 	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
-	@test -d .coverage || mkdir -p .coverage
-	COVERAGE_FILE=.coverage/.coverage.component $(RUN) pytest --cov=src --cov-report=xml:.coverage/coverage-component.xml tests/component/test_autoplay_end_to_end.py
+	@test -d coverage/component || mkdir -p coverage/component
+	${RUN} pytest --cov=src --cov-report=xml:coverage/component/coverage-component.xml --cov-report=html:coverage/component/coverage-component.html --cov-report=lcov:coverage/component/coverage-component.lcov tests/component
+	@mv .coverage coverage/component/coverage-component.cov
 
 coverage-combine:
-	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
-	@test -d .coverage || mkdir -p .coverage
 	@echo "combine all .coverage.* files into one and create XML + HTML"
-	$(RUN) coverage combine .coverage/.coverage.* || true
-	$(RUN) coverage xml -o .coverage/coverage-combined.xml
-	$(RUN) coverage html -d .coverage/coverage_html
+	${RUN} coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
+	${RUN} coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov || true
+	${RUN} coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml || true
+	${RUN} coverage html --data-file=coverage/coverage.combined --directory=coverage/coverage-combined.html || true
+	${RUN} coverage report --data-file=coverage/coverage.combined --fail-under=80 || true
 
 lint:
 	poetry run ruff check src/ tests/

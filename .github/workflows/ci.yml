@@ -30,19 +30,21 @@ jobs:
           poetry install --only dev --no-interaction --no-ansi
 
       - name: Run unit tests with coverage
-        env:
-          COVERAGE_FILE: .coverage/.coverage.unit
         run: |
-          mkdir -p .coverage
-          poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-unit.xml tests/unit
-
+          mkdir -p coverage/unit
+          pytest -q --cov=src --cov-report=xml:coverage/unit/coverage-unit.xml --cov-report=html:coverage/unit/coverage-unit.html --cov-report=lcov:coverage/unit/coverage-unit.lcov tests/unit
+          mv .coverage coverage/unit/coverage-unit.cov
+          ls -la coverage/unit || true
+          test -f coverage/unit/coverage-unit.cov && echo "✓ Coverage database file created" || echo "✗ WARNING: Coverage database file not found!"
       - name: Upload unit coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-unit
           path: |
-            .coverage/coverage-unit.xml
-            .coverage/.coverage.unit
+            coverage/unit/coverage-unit.cov
+            coverage/unit/coverage-unit.lcov
+            coverage/unit/coverage-unit.xml
+            coverage/unit/coverage-unit.html
 
   integration:
     name: Integration tests
@@ -67,19 +69,22 @@ jobs:
           poetry install --only dev --no-interaction --no-ansi
 
       - name: Run integration tests with coverage
-        env:
-          COVERAGE_FILE: .coverage/.coverage.integration
         run: |
-          mkdir -p .coverage
-          poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-integration.xml tests/integration
+          mkdir -p coverage/integration
+          pytest -q --cov=src --cov-report=xml:coverage/integration/coverage-integration.xml --cov-report=html:coverage/integration/coverage-integration.html --cov-report=lcov:coverage/integration/coverage-integration.lcov tests/integration
+          mv .coverage coverage/integration/coverage-integration.cov
+          ls -la coverage/integration || true
+          test -f coverage/integration/coverage-integration.cov && echo "✓ Coverage database file created" || echo "✗ WARNING: Coverage database file not found!"
 
       - name: Upload integration coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-integration
           path: |
-            .coverage/coverage-integration.xml
-            .coverage/.coverage.integration
+            coverage/integration/coverage-integration.cov
+            coverage/integration/coverage-integration.lcov
+            coverage/integration/coverage-integration.xml
+            coverage/integration/coverage-integration.html
 
   component:
     name: Component tests
@@ -104,19 +109,21 @@ jobs:
           poetry install --only dev --no-interaction --no-ansi
 
       - name: Run component tests with coverage
-        env:
-          COVERAGE_FILE: .coverage/.coverage.component
         run: |
-          mkdir -p .coverage
-          poetry run pytest -q --cov=src --cov-report=xml:.coverage/coverage-component.xml tests/component/test_autoplay_end_to_end.py
-
+          mkdir -p coverage/component
+          pytest -q --cov=src --cov-report=xml:coverage/component/coverage-component.xml --cov-report=html:coverage/component/coverage-component.html --cov-report=lcov:coverage/component/coverage-component.lcov tests/component/test_autoplay_end_to_end.py
+          mv .coverage coverage/component/coverage-component.cov
+          ls -la coverage/component || true
+          test -f coverage/component/coverage-component.cov && echo "✓ Coverage database file created" || echo "✗ WARNING: Coverage database file not found!"
       - name: Upload component coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-component
           path: |
-            .coverage/coverage-component.xml
-            .coverage/.coverage.component
+            coverage/component/coverage-component.cov
+            coverage/component/coverage-component.lcov
+            coverage/component/coverage-component.xml
+            coverage/component/coverage-component.html
 
   coverage_quality:
     name: Coverage quality check
@@ -148,30 +155,53 @@ jobs:
 
       - name: Merge coverage data
         run: |
-          ls -la coverage-artifacts || true
-          # Move coverage files into .coverage/ directory
-          mkdir -p .coverage
-          cp coverage-artifacts/coverage/.coverage.* .coverage/ || true
-          cp coverage-artifacts/coverage/coverage-*.xml .coverage/ || true
-          poetry run coverage combine .coverage/.coverage.* || true
-          poetry run coverage xml -o .coverage/coverage-combined.xml
-          poetry run coverage report --fail-under=80
+          # ls -laR coverage-artifacts || true
+          test -f coverage-artifacts && echo "✓ Coverage artifacts directory found" || echo "✗ WARNING: Coverage artifacts directory not found!"
 
-      - name: Generate HTML coverage report
+          mkdir -p coverage || true
+          mv coverage-artifacts/coverage-unit coverage/unit || true
+          mv coverage-artifacts/coverage-integration coverage/integration || true
+          mv coverage-artifacts/coverage-component coverage/component || true
+
+          test -d coverage/unit/ && echo "✓ Coverage unit directory found" || echo "✗ WARNING: Coverage unit directory not found!"
+          test -d coverage/integration/ && echo "✓ Coverage integration directory found" || echo "✗ WARNING: Coverage integration directory not found!"
+          test -d coverage/component/ && echo "✓ Coverage component directory found" || echo "✗ WARNING: Coverage component directory not found!"
+
+          # ls -laR coverage/unit/ || true
+          # ls -laR coverage/integration/ || true
+          # ls -laR coverage/component/ || true
+
+          coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
+          coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov
+          coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml
+          coverage html --data-file=coverage/coverage.combined --directory=coverage/coverage-combined.html
+          # coverage report --data-file=coverage/coverage.combined --fail-under=80
+
+      - name: Coverage quality check
         run: |
-          poetry run coverage html -d .coverage/coverage_html
-
-      - name: Upload HTML coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_html
-          path: .coverage/coverage_html
+          coverage report --data-file=coverage/coverage.combined --fail-under=80
 
       - name: Upload combined coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-combined
-          path: .coverage/coverage-combined.xml
+          path: |
+            coverage/unit/coverage-unit.cov
+            coverage/unit/coverage-unit.lcov
+            coverage/unit/coverage-unit.xml
+            coverage/unit/coverage-unit.html
+            coverage/integration/coverage-integration.cov
+            coverage/integration/coverage-integration.lcov
+            coverage/integration/coverage-integration.xml
+            coverage/integration/coverage-integration.html
+            coverage/component/coverage-component.cov
+            coverage/component/coverage-component.lcov
+            coverage/component/coverage-component.xml
+            coverage/component/coverage-component.html
+            coverage/coverage.combined
+            coverage/coverage-combined.lcov
+            coverage/coverage-combined.xml
+            coverage/coverage-combined.html
 
   lint:
     runs-on: ubuntu-latest

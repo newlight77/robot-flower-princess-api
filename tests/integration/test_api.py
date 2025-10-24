@@ -67,9 +67,16 @@ def test_invalid_direction_payload(client, seeded_board):
     )
     assert resp.status_code == 422
     assert "detail" in resp.json()
-    assert resp.json()["detail"][0]["msg"] == "invalid direction"
-    assert resp.json()["detail"][0]["type"] == "value_error.enum"
-    assert resp.json()["detail"][0]["ctx"]["enum_values"] == ["north", "south", "east", "west"]
+
+    # Pydantic v2 returns different error format
+    error_detail = resp.json()["detail"][0]
+    error_msg = error_detail["msg"]
+
+    # Check that the error message mentions the valid directions
+    assert "north" in error_msg.lower() and "south" in error_msg.lower()
+
+    # Pydantic v2 uses "literal_error" type for Literal validation
+    assert error_detail["type"] == "literal_error"
 
 def test_move_with_helpers(client, make_empty_board, save_board):
     game_id = "helper-move"

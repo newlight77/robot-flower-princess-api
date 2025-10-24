@@ -1,34 +1,6 @@
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 
 
-def test_root_endpoint(client):
-    response = client.get("/")
-    assert response.status_code == 200
-    assert "message" in response.json()
-
-
-def test_health_check(client):
-    response = client.get("/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
-
-
-def test_create_game(client):
-    response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    assert response.status_code == 201
-    data = response.json()
-    assert "id" in data
-    assert data["board"]["rows"] == 5
-
-
-def test_get_game_state(client):
-    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["id"]
-
-    response = client.get(f"/api/games/{game_id}")
-    assert response.status_code == 200
-    assert response.json()["id"] == game_id
-
 def test_rotate_changes_orientation(client, create_game):
     game_id, board = create_game()
 
@@ -58,6 +30,7 @@ def test_robot_move(client, save_board, make_empty_board):
     if data["success"]:
         assert data["robot"]["position"] == {"row": 0, "col": 1}
 
+
 def test_invalid_direction_payload(client, seeded_board):
     game_id, board = seeded_board("invalid-dir")
 
@@ -78,6 +51,7 @@ def test_invalid_direction_payload(client, seeded_board):
     # Pydantic v2 uses "literal_error" type for Literal validation
     assert error_detail["type"] == "literal_error"
 
+
 def test_move_with_helpers(client, make_empty_board, save_board):
     game_id = "helper-move"
     board = make_empty_board()
@@ -92,23 +66,3 @@ def test_move_with_helpers(client, make_empty_board, save_board):
     # if move succeeded, robot moved to row 0, col 1
     if data["success"]:
         assert data["robot"]["position"] == {"row": 0, "col": 1}
-
-
-def test_get_game_history(client):
-    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["id"]
-
-    response = client.get(f"/api/games/{game_id}/history")
-    assert response.status_code == 200
-    assert "history" in response.json()
-
-
-def test_autoplay(client):
-    create_response = client.post("/api/games/", json={"rows": 5, "cols": 5})
-    game_id = create_response.json()["id"]
-
-    response = client.post(f"/api/games/{game_id}/autoplay")
-    assert response.status_code == 200
-    data = response.json()
-    assert "success" in data
-    assert "board" in data

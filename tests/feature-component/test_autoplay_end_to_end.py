@@ -119,13 +119,11 @@ def test_autoplay_multiple_flowers_with_obstacles():
     try:
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
-        data = resp.json()
 
         # Should successfully complete or at least make progress
         assert resp.status_code == 200
 
         # Verify some progress was made
-        final_board = repo.get(game_id)
         actions_taken = len(repo.get_history(game_id).actions) if repo.get_history(game_id) else 0
 
         # The solver should have taken some actions

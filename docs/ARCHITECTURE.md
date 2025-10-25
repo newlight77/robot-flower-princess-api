@@ -274,17 +274,23 @@ Robot-Flower-Princess-Claude-API-FastAPI-v4/
 │   │   │           │   └── game_router.py   # Game API endpoints
 │   │   │           └── schemas/
 │   │   │               └── game_schema.py   # Pydantic schemas
-│   │   └── aiplayer/                        # AIPlayer Hexagon (AI Solver)
-│   │       ├── domain/
-│   │       │   ├── core/
-│   │       │   │   └── entities/
-│   │       │   │       └── game_solver_player.py  # AI solver logic
-│   │       │   └── use_cases/
-│   │       │       └── autoplay.py          # Autoplay use case
+│   │   ├── aiplayer/                        # AIPlayer Hexagon (AI Solver)
+│   │   │   ├── domain/
+│   │   │   │   ├── core/
+│   │   │   │   │   └── entities/
+│   │   │   │   │       ├── ai_greedy_player.py   # Greedy AI strategy
+│   │   │   │   │       └── ai_optimal_player.py  # Optimal AI strategy
+│   │   │   │   └── use_cases/
+│   │   │   │       └── autoplay.py          # Autoplay use case
+│   │   │   └── driver/
+│   │   │       └── bff/
+│   │   │           └── routers/
+│   │   │               └── aiplayer_router.py  # Autoplay API endpoint
+│   │   └── health/                          # Health Hexagon (Monitoring)
 │   │       └── driver/
 │   │           └── bff/
 │   │               └── routers/
-│   │                   └── aiplayer_router.py  # Autoplay API endpoint
+│   │                   └── health_router.py  # Health check endpoint
 │   ├── configurator/                        # Configuration (Shared)
 │   │   ├── settings.py                      # App settings
 │   │   └── dependencies.py                  # Dependency injection

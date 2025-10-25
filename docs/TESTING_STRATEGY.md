@@ -10,7 +10,7 @@
 > - ✅ Follow best practices
 >
 > 📖 **Looking for test analysis and inventory?** See [TESTING_GUIDE.md](TESTING_GUIDE.md) for:
-> - Comprehensive analysis of all 49 tests (intention, purpose, benefits)
+> - Comprehensive analysis of all 50 tests (intention, purpose, benefits)
 > - E2E overlap evaluation and recommendations
 > - Test metrics and distribution by hexagon
 > - When to write each type of test
@@ -34,12 +34,12 @@
 
 ## Overview
 
-**Quick Stats**: 49 tests | ~0.3s execution | 90%+ coverage
+**Quick Stats**: 50 tests | ~0.3s execution | 90%+ coverage
 
 We use a **three-tier testing approach**:
-- 32 unit tests (65%) - Domain logic
+- 32 unit tests (64%) - Domain logic
 - 10 integration tests (20%) - API endpoints
-- 7 feature-component tests (14%) - E2E workflows
+- 8 feature-component tests (16%) - E2E workflows
 
 > 💡 For detailed test analysis and methodology, see [TESTING_GUIDE.md](TESTING_GUIDE.md)
 
@@ -1026,7 +1026,7 @@ def test_complex_autoplay_scenario():
 This document provides practical guidance for writing and running tests. For comprehensive test analysis, metrics, and E2E evaluation, see [TESTING_GUIDE.md](TESTING_GUIDE.md).
 
 **Key Takeaways**:
-- ✅ 49 tests running in ~0.3s (32 unit, 10 integration, 7 feature-component)
+- ✅ 50 tests running in ~0.3s (32 unit, 10 integration, 8 feature-component)
 - ✅ 80%+ coverage requirement enforced in CI/CD
 - ✅ Use AAA pattern, descriptive names, and fixtures
 - ✅ Keep tests isolated, fast, and focused

@@ -22,6 +22,30 @@ class GameSolverPlayer:
         while (board.flowers or board.robot.flowers_held > 0) and iteration < max_iterations:
             iteration += 1
 
+            # Check if robot is completely blocked (no adjacent empty cells)
+            adjacent_empty = GameSolverPlayer._get_adjacent_positions(board.robot.position, board)
+            if not adjacent_empty:
+                # Robot is blocked - must clean an adjacent obstacle to proceed
+                adjacent_obstacles = []
+                for direction in Direction:
+                    row_delta, col_delta = direction.get_delta()
+                    adj_pos = board.robot.position.move(row_delta, col_delta)
+                    if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
+                        adjacent_obstacles.append((adj_pos, direction))
+
+                if adjacent_obstacles:
+                    # Clean the first adjacent obstacle
+                    obstacle_pos, direction = adjacent_obstacles[0]
+                    actions.append(("rotate", direction))
+                    GameService.rotate_robot(board, direction)
+
+                    actions.append(("clean", None))
+                    GameService.clean_obstacle(board)
+                    continue
+                else:
+                    # No adjacent obstacles to clean and no empty cells - robot is stuck
+                    break
+
             # If holding flowers and need to deliver
             if board.robot.flowers_held > 0 and (
                 board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0

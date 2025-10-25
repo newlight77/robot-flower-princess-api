@@ -1,6 +1,6 @@
 # Testing Guide
 
-> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 49 tests
+> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 50 tests
 >
 > This document is your go-to resource when you need to:
 > - 📊 Understand what tests exist and why
@@ -45,8 +45,8 @@ Our testing strategy follows a **layered approach** with three distinct levels:
 |-------|-------|----------------|---------------|
 | **Unit Tests** | 32 | < 0.1s | Technical |
 | **Integration Tests** | 10 | ~0.1s | Technical + Functional |
-| **Feature-Component Tests** | 7 | ~0.2s | Functional |
-| **Total** | **49** | **~0.3s** | Comprehensive |
+| **Feature-Component Tests** | 8 | ~0.2s | Functional |
+| **Total** | **50** | **~0.3s** | Comprehensive |
 
 ---
 
@@ -150,7 +150,7 @@ This document is designed for **different audiences** with varying needs. Naviga
 **If you want to understand test coverage:**
 
 1. **Start here**: [Overview](#overview) - See the big picture
-   - Understand we have 49 tests running in < 1 second
+   - Understand we have 50 tests running in < 1 second
    - See test distribution (unit, integration, feature)
 
 2. **Then review**: Feature-specific sections
@@ -1387,7 +1387,7 @@ Add these if resources permit:
 
 ### Executive Summary
 
-Our test suite is **exceptionally well-designed** with 49 tests running in under 1 second, following test pyramid best practices.
+Our test suite is **exceptionally well-designed** with 50 tests running in under 1 second, following test pyramid best practices.
 
 **Bottom Line**: ✅ **Keep all current tests** - they provide excellent value and cannot be replaced by E2E tests.
 
@@ -1433,13 +1433,13 @@ Analysis of whether E2E tests would duplicate our current test coverage:
 | **Workflow Tests** | 3 | ✅ High (70-90%) | ⚠️ Evaluate | May be redundant with E2E |
 | **AI Solver Tests** | 7 | ⚠️ Partial (30-50%) | ✅ Keep All | Critical, needs thorough testing |
 
-**Key Takeaway**: Only **3 out of 49 tests** (6%) might be redundant if comprehensive E2E exists. The other 94% provide unique value.
+**Key Takeaway**: Only **3 out of 50 tests** (6%) might be redundant if comprehensive E2E exists. The other 94% provide unique value.
 
 ---
 
 ### 📊 Test Value Matrix
 
-Classification of all 49 tests by value and E2E overlap:
+Classification of all 50 tests by value and E2E overlap:
 
 ```
                            E2E OVERLAP
@@ -1460,8 +1460,8 @@ Classification of all 49 tests by value and E2E overlap:
 ```
 
 **Verdict**:
-- ✅ **Keep 94%** (46/49 tests) - Essential regardless of E2E
-- ⚠️ **Evaluate 6%** (3/49 tests) - Only if comprehensive E2E exists
+- ✅ **Keep 94%** (46/50 tests) - Essential regardless of E2E
+- ⚠️ **Evaluate 6%** (3/50 tests) - Only if comprehensive E2E exists
 
 ---
 
@@ -1535,7 +1535,7 @@ Complete analysis showing technical/functional intent, E2E overlap, and recommen
 
 #### 1. **Test Suite Strengths** ✅
 
-- ⚡ **Exceptional Speed**: 49 tests in 0.3s enables TDD workflow
+- ⚡ **Exceptional Speed**: 50 tests in 0.3s enables TDD workflow
 - 🎯 **Perfect Balance**: Nearly ideal pyramid distribution
 - 🔒 **Comprehensive**: Tests domain logic, API contracts, and workflows
 - 🧪 **Quality**: Zero flaky tests, clear naming, good documentation

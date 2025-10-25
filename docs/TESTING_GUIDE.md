@@ -1,8 +1,8 @@
-# Test Inventory & Analysis
+# Testing Guide
 
 > **Comprehensive documentation of all tests in the Robot-Flower-Princess system**
 >
-> This document provides a complete analysis of our testing strategy, covering intention, purpose, methodology, benefits, and E2E overlap considerations for each test level.
+> This guide provides a complete analysis of our testing strategy, covering intention, purpose, methodology, benefits, and E2E overlap considerations for each test level.
 
 ---
 

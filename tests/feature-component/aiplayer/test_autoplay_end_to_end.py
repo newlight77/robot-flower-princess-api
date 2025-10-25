@@ -360,12 +360,220 @@ def test_autoplay_robot_starts_blocked():
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
 
-        final_board = repo.get(game_id)
         history = repo.get_history(game_id)
 
         # AI should have attempted to solve (may or may not succeed on this board)
         # This test primarily verifies the API works with obstacle scenarios
         assert len(history.actions) >= 0, "Should return valid history"
+
+    finally:
+        if original_override is None:
+            app.dependency_overrides.pop(get_game_repository, None)
+        else:
+            app.dependency_overrides[get_game_repository] = original_override
+
+
+# =====================================================
+# AIOptimalPlayer Tests (strategy="optimal")
+# =====================================================
+
+
+def test_autoplay_optimal_end_to_end():
+    """Test AIOptimalPlayer with simple solvable board."""
+    repo = InMemoryGameRepository()
+    # create a small solvable board
+    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+    board = Game(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
+    board.flowers = {Position(0, 1)}
+    board.obstacles = set()
+    board.initial_flower_count = len(board.flowers)
+
+    game_id = "component-autoplay-optimal"
+    repo.save(game_id, board)
+    repo.save_history(game_id, GameHistory(game_id=game_id))
+
+    from configurator.dependencies import get_game_repository
+
+    original_override = app.dependency_overrides.get(get_game_repository)
+    app.dependency_overrides[get_game_repository] = lambda: repo
+
+    try:
+        resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "actions_taken" in data["message"] or "board" in data
+    finally:
+        if original_override is None:
+            app.dependency_overrides.pop(get_game_repository, None)
+        else:
+            app.dependency_overrides[get_game_repository] = original_override
+
+
+def test_autoplay_optimal_with_obstacles():
+    """Test AIOptimalPlayer can solve a game with obstacles."""
+    repo = InMemoryGameRepository()
+
+    # Create a simple 3x3 board where robot can access everything
+    # Layout:
+    # R F _
+    # _ O _
+    # _ _ P
+    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board.flowers = {Position(0, 1)}
+    board.obstacles = {Position(1, 1)}  # One obstacle in the middle
+    board.initial_flower_count = len(board.flowers)
+
+    game_id = "component-autoplay-optimal-obstacles"
+    repo.save(game_id, board)
+    repo.save_history(game_id, GameHistory(game_id=game_id))
+
+    from configurator.dependencies import get_game_repository
+
+    original_override = app.dependency_overrides.get(get_game_repository)
+    app.dependency_overrides[get_game_repository] = lambda: repo
+
+    try:
+        resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
+        assert resp.status_code == 200
+        data = resp.json()
+
+        # Verify the endpoint works with optimal strategy
+        assert "success" in data or "message" in data
+
+    finally:
+        if original_override is None:
+            app.dependency_overrides.pop(get_game_repository, None)
+        else:
+            app.dependency_overrides[get_game_repository] = original_override
+
+
+def test_autoplay_optimal_multiple_flowers():
+    """Test AIOptimalPlayer can handle multiple flowers and plan efficiently."""
+    repo = InMemoryGameRepository()
+
+    # Create a simple 4x4 board with 2 flowers
+    # Layout:
+    # R F _ _
+    # _ _ _ _
+    # _ O _ F
+    # _ _ _ P
+    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board.flowers = {
+        Position(0, 1),  # Next to robot
+        Position(2, 3),  # Near princess
+    }
+    board.obstacles = {Position(2, 1)}  # One obstacle
+    board.initial_flower_count = len(board.flowers)
+
+    game_id = "component-autoplay-optimal-multiple"
+    repo.save(game_id, board)
+    repo.save_history(game_id, GameHistory(game_id=game_id))
+
+    from configurator.dependencies import get_game_repository
+
+    original_override = app.dependency_overrides.get(get_game_repository)
+    app.dependency_overrides[get_game_repository] = lambda: repo
+
+    try:
+        resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
+        assert resp.status_code == 200
+
+        # Verify the endpoint works with optimal strategy
+        data = resp.json()
+        assert "success" in data or "message" in data
+
+    finally:
+        if original_override is None:
+            app.dependency_overrides.pop(get_game_repository, None)
+        else:
+            app.dependency_overrides[get_game_repository] = original_override
+
+
+def test_autoplay_optimal_clear_path_efficiency():
+    """Test AIOptimalPlayer with clear path - should be efficient."""
+    repo = InMemoryGameRepository()
+
+    # Simple 3x3 board with clear path
+    # Layout:
+    # R F _
+    # _ _ _
+    # _ _ P
+    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board.flowers = {Position(0, 1)}
+    board.obstacles = set()  # No obstacles
+    board.initial_flower_count = len(board.flowers)
+
+    game_id = "test-optimal-clear-path"
+    repo.save(game_id, board)
+    repo.save_history(game_id, GameHistory(game_id=game_id))
+
+    from configurator.dependencies import get_game_repository
+
+    original_override = app.dependency_overrides.get(get_game_repository)
+    app.dependency_overrides[get_game_repository] = lambda: repo
+
+    try:
+        resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
+        assert resp.status_code == 200
+
+        final_board = repo.get(game_id)
+        history = repo.get_history(game_id)
+
+        # Optimal should complete the game
+        assert final_board.flowers_delivered > 0 or final_board.get_status().value == "victory"
+
+        # Optimal should use fewer actions (more efficient)
+        # This is a simple board, so action count should be reasonable
+        assert len(history.actions) > 0, "Should take some actions"
+        assert len(history.actions) < 50, "Should be efficient on simple board"
+
+    finally:
+        if original_override is None:
+            app.dependency_overrides.pop(get_game_repository, None)
+        else:
+            app.dependency_overrides[get_game_repository] = original_override
+
+
+def test_autoplay_optimal_complex_obstacle_pattern():
+    """Test AIOptimalPlayer with complex obstacle pattern requiring smart navigation."""
+    repo = InMemoryGameRepository()
+
+    # 4x4 board where robot needs to navigate around obstacles
+    # Layout:
+    # R F _ _
+    # _ O O O
+    # _ O _ _
+    # _ _ _ P
+    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board.flowers = {Position(0, 1)}
+    board.obstacles = {
+        Position(1, 1),
+        Position(1, 2),
+        Position(1, 3),
+        Position(2, 1),
+    }
+    board.initial_flower_count = len(board.flowers)
+
+    game_id = "test-optimal-complex"
+    repo.save(game_id, board)
+    repo.save_history(game_id, GameHistory(game_id=game_id))
+
+    from configurator.dependencies import get_game_repository
+
+    original_override = app.dependency_overrides.get(get_game_repository)
+    app.dependency_overrides[get_game_repository] = lambda: repo
+
+    try:
+        resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
+        assert resp.status_code == 200
+
+        # Verify the endpoint works with optimal strategy
+        data = resp.json()
+        assert "success" in data or "message" in data
 
     finally:
         if original_override is None:

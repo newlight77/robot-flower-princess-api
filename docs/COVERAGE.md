@@ -352,12 +352,12 @@ code-coverage:
 
 ### Current Coverage Status
 
-| Test Suite | Coverage | Target | Status |
-|------------|----------|--------|--------|
-| **Unit** | 92% | 90%+ | ✅ |
-| **Integration** | 88% | 85%+ | ✅ |
-| **Feature-Component** | N/A | Critical paths | ✅ |
-| **Combined** | 90% | 80%+ | ✅ |
+| Test Suite | Test Count | Coverage | Target | Status |
+|------------|------------|----------|--------|--------|
+| **Unit** | 146 tests | 92% | 90%+ | ✅ |
+| **Integration** | 6 tests | 88% | 85%+ | ✅ |
+| **Feature-Component** | 13 tests | N/A | Critical paths | ✅ |
+| **Combined** | **165 tests** | **90%** | **80%+** | ✅ |
 
 ### Coverage by Module
 

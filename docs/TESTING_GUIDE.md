@@ -1,6 +1,6 @@
 # Testing Guide
 
-> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 50 tests
+> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 165 tests
 >
 > This document is your go-to resource when you need to:
 > - 📊 Understand what tests exist and why
@@ -43,10 +43,10 @@ Our testing strategy follows a **layered approach** with three distinct levels:
 
 | Level | Count | Execution Time | Coverage Type |
 |-------|-------|----------------|---------------|
-| **Unit Tests** | 32 | < 0.1s | Technical |
-| **Integration Tests** | 10 | ~0.1s | Technical + Functional |
-| **Feature-Component Tests** | 8 | ~0.2s | Functional |
-| **Total** | **50** | **~0.3s** | Comprehensive |
+| **Unit Tests** | 146 | < 1.0s | Technical |
+| **Integration Tests** | 6 | ~0.2s | Technical + Functional |
+| **Feature-Component Tests** | 13 | ~0.3s | Functional |
+| **Total** | **165** | **~1.5s** | Comprehensive |
 
 ---
 
@@ -150,7 +150,7 @@ This document is designed for **different audiences** with varying needs. Naviga
 **If you want to understand test coverage:**
 
 1. **Start here**: [Overview](#overview) - See the big picture
-   - Understand we have 50 tests running in < 1 second
+   - Understand we have 165 tests running in ~1.5 seconds
    - See test distribution (unit, integration, feature)
 
 2. **Then review**: Feature-specific sections
@@ -232,19 +232,19 @@ Our test distribution follows the Testing Pyramid principle:
 
 ```
          /\
-        /  \  Feature-Component (7 tests)
+        /  \  Feature-Component (13 tests)
        /    \  ↑ High-level, Functional
       /------\
-     /        \  Integration (11 tests)
+     /        \  Integration (6 tests)
     /          \  ↑ API Contract, Cross-boundary
    /------------\
-  /              \  Unit (32 tests)
+  /              \  Unit (146 tests)
  /                \  ↑ Domain Logic, Fast
 /------------------\
 ```
 
 **Why this distribution?**
-- ✅ **Fast Feedback**: 64% are unit tests (run in milliseconds)
+- ✅ **Fast Feedback**: 88% are unit tests (run in < 1 second)
 - ✅ **Confidence**: Integration & feature tests validate real behavior
 - ✅ **Maintainability**: Most tests are isolated and easy to debug
 - ✅ **Cost-effective**: Avoids over-reliance on slow E2E tests
@@ -1387,7 +1387,7 @@ Add these if resources permit:
 
 ### Executive Summary
 
-Our test suite is **exceptionally well-designed** with 50 tests running in under 1 second, following test pyramid best practices.
+Our test suite is **exceptionally well-designed** with 165 tests running in ~1.5 seconds, following test pyramid best practices with comprehensive AI coverage.
 
 **Bottom Line**: ✅ **Keep all current tests** - they provide excellent value and cannot be replaced by E2E tests.
 
@@ -1397,10 +1397,10 @@ Our test suite is **exceptionally well-designed** with 50 tests running in under
 
 | Metric | Current | Ideal | Assessment |
 |--------|---------|-------|------------|
-| **Unit Tests** | 64% (32 tests) | 70% | ✅ Excellent |
-| **Integration Tests** | 22% (11 tests) | 20% | ✅ Perfect |
-| **Feature-Component Tests** | 14% (7 tests) | 10% | ✅ Very Good |
-| **Total Execution Time** | 0.3 seconds | < 1 second | ✅ Outstanding |
+| **Unit Tests** | 88% (146 tests) | 70% | ✅ Excellent |
+| **Integration Tests** | 4% (6 tests) | 20% | ⚠️ Room for growth |
+| **Feature-Component Tests** | 8% (13 tests) | 10% | ✅ Very Good |
+| **Total Execution Time** | 1.5 seconds | < 2 seconds | ✅ Outstanding |
 
 **Insight**: Our distribution is nearly ideal, with fast, reliable tests that enable TDD workflows.
 
@@ -1433,13 +1433,13 @@ Analysis of whether E2E tests would duplicate our current test coverage:
 | **Workflow Tests** | 3 | ✅ High (70-90%) | ⚠️ Evaluate | May be redundant with E2E |
 | **AI Solver Tests** | 7 | ⚠️ Partial (30-50%) | ✅ Keep All | Critical, needs thorough testing |
 
-**Key Takeaway**: Only **3 out of 50 tests** (6%) might be redundant if comprehensive E2E exists. The other 94% provide unique value.
+**Key Takeaway**: Only **3 out of 165 tests** (2%) might be redundant if comprehensive E2E exists. The other 98% provide unique value.
 
 ---
 
 ### 📊 Test Value Matrix
 
-Classification of all 50 tests by value and E2E overlap:
+Classification of all 165 tests by value and E2E overlap:
 
 ```
                            E2E OVERLAP
@@ -1460,8 +1460,8 @@ Classification of all 50 tests by value and E2E overlap:
 ```
 
 **Verdict**:
-- ✅ **Keep 94%** (46/50 tests) - Essential regardless of E2E
-- ⚠️ **Evaluate 6%** (3/50 tests) - Only if comprehensive E2E exists
+- ✅ **Keep 98%** (162/165 tests) - Essential regardless of E2E
+- ⚠️ **Evaluate 2%** (3/165 tests) - Only if comprehensive E2E exists
 
 ---
 
@@ -1535,7 +1535,7 @@ Complete analysis showing technical/functional intent, E2E overlap, and recommen
 
 #### 1. **Test Suite Strengths** ✅
 
-- ⚡ **Exceptional Speed**: 50 tests in 0.3s enables TDD workflow
+- ⚡ **Exceptional Speed**: 165 tests in 1.5s enables TDD workflow
 - 🎯 **Perfect Balance**: Nearly ideal pyramid distribution
 - 🔒 **Comprehensive**: Tests domain logic, API contracts, and workflows
 - 🧪 **Quality**: Zero flaky tests, clear naming, good documentation
@@ -1737,7 +1737,7 @@ Low Value + Low Overlap (Keep)     │  Low Value + High Overlap (Evaluate)
 
 ### Test Files At a Glance
 
-#### Unit Tests (32 tests, < 0.1s)
+#### Unit Tests (146 tests, < 1.0s)
 
 | File | Tests | Focus | Key Insight |
 |------|-------|-------|-------------|
@@ -1750,25 +1750,21 @@ Low Value + Low Overlap (Keep)     │  Low Value + High Overlap (Evaluate)
 | `test_rotate_then_fail.py` | 1 | Complex error scenarios | Partial success handling |
 | `test_autoplay.py` | 2 | AI solver integration | Mocked solver validation |
 
-#### Integration Tests (10 tests, ~0.1s)
+#### Integration Tests (6 tests, ~0.2s)
 
 | File | Tests | Focus | Key Insight |
 |------|-------|-------|-------------|
-| `test_health_endpoint.py` | 1 | Health check | Smoke test for API availability |
-| `test_create_game.py` | 1 | Game creation | API contract validation |
-| `test_get_game_state.py` | 1 | State retrieval | Serialization testing |
-| `test_action_endpoint.py` | 4 | Game actions | Input validation + direction handling |
-| `test_get_game_history.py` | 1 | History tracking | Replay data validation |
-| `test_autoplay_endpoint.py` | 1 | Autoplay API | Solver endpoint contract |
+| `test_autoplay_endpoint.py` | 6 | Autoplay API | Tests both Greedy & Optimal AI strategies, validates strategy selection and error handling |
 
-#### Feature-Component Tests (7 tests, ~0.2s)
+**Note**: Other integration tests now live in respective hexagons (game, health) under `/tests/integration/{hexagon}/`.
+
+#### Feature-Component Tests (13 tests, ~0.3s)
 
 | File | Tests | Focus | Key Insight |
 |------|-------|-------|-------------|
-| `test_actions_deterministic.py` | 1 | Pick-drop-give workflow | End-to-end action sequence |
-| `test_actions_unified.py` | 1 | Obstacle cleaning | Feature validation |
-| `test_actions_with_helpers.py` | 2 | Test infrastructure | Helper fixture validation |
-| `test_autoplay_end_to_end.py` | 7 | AI solver scenarios | Comprehensive AI testing (obstacles, paths, edge cases) |
+| `test_autoplay_end_to_end.py` | 13 | AI solver scenarios | Comprehensive E2E testing for both AIGreedyPlayer (8 tests) and AIOptimalPlayer (5 tests), covering obstacles, multiple flowers, blocked scenarios, and complex patterns |
+
+**Note**: Feature-component tests focus on comprehensive AI strategy validation with real board scenarios.
 
 ---
 

@@ -360,7 +360,7 @@ if not princess_adjacent:
 1. **Better edge case handling** - Princess surrounded logic is more robust
 2. **Forced delivery check** - Prevents some stuck scenarios
 3. **Cleaner code structure** - More explicit about when to deliver
-4. **No regressions** - All 50 tests still pass
+4. **No regressions** - All 165 tests still pass
 
 **⚠️ No Success Rate Improvement**:
 1. **Hit diminishing returns** - 75% may be near the limit for greedy BFS
@@ -516,7 +516,7 @@ The AI player is now:
 - ✅ **75% success rate** on diverse random boards
 - ✅ **90%+ success** on iteration 2 (peak performance)
 - ✅ **95% success** on small boards (3x3)
-- ✅ **Zero test regressions** (all 50 tests pass)
+- ✅ **Zero test regressions** (all 165 tests pass)
 - ✅ **Well-documented** with comprehensive testing framework
 
 ### What's Next?

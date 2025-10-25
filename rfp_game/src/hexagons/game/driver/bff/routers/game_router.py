@@ -4,9 +4,11 @@ from shared.logging import get_logger
 
 from ..schemas.game_schema import (
     CreateGameRequest,
+    CreateGameResponse,
     ActionRequest,
     ActionType,
-    GameStateResponse,
+    GameSchema,
+    GetGameResponse,
     ActionResponse,
     GameHistoryResponse,
     GamesResponse,
@@ -50,11 +52,11 @@ def flowers_to_dict(flowers: set, total: int = None) -> dict:
     }
 
 
-@router.post("/", response_model=GameStateResponse, status_code=201)
+@router.post("/", response_model=CreateGameResponse, status_code=201)
 def create_game(
     request: CreateGameRequest,
     repository: GameRepository = Depends(get_game_repository),
-) -> GameStateResponse:
+) -> CreateGameResponse:
     """Create a new game with specified board size."""
 
     logger.info("get_games: rows=%s cols=%s", request.rows, request.cols)
@@ -73,17 +75,17 @@ def create_game(
             obstacles=result.obstacles,
         )
 
-        return GameStateResponse(
+        return CreateGameResponse(
             id=result.game_id,
-            message=result.message,
             status=result.status,
+            message=result.message,
+            created_at=result.created_at.isoformat() + "Z",
+            updated_at=result.updated_at.isoformat() + "Z",
             board=board_dict,
             robot=result.robot.to_dict(),
             princess=result.princess.to_dict(),
             obstacles=obstacles_to_dict(result.obstacles, result.robot),
             flowers=flowers_to_dict(result.flowers),
-            created_at=result.created_at.isoformat() + "Z",
-            updated_at=result.updated_at.isoformat() + "Z",
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -103,27 +105,18 @@ def get_games(
         use_case = GetGamesUseCase(repository)
         result: GetGamesResult = use_case.execute(GetGamesQuery(limit=limit, status=status))
 
-        # Convert dataclass GameSummary to Pydantic GameSummary
-        from ..schemas.game_schema import GameSummary as PydanticGameSummary
-
-        pydantic_games = []
-        for game_summary in result.games:
+        games = []
+        for game in result.games:
             # Get the full game from the repository to access all fields
-            game = repository.get(game_summary.game_id)
+            game = repository.get(game.game_id)
             if game:
-                board_dict = game_summary.board.to_dict(
-                    robot_pos=game.robot.position,
-                    princess_pos=game.princess.position,
-                    flowers=game.flowers,
-                    obstacles=game.obstacles,
-                )
-                pydantic_games.append(
-                    PydanticGameSummary(
-                        id=game_summary.game_id,
-                        status=game_summary.status,
-                        created_at=game_summary.created_at.isoformat() + "Z",
-                        updated_at=game_summary.updated_at.isoformat() + "Z",
-                        board=board_dict,
+                games.append(
+                    GameSchema(
+                        id=game.game_id,
+                        status=game.get_status().value,
+                        created_at=game.created_at.isoformat() + "Z",
+                        updated_at=game.updated_at.isoformat() + "Z",
+                        board=game.to_dict(),
                         robot=game.robot.to_dict(),
                         princess=game.princess.to_dict(),
                         obstacles=obstacles_to_dict(game.obstacles, game.robot),
@@ -131,16 +124,16 @@ def get_games(
                     )
                 )
 
-        return GamesResponse(gamess=pydantic_games, total=len(pydantic_games))
+        return GamesResponse(games=games, total=len(games))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{game_id}", response_model=GameStateResponse)
+@router.get("/{game_id}", response_model=GetGameResponse)
 def get_game_state(
     game_id: str,
     repository: GameRepository = Depends(get_game_repository),
-) -> GameStateResponse:
+) -> GetGameResponse:
     """Get the current state of a game."""
 
     logger.info("get_game_state: game_id=%s", game_id)
@@ -162,17 +155,17 @@ def get_game_state(
         # Get the full game object to access created_at and updated_at
         game = repository.get(game_id)
 
-        return GameStateResponse(
+        return GetGameResponse(
             id=game_id,
             status=result.status,
             message="Game state retrieved successfully",
+            created_at=game.created_at.isoformat() + "Z",
+            updated_at=game.updated_at.isoformat() + "Z",
             board=board_dict,
             robot=result.robot.to_dict(),
             princess=result.princess.to_dict(),
             obstacles=obstacles_to_dict(result.obstacles, result.robot),
             flowers=flowers_to_dict(result.flowers),
-            created_at=game.created_at.isoformat() + "Z",
-            updated_at=game.updated_at.isoformat() + "Z",
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

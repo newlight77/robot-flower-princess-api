@@ -8,7 +8,7 @@ from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
-from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
+from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 
 
 class RandomBoardGenerator:
@@ -86,7 +86,7 @@ class AIPlayerTester:
 
         try:
             # Try to solve
-            actions = GameSolverPlayer.solve(board)
+            actions = AIGreedyPlayer.solve(board)
 
             # Check if solved
             success = (

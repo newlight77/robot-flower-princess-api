@@ -28,7 +28,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
 
     # stub solver to rotate north then move
     with patch(
-        "hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
         return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
     ):
         use_case = AutoplayUseCase(repo)
@@ -54,7 +54,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo.save_history("a2", GameHistory(game_id="a2"))
 
     with patch(
-        "hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
         side_effect=Exception("solver fail"),
     ):
         use_case = AutoplayUseCase(repo)

@@ -1,6 +1,6 @@
 """AI Player entities."""
 
-from .game_solver_player import GameSolverPlayer
-from .game_planning_player import GamePlanningPlayer
+from .ai_greedy_player import AIGreedyPlayer
+from .ai_optimal_player import AIOptimalPlayer
 
-__all__ = ["GameSolverPlayer", "GamePlanningPlayer"]
+__all__ = ["AIGreedyPlayer", "AIOptimalPlayer"]

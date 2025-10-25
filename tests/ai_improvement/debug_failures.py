@@ -1,6 +1,6 @@
 """Debug specific failures with detailed logging."""
 from test_random_boards import RandomBoardGenerator, AIPlayerTester
-from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
+from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 from hexagons.game.domain.core.entities.position import Position
 import copy
 
@@ -25,21 +25,21 @@ def debug_failing_board(seed, config):
     print(f"  Obstacles: {initial_obstacles}")
 
     # Check initial paths
-    princess_adj = GameSolverPlayer._get_adjacent_positions(initial_princess_pos, board)
+    princess_adj = AIGreedyPlayer._get_adjacent_positions(initial_princess_pos, board)
     print(f"  Princess accessible: {len(princess_adj)} adjacent empty cells")
 
     if princess_adj:
         closest_princess = min(princess_adj, key=lambda p: initial_robot_pos.manhattan_distance(p))
-        path_to_princess = GameSolverPlayer._find_path(board, initial_robot_pos, closest_princess)
+        path_to_princess = AIGreedyPlayer._find_path(board, initial_robot_pos, closest_princess)
         print(f"  Initial path to princess: {'YES (%d steps)' % len(path_to_princess) if path_to_princess else 'NO'}")
 
     # Check flower accessibility
     accessible = 0
     for flower in board.flowers:
-        adj = GameSolverPlayer._get_adjacent_positions(flower, board)
+        adj = AIGreedyPlayer._get_adjacent_positions(flower, board)
         if adj:
             target = min(adj, key=lambda p: initial_robot_pos.manhattan_distance(p))
-            if GameSolverPlayer._find_path(board, initial_robot_pos, target):
+            if AIGreedyPlayer._find_path(board, initial_robot_pos, target):
                 accessible += 1
     print(f"  Accessible flowers: {accessible}/{initial_flowers}")
 
@@ -69,7 +69,7 @@ def debug_failing_board(seed, config):
                 # Parse position string "(row,col)"
                 row, col = map(int, final_pos_str.strip('()').split(','))
                 final_pos = Position(row, col)
-                path_from_final = GameSolverPlayer._find_path(board, final_pos, closest_princess)
+                path_from_final = AIGreedyPlayer._find_path(board, final_pos, closest_princess)
                 print(f"  Path from final position to princess: {'YES' if path_from_final else 'NO'}")
 
         elif result.get('failure_reason') == 'robot_blocked':

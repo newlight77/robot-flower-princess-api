@@ -573,12 +573,12 @@ The optimal strategy makes aggressive choices that lead to getting stuck more of
 
 **✅ BOTH STRATEGIES ARE NOW AVAILABLE**:
 
-1. **GameSolverPlayer** (Iteration 3) - **"greedy" strategy**
+1. **AIGreedyPlayer** (Iteration 3) - **"greedy" strategy**
    - Safe & Reliable: 75% success rate
    - Default strategy
    - Best for most use cases
 
-2. **GamePlanningPlayer** (Iteration 4) - **"optimal" strategy**
+2. **AIOptimalPlayer** (Iteration 4) - **"optimal" strategy**
    - Fast & Efficient: 62% success rate, 25% fewer actions
    - Uses A* pathfinding and multi-step planning
    - Best when efficiency matters more than reliability

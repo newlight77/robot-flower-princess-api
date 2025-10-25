@@ -1,6 +1,6 @@
 """Analyze specific failing boards to understand patterns."""
 from test_random_boards import RandomBoardGenerator, AIPlayerTester
-from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
+from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 
 def save_failing_boards():
     """Generate and save boards that fail for analysis."""
@@ -40,14 +40,14 @@ def save_failing_boards():
         princess_pos = board.princess_position
 
         # Check adjacent positions to princess
-        adjacent_to_princess = GameSolverPlayer._get_adjacent_positions(princess_pos, board)
+        adjacent_to_princess = AIGreedyPlayer._get_adjacent_positions(princess_pos, board)
         print(f"  Princess at {princess_pos}, {len(adjacent_to_princess)} adjacent empty cells")
 
         # Check if robot can reach any adjacent position
         can_reach_princess = False
         if adjacent_to_princess:
             target = min(adjacent_to_princess, key=lambda p: robot_pos.manhattan_distance(p))
-            path = GameSolverPlayer._find_path(board, robot_pos, target)
+            path = AIGreedyPlayer._find_path(board, robot_pos, target)
             can_reach_princess = len(path) > 0
             print(f"  Path from robot to princess: {'YES' if can_reach_princess else 'NO'}")
         else:
@@ -56,10 +56,10 @@ def save_failing_boards():
         # Check flower accessibility
         accessible_flowers = 0
         for flower in board.flowers:
-            adjacent_to_flower = GameSolverPlayer._get_adjacent_positions(flower, board)
+            adjacent_to_flower = AIGreedyPlayer._get_adjacent_positions(flower, board)
             if adjacent_to_flower:
                 target = min(adjacent_to_flower, key=lambda p: robot_pos.manhattan_distance(p))
-                path = GameSolverPlayer._find_path(board, robot_pos, target)
+                path = AIGreedyPlayer._find_path(board, robot_pos, target)
                 if path:
                     accessible_flowers += 1
 

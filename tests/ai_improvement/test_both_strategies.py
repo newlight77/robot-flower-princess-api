@@ -4,8 +4,8 @@ from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
-from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
-from hexagons.aiplayer.domain.core.entities.game_planning_player import GamePlanningPlayer
+from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
+from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
 import copy
 
 def create_test_board():
@@ -47,12 +47,12 @@ if __name__ == "__main__":
 
     # Test Greedy (safe) strategy
     greedy_success, greedy_actions = test_strategy(
-        board, "Greedy Strategy (Safe & Reliable)", GameSolverPlayer
+        board, "Greedy Strategy (Safe & Reliable)", AIGreedyPlayer
     )
 
     # Test Optimal (fast) strategy
     optimal_success, optimal_actions = test_strategy(
-        board, "Optimal Strategy (Fast & Efficient)", GamePlanningPlayer
+        board, "Optimal Strategy (Fast & Efficient)", AIOptimalPlayer
     )
 
     print(f"\n{'='*60}")

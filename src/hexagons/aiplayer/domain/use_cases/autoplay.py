@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Set, Literal
 from copy import deepcopy
 from hexagons.game.domain.ports.game_repository import GameRepository
-from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
-from hexagons.aiplayer.domain.core.entities.game_planning_player import GamePlanningPlayer
+from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
+from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
 from hexagons.game.domain.core.value_objects.action_type import ActionType
 from hexagons.game.domain.core.entities.game_history import Action, GameHistory
 from hexagons.game.domain.core.entities.board import Board
@@ -64,11 +64,11 @@ class AutoplayUseCase:
             # Select AI player based on strategy
             if command.strategy == "optimal":
                 # Fast & efficient (25% fewer actions, but 13% lower success rate)
-                actions = GamePlanningPlayer.solve(board_copy)
+                actions = AIOptimalPlayer.solve(board_copy)
                 strategy_name = "Optimal AI (A* + Planning)"
             else:  # "greedy" (default)
                 # Safe & reliable (75% success rate)
-                actions = GameSolverPlayer.solve(board_copy)
+                actions = AIGreedyPlayer.solve(board_copy)
                 strategy_name = "Greedy AI (Safe)"
 
             self.logger.info("Using %s, generated %d actions", strategy_name, len(actions))

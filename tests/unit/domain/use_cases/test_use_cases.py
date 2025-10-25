@@ -1,22 +1,22 @@
 import pytest
 
-from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
-from robot_flower_princess.domain.core.entities.position import Position
-from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.game import Game
-from robot_flower_princess.domain.core.entities.game_history import GameHistory
-from robot_flower_princess.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.game import Game
+from hexagons.game.domain.core.entities.game_history import GameHistory
+from hexagons.game.domain.core.value_objects.direction import Direction
 
-from robot_flower_princess.domain.use_cases.rotate_robot import (
+from hexagons.game.domain.use_cases.rotate_robot import (
     RotateRobotUseCase,
     RotateRobotCommand,
 )
-from robot_flower_princess.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
-from robot_flower_princess.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
-from robot_flower_princess.domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
-from robot_flower_princess.domain.use_cases.give_flowers import (
+from hexagons.game.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
+from hexagons.game.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
+from hexagons.game.domain.use_cases.drop_flower import DropFlowerUseCase, DropFlowerCommand
+from hexagons.game.domain.use_cases.give_flowers import (
     GiveFlowersUseCase,
     GiveFlowersCommand,
 )

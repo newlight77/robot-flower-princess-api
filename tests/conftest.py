@@ -3,13 +3,13 @@ from typing import Callable
 from fastapi.testclient import TestClient
 
 from main import app
-from robot_flower_princess.domain.core.entities.game import Game
-from robot_flower_princess.domain.core.entities.position import Position
-from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.game_history import GameHistory
-from robot_flower_princess.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.core.entities.game import Game
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.game_history import GameHistory
+from hexagons.game.domain.core.value_objects.direction import Direction
 from configurator.dependencies import get_game_repository
-from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 
@@ -70,10 +70,10 @@ def save_board(repo):
 
 @pytest.fixture
 def make_empty_board():
-    from robot_flower_princess.domain.core.entities.game import Game
-    from robot_flower_princess.domain.core.entities.position import Position
-    from robot_flower_princess.domain.core.entities.robot import Robot
-    from robot_flower_princess.domain.core.value_objects.direction import Direction
+    from hexagons.game.domain.core.entities.game import Game
+    from hexagons.game.domain.core.entities.position import Position
+    from hexagons.game.domain.core.entities.robot import Robot
+    from hexagons.game.domain.core.value_objects.direction import Direction
 
     def _make(rows=3, cols=3):
         robot_pos = Position(1, 1)

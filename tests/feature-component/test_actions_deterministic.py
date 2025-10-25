@@ -1,6 +1,6 @@
 from configurator.dependencies import get_game_repository
-from robot_flower_princess.domain.core.entities.position import Position
-from robot_flower_princess.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.value_objects.direction import Direction
 
 
 def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):

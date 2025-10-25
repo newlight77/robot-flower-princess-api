@@ -1,14 +1,14 @@
 from unittest.mock import patch
 
-from robot_flower_princess.driven.persistence.in_memory_game_repository import (
+from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
-from robot_flower_princess.domain.core.entities.position import Position
-from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.game import Game
-from robot_flower_princess.domain.core.entities.game_history import GameHistory
-from robot_flower_princess.domain.core.value_objects.direction import Direction
-from robot_flower_princess.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.game import Game
+from hexagons.game.domain.core.entities.game_history import GameHistory
+from hexagons.game.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
 
 def make_small_board():
@@ -28,7 +28,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
 
     # stub solver to rotate north then move
     with patch(
-        "robot_flower_princess.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.game.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
         return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
     ):
         use_case = AutoplayUseCase(repo)
@@ -54,7 +54,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo.save_history("a2", GameHistory())
 
     with patch(
-        "robot_flower_princess.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.game.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
         side_effect=Exception("solver fail"),
     ):
         use_case = AutoplayUseCase(repo)

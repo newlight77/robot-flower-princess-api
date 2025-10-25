@@ -1,4 +1,4 @@
-from robot_flower_princess.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.core.value_objects.direction import Direction
 
 
 def test_rotate_changes_orientation(client, create_game):

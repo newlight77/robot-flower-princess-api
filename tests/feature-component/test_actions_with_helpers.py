@@ -2,7 +2,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     game_id = "helper-pick"
     board = make_empty_board()
     # place a flower north of robot
-    from robot_flower_princess.domain.core.entities.position import Position
+    from hexagons.game.domain.core.entities.position import Position
 
     flower_pos = Position(0, 1)
     place_flower(board, flower_pos)
@@ -38,7 +38,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     b = repo.get(game_id)
     assert b is not None
     # put robot adjacent to princess
-    from robot_flower_princess.domain.core.entities.position import Position
+    from hexagons.game.domain.core.entities.position import Position
 
     b.robot.position = Position(2, 1)
     b.robot.flowers_held = 1
@@ -55,8 +55,8 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
 def test_clean_with_helpers(client, make_empty_board, save_board, place_obstacle, place_robot):
     game_id = "helper-clean"
     board = make_empty_board()
-    from robot_flower_princess.domain.core.entities.position import Position
-    from robot_flower_princess.domain.core.value_objects.direction import Direction
+    from hexagons.game.domain.core.entities.position import Position
+    from hexagons.game.domain.core.value_objects.direction import Direction
 
     # place obstacle north of robot
     obs_pos = Position(0, 1)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from robot_flower_princess.driver.bff.routers import game_router
+from hexagons.game.driver.bff.routers import game_router
 
 app = FastAPI(
     title="Robot-Flower-Princess Game API",

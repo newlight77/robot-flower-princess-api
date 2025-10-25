@@ -1,7 +1,7 @@
 import pytest
-from robot_flower_princess.domain.core.entities.robot import Robot
-from robot_flower_princess.domain.core.entities.position import Position
-from robot_flower_princess.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.value_objects.direction import Direction
 
 
 def test_robot_creation():

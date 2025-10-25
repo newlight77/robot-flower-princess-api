@@ -77,7 +77,7 @@ coverage-feature-component:
 	@mv .coverage coverage/feature-component/coverage-feature-component.cov
 
 coverage-combine:
-	@echo "combine all .coverage.* files into one and create XML + HTML"
+	@echo "combine all coverage.* files into one and create XML + HTML"
 	${RUN} coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
 	${RUN} coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov || true
 	${RUN} coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml || true

@@ -1,8 +1,19 @@
 # Testing Guide
 
-> **Comprehensive documentation of all tests in the Robot-Flower-Princess system**
+> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 50 tests
 >
-> This guide provides a complete analysis of our testing strategy, covering intention, purpose, methodology, benefits, and E2E overlap considerations for each test level.
+> This document is your go-to resource when you need to:
+> - 📊 Understand what tests exist and why
+> - 🔍 Analyze test coverage and distribution
+> - 🎯 Evaluate E2E testing strategy and ROI
+> - 📈 Review test metrics and quality indicators
+> - 🧭 Navigate tests by role (developer, QA, architect, PM)
+>
+> 🔧 **Need to write or run tests?** See [TESTING_STRATEGY.md](TESTING_STRATEGY.md) for:
+> - Practical code examples and test templates
+> - Commands to run tests locally and in CI/CD
+> - Troubleshooting guide for failing tests
+> - Best practices and testing patterns
 
 ---
 

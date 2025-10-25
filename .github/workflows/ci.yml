@@ -218,6 +218,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Coverage by Test Level" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
           echo "| Test Level | Tests | Execution Time |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|-------|----------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Unit | 32 (64%) | < 0.1s |" >> $GITHUB_STEP_SUMMARY

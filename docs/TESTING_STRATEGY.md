@@ -1,5 +1,22 @@
 # Testing Strategy
 
+> **🎯 Purpose**: Practical guide for **writing, running, and debugging tests**
+>
+> This document is your go-to resource when you need to:
+> - ✅ Write a new test (with code examples)
+> - ✅ Run tests locally or in CI/CD
+> - ✅ Debug failing tests
+> - ✅ Configure coverage
+> - ✅ Follow best practices
+>
+> 📖 **Looking for test analysis and inventory?** See [TESTING_GUIDE.md](TESTING_GUIDE.md) for:
+> - Comprehensive analysis of all 50 tests (intention, purpose, benefits)
+> - E2E overlap evaluation and recommendations
+> - Test metrics and distribution by hexagon
+> - When to write each type of test
+
+---
+
 ## Table of Contents
 - [Overview](#overview)
 - [Test Suite Structure](#test-suite-structure)
@@ -17,16 +34,14 @@
 
 ## Overview
 
-This project follows a **three-tier testing strategy** aligned with Domain-Driven Design (DDD) principles:
+**Quick Stats**: 50 tests | ~0.3s execution | 90%+ coverage
 
-1. **Unit Tests** - Test individual components in isolation
-2. **Integration Tests** - Test API endpoints and their interactions
-3. **Feature-Component Tests** - Test complete user workflows end-to-end
+We use a **three-tier testing approach**:
+- 32 unit tests (64%) - Domain logic
+- 11 integration tests (22%) - API endpoints
+- 7 feature-component tests (14%) - E2E workflows
 
-The testing pyramid emphasizes:
-- **Many unit tests** (fast, isolated, precise)
-- **Moderate integration tests** (API contract validation)
-- **Fewer feature-component tests** (complex scenarios, end-to-end flows)
+> 💡 For detailed test analysis and methodology, see [TESTING_GUIDE.md](TESTING_GUIDE.md)
 
 ---
 
@@ -58,16 +73,14 @@ tests/
 
 ## Test Types
 
+> 💡 **For detailed test analysis** (intention, purpose, benefits), see [Unit Tests](TESTING_GUIDE.md#unit-tests) in TESTING_GUIDE.md
+
 ### Unit Tests
 
-**Purpose**: Test individual classes, methods, and functions in isolation.
-
-**Characteristics**:
-- ✅ Fast execution (< 1ms per test)
-- ✅ No external dependencies (database, network, file system)
-- ✅ Mock external collaborators
-- ✅ Test one thing at a time
-- ✅ High code coverage
+**Quick Tips**:
+- Fast (< 1ms) | Isolated | No external dependencies
+- Use AAA pattern: Arrange → Act → Assert
+- Test behavior, not implementation
 
 **Example: Testing a Domain Entity**
 
@@ -133,25 +146,14 @@ def test_robot_cannot_pick_when_full():
     assert robot.flowers_held == 2
 ```
 
-**Best Practices for Unit Tests**:
-- ✅ Use descriptive test names that explain the scenario
-- ✅ Follow AAA pattern: **A**rrange, **A**ct, **A**ssert
-- ✅ Test both happy paths and edge cases
-- ✅ Use parametrized tests for multiple similar scenarios
-- ✅ Keep tests independent (no shared state)
-
 ---
 
 ### Integration Tests
 
-**Purpose**: Test API endpoints, request/response handling, and interactions between layers.
-
-**Characteristics**:
-- ✅ Test HTTP contracts (status codes, response structure)
-- ✅ Validate Pydantic schemas
-- ✅ Use FastAPI TestClient
-- ✅ Test error handling and validation
-- ✅ Verify business rules at API level
+**Quick Tips**:
+- Use `TestClient` from FastAPI | Test HTTP contracts
+- Verify status codes, response schemas, error handling
+- Use fixtures for seeded test data
 
 **Example: Testing an API Endpoint**
 
@@ -247,26 +249,14 @@ def test_invalid_direction_payload(client, seeded_board):
     assert error_detail["type"] == "literal_error"
 ```
 
-**Best Practices for Integration Tests**:
-- ✅ Use fixtures to set up test data
-- ✅ Test one endpoint per test file for clarity
-- ✅ Validate both success and error responses
-- ✅ Check HTTP status codes and response structure
-- ✅ Test Pydantic validation errors
-- ✅ Use descriptive test names indicating the scenario
-
 ---
 
 ### Feature-Component Tests
 
-**Purpose**: Test complete user workflows and complex scenarios end-to-end.
-
-**Characteristics**:
-- ✅ Test business-critical features
-- ✅ Simulate real user interactions
-- ✅ Validate complex state transitions
-- ✅ Test AI/solver logic with realistic scenarios
-- ✅ Cover edge cases and boundary conditions
+**Quick Tips**:
+- Test complete workflows | Validate state transitions
+- Focus on business-critical features (e.g., AI autoplay)
+- Test realistic scenarios with obstacles, multiple flowers
 
 **Example: Testing Autoplay Feature**
 
@@ -423,17 +413,11 @@ def test_autoplay_multiple_flowers_with_obstacles():
     assert len(board.obstacles) <= 2  # At most, some obstacles cleaned
 ```
 
-**Best Practices for Feature-Component Tests**:
-- ✅ Test realistic, complex scenarios
-- ✅ Document the scenario and expected behavior in docstrings
-- ✅ Test multiple interactions in a single flow
-- ✅ Verify final state, not just intermediate steps
-- ✅ Cover edge cases that might fail in production
-- ✅ Use descriptive names that explain the scenario
-
 ---
 
 ## Best Practices
+
+> 💡 **For test analysis and when to write each type**, see [Test Decision Guide](TESTING_GUIDE.md#when-to-write-each-type-of-test) in TESTING_GUIDE.md
 
 ### General Testing Principles
 
@@ -1039,18 +1023,24 @@ def test_complex_autoplay_scenario():
 
 ## Summary
 
-A strong testing strategy ensures:
-- ✅ **Confidence** in code changes
-- ✅ **Documentation** through test examples
-- ✅ **Regression prevention**
-- ✅ **Faster debugging**
-- ✅ **Better design** through testability
+This document provides practical guidance for writing and running tests. For comprehensive test analysis, metrics, and E2E evaluation, see [TESTING_GUIDE.md](TESTING_GUIDE.md).
 
-Remember:
-- Write tests **before** or **during** development
-- Keep tests **simple** and **focused**
-- **Refactor** tests like production code
-- **Maintain** tests as requirements evolve
-- **Review** test coverage regularly
+**Key Takeaways**:
+- ✅ 50 tests running in ~0.3s (32 unit, 11 integration, 7 feature-component)
+- ✅ 80%+ coverage requirement enforced in CI/CD
+- ✅ Use AAA pattern, descriptive names, and fixtures
+- ✅ Keep tests isolated, fast, and focused
+
+**Quick Commands**:
+```bash
+make test-all          # Run all tests
+make coverage          # Run with coverage
+make coverage-combine  # Combine coverage reports
+```
+
+📖 **Related Documentation**:
+- [TESTING_GUIDE.md](TESTING_GUIDE.md) - Complete test inventory and analysis
+- [CI_CD.md](CI_CD.md) - CI/CD workflow and pipeline
+- [COVERAGE.md](COVERAGE.md) - Coverage strategy and tools
 
 Happy testing! 🎉

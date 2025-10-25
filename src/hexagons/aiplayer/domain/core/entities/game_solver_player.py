@@ -398,30 +398,60 @@ class GameSolverPlayer:
 
     @staticmethod
     def _find_path(board: Game, start: Position, goal: Position) -> List[Position]:
-        """Find path from start to goal using BFS."""
+        """
+        Find optimal path from start to goal using A* algorithm.
+        
+        A* is more efficient than BFS and finds optimal paths by using:
+        - g(n): actual cost from start to node n
+        - h(n): heuristic estimated cost from n to goal (Manhattan distance)
+        - f(n) = g(n) + h(n): total estimated cost
+        """
         if start == goal:
             return []
 
-        queue = deque([(start, [])])
-        visited = {start}
+        # Priority queue: (f_score, counter, position, g_score, path)
+        # Using counter for tie-breaking to make heap stable
+        import heapq
+        
+        counter = 0
+        h_score = start.manhattan_distance(goal)
+        heap = [(h_score, counter, start, 0, [])]  # (f_score, counter, position, g_score, path)
+        visited = set()  # Positions we've already processed (expanded)
+        g_scores = {start: 0}  # Position -> best known g_score
 
-        while queue:
-            current, path = queue.popleft()
+        while heap:
+            f_score, _, current, g_score, path = heapq.heappop(heap)
 
+            # If we've already processed this position, skip
+            if current in visited:
+                continue
+            
+            visited.add(current)
+
+            # Check all neighbors
             for direction in Direction:
                 row_delta, col_delta = direction.get_delta()
                 next_pos = current.move(row_delta, col_delta)
 
+                # Found goal!
                 if next_pos == goal:
                     return path + [next_pos]
 
+                # Check if next position is valid and not yet processed
                 if (
                     board.is_valid_position(next_pos)
                     and board.is_empty(next_pos)
                     and next_pos not in visited
                 ):
-                    visited.add(next_pos)
-                    queue.append((next_pos, path + [next_pos]))
+                    new_g_score = g_score + 1
+                    
+                    # Only add if we haven't seen this position or found a better path
+                    if next_pos not in g_scores or new_g_score < g_scores[next_pos]:
+                        g_scores[next_pos] = new_g_score
+                        h = next_pos.manhattan_distance(goal)
+                        f = new_g_score + h
+                        counter += 1
+                        heapq.heappush(heap, (f, counter, next_pos, new_g_score, path + [next_pos]))
 
         return []
 

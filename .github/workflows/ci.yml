@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  unit:
+  test-unit:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +46,7 @@ jobs:
             coverage/unit/coverage-unit.xml
             coverage/unit/coverage-unit.html
 
-  integration:
+  test-integration:
     name: Integration tests
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +86,7 @@ jobs:
             coverage/integration/coverage-integration.xml
             coverage/integration/coverage-integration.html
 
-  feature-component:
+  test-feature-component:
     name: Feature-Component tests
     runs-on: ubuntu-latest
     steps:
@@ -128,7 +128,7 @@ jobs:
   code-coverage:
     name: Coverage quality check
     runs-on: ubuntu-latest
-    needs: [unit, integration, feature-component]
+    needs: [test-unit, test-integration, test-feature-component]
     steps:
       - uses: actions/checkout@v5
 
@@ -204,9 +204,9 @@ jobs:
             coverage/coverage-combined.html
 
   lint:
+    name: Linting
     runs-on: ubuntu-latest
-    needs:
-      - code-coverage
+    needs: [test-unit, test-integration, test-feature-component]
 
     steps:
     - uses: actions/checkout@v5
@@ -234,8 +234,9 @@ jobs:
         #poetry run mypy src/
 
   docker:
+    name: Build Docker image
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [lint, code-coverage]
     steps:
     - uses: actions/checkout@v5
 

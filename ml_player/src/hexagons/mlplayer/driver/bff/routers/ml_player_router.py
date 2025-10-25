@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/ml-player", tags=["ML Player"])
 @router.post("/predict/{game_id}", response_model=PredictActionResponse)
 async def predict_action(
     game_id: str,
-    request: PredictActionRequest = PredictActionRequest(),
+    request: PredictActionRequest,
     game_client: GameClientPort = Depends(get_game_client),
 ) -> PredictActionResponse:
     """
@@ -43,7 +43,16 @@ async def predict_action(
 
     try:
         use_case = PredictActionUseCase(game_client)
-        command = PredictActionCommand(game_id=game_id, strategy=request.strategy)
+        command = PredictActionCommand(
+            strategy=request.strategy,
+            game_id=game_id,
+            status=request.status,
+            board=request.board,
+            robot=request.robot,
+            princess=request.princess,
+            obstacles=request.obstacles,
+            flowers=request.flowers,
+        )
         result = await use_case.execute(command)
 
         logger.info(

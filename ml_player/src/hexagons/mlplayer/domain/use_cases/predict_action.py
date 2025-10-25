@@ -12,14 +12,20 @@ from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 class PredictActionCommand:
     """Command for predicting action."""
 
+    strategy: str  # "default", "aggressive", "conservative"
     game_id: str
-    strategy: str = "default"  # "default", "aggressive", "conservative"
+    status: str
+    board: dict
+    robot: dict
+    princess: dict
+    obstacles: dict
+    flowers: dict
 
 
 @dataclass
 class PredictActionResult:
     """Result of action prediction."""
-
+    game_id: str
     action: str
     direction: Optional[str]
     confidence: float

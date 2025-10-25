@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from typing import Set, Literal
+from typing import Set, Literal, Optional
 from copy import deepcopy
 from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
+from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
+from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
 from hexagons.game.domain.core.value_objects.action_type import ActionType
 from hexagons.game.domain.core.entities.game_history import Action, GameHistory
 from hexagons.game.domain.core.entities.board import Board
@@ -14,7 +16,7 @@ from hexagons.game.domain.services.game_service import GameService
 from shared.logging import get_logger
 
 
-AIStrategy = Literal["greedy", "optimal"]
+AIStrategy = Literal["greedy", "optimal", "ml"]
 
 
 @dataclass
@@ -37,12 +39,13 @@ class AutoplayResult:
 
 
 class AutoplayUseCase:
-    def __init__(self, repository: GameRepository):
+    def __init__(self, repository: GameRepository, ml_client: Optional[MLPlayerClientPort] = None):
         self.logger = get_logger(self)
-        self.logger.debug("Initializing AutoplayUseCase repository=%r", repository)
+        self.logger.debug("Initializing AutoplayUseCase repository=%r ml_client=%r", repository, ml_client)
         self.repository = repository
+        self.ml_client = ml_client
 
-    def execute(self, command: AutoplayCommand) -> AutoplayResult:
+    async def execute(self, command: AutoplayCommand) -> AutoplayResult:
         """Let AI solve the game automatically."""
         self.logger.info(
             "execute: AutoplayCommand game_id=%s strategy=%s", command.game_id, command.strategy
@@ -64,6 +67,16 @@ class AutoplayUseCase:
                 # Fast & efficient (25% fewer actions, but 13% lower success rate)
                 actions = AIOptimalPlayer.solve(board_copy)
                 strategy_name = "Optimal AI (A* + Planning)"
+            elif command.strategy == "ml":
+                # ML Player (hybrid heuristic/ML approach)
+                if self.ml_client is None:
+                    raise ValueError("ML Player client not configured. Cannot use 'ml' strategy.")
+
+                # ML Player works iteratively (one action at a time)
+                # We'll execute actions as they come
+                ml_player = MLProxyPlayer(self.ml_client, strategy="default")
+                actions = await ml_player.solve_async(board_copy, command.game_id)
+                strategy_name = "ML Player (Hybrid)"
             else:  # "greedy" (default)
                 # Safe & reliable (75% success rate)
                 actions = AIGreedyPlayer.solve(board_copy)

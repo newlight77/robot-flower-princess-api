@@ -1,5 +1,6 @@
 """Debug specific failures with detailed logging."""
-from test_random_boards import RandomBoardGenerator, AIPlayerTester
+from tests.unit.aiplayer.domain.core.entities.random_board_tester import RandomBoardGenerator
+from tests.unit.aiplayer.domain.core.entities.ai_player_tester import AIPlayerTester
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 from hexagons.game.domain.core.entities.position import Position
 import copy
@@ -10,7 +11,7 @@ def debug_failing_board(seed, config):
     print(f"DEBUG: {config['rows']}x{config['cols']}, seed={seed}")
     print(f"{'='*70}")
 
-    board = RandomBoardGenerator.generate_board(**config, seed=seed)
+    board = RandomBoardGenerator.generate_board(**config, seed=seed, player=AIGreedyPlayer())
 
     # Save initial state
     initial_robot_pos = board.robot.position

@@ -1,10 +1,12 @@
 """Analyze specific failing boards to understand patterns."""
-from test_random_boards import RandomBoardGenerator, AIPlayerTester
+from tests.unit.aiplayer.domain.core.entities.random_board_tester import RandomBoardGenerator
+from tests.unit.aiplayer.domain.core.entities.ai_player_tester import AIPlayerTester
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 
 def save_failing_boards():
     """Generate and save boards that fail for analysis."""
-    tester = AIPlayerTester()
+    player = AIGreedyPlayer()
+    tester = AIPlayerTester(player=player)
     failing_boards = []
 
     # Test the specific seeds/configs that failed in the full run
@@ -30,7 +32,7 @@ def save_failing_boards():
     print("Analyzing failing boards...\n")
 
     for i, config in enumerate(test_configs, 1):
-        board = RandomBoardGenerator.generate_board(**config)
+        board = RandomBoardGenerator.generate_board(**config, player=player)
 
         print(f"Test {i}: {config['rows']}x{config['cols']}, "
               f"{config['num_flowers']} flowers, {config['num_obstacles']} obstacles (seed={config['seed']})")

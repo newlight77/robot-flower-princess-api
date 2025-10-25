@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 from ..ports.game_repository import GameRepository
 from ..core.entities.board import Board
-from ...logging import get_logger
+from shared.logging import get_logger
 
 
 @dataclass

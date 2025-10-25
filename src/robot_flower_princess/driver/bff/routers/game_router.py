@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import Any, cast
-from ....logging import get_logger
+from shared.logging import get_logger
 
 from ..schemas.game_schema import (
     CreateGameRequest,

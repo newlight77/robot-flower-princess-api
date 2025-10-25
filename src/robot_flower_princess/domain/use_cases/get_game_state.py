@@ -5,7 +5,7 @@ from ..core.entities.board import Board
 from ..core.entities.robot import Robot
 from ..core.entities.princess import Princess
 from ..core.entities.position import Position
-from ...logging import get_logger
+from shared.logging import get_logger
 
 
 @dataclass

@@ -2,7 +2,7 @@ import pytest
 from typing import Callable
 from fastapi.testclient import TestClient
 
-from robot_flower_princess.main import app
+from main import app
 from robot_flower_princess.domain.core.entities.game import Game
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot

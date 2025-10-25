@@ -9,7 +9,7 @@ from ..core.entities.robot import Robot
 from ..core.entities.princess import Princess
 from ..core.entities.position import Position
 from ..core.entities.game_history import GameHistory
-from ...logging import get_logger
+from shared.logging import get_logger
 
 
 @dataclass

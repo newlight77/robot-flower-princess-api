@@ -2,7 +2,7 @@ from typing import Optional, Dict, List
 from ...domain.ports.game_repository import GameRepository
 from ...domain.core.entities.game import Game
 from ...domain.core.entities.game_history import GameHistory
-from ...logging import get_logger
+from shared.logging import get_logger
 
 logger = get_logger("InMemoryGameRepository")
 

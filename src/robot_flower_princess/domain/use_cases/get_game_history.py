@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
-from ...logging import get_logger
+from shared.logging import get_logger
 from ..core.entities.game_history import GameHistory
 
 

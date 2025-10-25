@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from robot_flower_princess.main import app
+from main import app
 from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )

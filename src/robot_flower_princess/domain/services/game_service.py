@@ -10,7 +10,7 @@ from ..core.exceptions.game_exceptions import (
     InvalidGiveException,
     InvalidCleanException,
 )
-from ...logging import get_logger
+from shared.logging import get_logger
 
 logger = get_logger("GameService")
 

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ml-player:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - APP_NAME=ML Player Service
+      - DEBUG=false
+      - GAME_SERVICE_URL=http://host.docker.internal:8000
+      - LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - ml-player-network
+
+networks:
+  ml-player-network:
+    driver: bridge

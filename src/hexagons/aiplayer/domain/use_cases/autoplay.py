@@ -9,6 +9,7 @@ from hexagons.game.domain.core.entities.board import Board
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.services.game_service import GameService
 from shared.logging import get_logger
 
 
@@ -55,8 +56,6 @@ class AutoplayUseCase:
             actions = GameSolverPlayer.solve(board_copy)
 
             # Apply actions to original board
-            from ...domain.services.game_service import GameService
-
             for action_type, direction in actions:
                 # Always rotate to the solver-provided direction first (if provided)
                 if direction is not None:

@@ -24,7 +24,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
     repo = InMemoryGameRepository()
     board = make_small_board()
     repo.save("a1", board)
-    repo.save_history("a1", GameHistory())
+    repo.save_history("a1", GameHistory(game_id="a1"))
 
     # stub solver to rotate north then move
     with patch(
@@ -51,7 +51,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo = InMemoryGameRepository()
     board = make_small_board()
     repo.save("a2", board)
-    repo.save_history("a2", GameHistory())
+    repo.save_history("a2", GameHistory(game_id="a2"))
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolverPlayer.solve",

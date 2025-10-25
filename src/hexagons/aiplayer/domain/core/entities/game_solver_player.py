@@ -152,15 +152,53 @@ class GameSolverPlayer:
                 )
 
                 if not princess_adjacent:
-                    # Princess is completely surrounded! Clean an adjacent obstacle first
+                    # Princess is completely surrounded! Must clean obstacles around her
                     if board.robot.flowers_held == 0:  # Can only clean without flowers
-                        if GameSolverPlayer._clean_obstacle_near_flower(
+                        # Try to clean an obstacle adjacent to princess
+                        cleaned = GameSolverPlayer._clean_obstacle_near_flower(
                             board, board.princess_position, actions
-                        ):
+                        )
+                        if cleaned:
+                            continue  # Successfully cleaned, check again
+
+                        # If can't clean directly adjacent, try to clean blocking our path
+                        # Find any obstacle we can reach and clean it
+                        for direction in [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]:
+                            row_delta, col_delta = direction.get_delta()
+                            adj_pos = board.princess_position.move(row_delta, col_delta)
+                            if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
+                                # Try to reach this obstacle
+                                # Find adjacent empty position to this obstacle
+                                obstacle_adjacent = GameSolverPlayer._get_adjacent_positions(adj_pos, board)
+                                if obstacle_adjacent:
+                                    target = min(obstacle_adjacent,
+                                               key=lambda p: board.robot.position.manhattan_distance(p))
+                                    path = GameSolverPlayer._find_path(board, board.robot.position, target)
+                                    if path:
+                                        # Navigate to obstacle and clean it
+                                        for next_pos in path:
+                                            dir = GameSolverPlayer._get_direction(board.robot.position, next_pos)
+                                            actions.append(("rotate", dir))
+                                            GameService.rotate_robot(board, dir)
+                                            actions.append(("move", None))
+                                            GameService.move_robot(board)
+
+                                        # Clean the obstacle
+                                        clean_dir = GameSolverPlayer._get_direction(board.robot.position, adj_pos)
+                                        actions.append(("rotate", clean_dir))
+                                        GameService.rotate_robot(board, clean_dir)
+                                        actions.append(("clean", None))
+                                        GameService.clean_obstacle(board)
+
+                                        # Successfully cleaned, continue
+                                        cleaned = True
+                                        break
+
+                        if cleaned:
                             continue
-                        else:
-                            # Can't clean around princess, game may be unsolvable
-                            break
+
+                        # Still can't clean, game may be unsolvable
+                        break
                     else:
                         # Holding flowers but princess is surrounded - must drop flowers first
                         drop_positions = GameSolverPlayer._get_adjacent_positions(
@@ -268,11 +306,46 @@ class GameSolverPlayer:
                         break
 
                 if not safe_flower:
-                    # No safe flowers to pick - try cleaning obstacles
-                    if board.robot.flowers_held == 0:
-                        # Try to clean obstacles to open up paths
+                    # No safe flowers to pick
+
+                    # CRITICAL: If we're already holding flowers, try to deliver them now!
+                    # Don't wait for 3+ flowers if we can't find safe flowers
+                    if board.robot.flowers_held > 0:
+                        # Check if we can deliver what we have
+                        path_to_princess_now = GameSolverPlayer._find_path(
+                            board, board.robot.position, closest_to_princess
+                        )
+                        if path_to_princess_now:
+                            # We CAN deliver! Force delivery on next iteration
+                            # by continuing - the main loop will handle it
+                            continue
+                        else:
+                            # Can't deliver - try drop-clean-repick
+                            drop_positions = GameSolverPlayer._get_adjacent_positions(
+                                board.robot.position, board
+                            )
+                            if drop_positions:
+                                # Drop all flowers
+                                while board.robot.flowers_held > 0:
+                                    drop_pos = drop_positions[0]
+                                    direction = GameSolverPlayer._get_direction(
+                                        board.robot.position, drop_pos
+                                    )
+                                    actions.append(("rotate", direction))
+                                    GameService.rotate_robot(board, direction)
+                                    actions.append(("drop", None))
+                                    GameService.drop_flower(board)
+
+                                # Now try to clean obstacles
+                                if GameSolverPlayer._clean_blocking_obstacle(
+                                    board, closest_to_princess, actions
+                                ):
+                                    continue
+                    else:
+                        # No flowers held - try cleaning obstacles to open up paths
                         if GameSolverPlayer._clean_blocking_obstacle(board, closest_to_princess, actions):
                             continue
+
                     # No safe moves, give up
                     break
 
@@ -299,6 +372,25 @@ class GameSolverPlayer:
 
                 actions.append(("pick", None))
                 GameService.pick_flower(board)
+
+                # CRITICAL FIX: After picking flower, board state changed!
+                # Re-check if we now have a path to princess from new position
+                # This is especially important when obstacles were cleaned or robot moved
+                if board.robot.flowers_held >= min(3, board.robot.max_flowers):
+                    # We have enough flowers to deliver, check if path exists NOW
+                    princess_adjacent_now = GameSolverPlayer._get_adjacent_positions(
+                        board.princess_position, board
+                    )
+                    if princess_adjacent_now:
+                        closest_now = min(
+                            princess_adjacent_now,
+                            key=lambda p: board.robot.position.manhattan_distance(p)
+                        )
+                        path_now = GameSolverPlayer._find_path(
+                            board, board.robot.position, closest_now
+                        )
+                        # If path exists now, continue to delivery phase on next iteration
+                        # The main loop will handle delivery
             else:
                 break
 

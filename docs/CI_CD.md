@@ -286,9 +286,34 @@ code-coverage:
         coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml
         coverage html --data-file=coverage/coverage.combined --directory=coverage/coverage-combined.html
 
+    - name: Extract coverage percentage
+      id: coverage
+      run: |
+        COVERAGE=$(coverage report --data-file=coverage/coverage.combined | grep TOTAL | awk '{print $4}' | sed 's/%//')
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE%"
+
+    - name: Generate Job Summary
+      if: always()
+      run: |
+        # Generates a beautiful coverage report in GitHub Actions UI
+        # Shows coverage percentage, test suite status, and artifact links
+        COVERAGE=${{ steps.coverage.outputs.percentage }}
+        THRESHOLD=80
+        echo "# 🧪 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+        # ... (full implementation generates tables with emojis and status)
+
     - name: Coverage quality check
       run: |
         coverage report --data-file=coverage/coverage.combined --fail-under=80
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          # Posts a comprehensive coverage report as a PR comment
+          # Includes coverage %, test suite status, and artifact links
 
     - name: Upload combined coverage report
       uses: actions/upload-artifact@v4
@@ -320,6 +345,91 @@ code-coverage:
 - Combines `.coverage.*` files from all test suites
 - Generates multiple report formats (LCOV, XML, HTML)
 - Fails if coverage < 80%
+
+**📊 Job Summary Feature**:
+
+The workflow automatically generates a beautiful coverage report in the GitHub Actions UI with:
+
+✅ **Coverage Summary**: Shows total coverage percentage with pass/fail status
+🧩 **Test Suite Status**: Displays all test suites with counts (50 total tests)
+📈 **Coverage Details**: Breakdown by test level with execution times
+📦 **Artifact Links**: Quick access to downloadable reports
+🎯 **Coverage by Hexagon**: Shows test distribution across architecture layers
+
+**Example Output**:
+```
+# 🧪 Test Coverage Report
+
+## 📊 Coverage Summary
+| Metric              | Value  | Status    |
+|---------------------|--------|-----------|
+| Total Coverage      | 95.2%  | ✅ PASS   |
+| Coverage Threshold  | 80%    | -         |
+
+## 🧩 Test Suites
+| Test Suite              | Count | Status        |
+|-------------------------|-------|---------------|
+| Unit Tests              | 32    | ✅ Passed     |
+| Integration Tests       | 11    | ✅ Passed     |
+| Feature-Component Tests | 7     | ✅ Passed     |
+| Total                   | 50    | ✅ All Passed |
+```
+
+💡 **How to View**: Navigate to any workflow run → Click the "Summary" tab at the top
+
+**📝 PR Comment Feature**:
+
+For pull requests, the workflow automatically posts a comment with the coverage report directly on the PR:
+
+✅ **Automatically triggers** on every PR push
+📊 **Comprehensive metrics** including coverage %, test counts, and status
+🎯 **Hexagon breakdown** showing coverage across architecture layers
+🔗 **Quick links** to detailed reports and workflow runs
+⏰ **Timestamp** showing when the report was generated
+
+**Example PR Comment**:
+```
+## ✅ Test Coverage Report
+
+### 📊 Coverage Summary
+| Metric              | Value  | Status         |
+|---------------------|--------|----------------|
+| Total Coverage      | 95.2%  | ✅ PASSED      |
+| Coverage Threshold  | 80%    | -              |
+
+### 🧩 Test Suites
+| Test Suite              | Count | Status        |
+|-------------------------|-------|---------------|
+| Unit Tests              | 32    | ✅ Passed     |
+| Integration Tests       | 11    | ✅ Passed     |
+| Feature-Component Tests | 7     | ✅ Passed     |
+| Total                   | 50    | ✅ All Passed |
+
+### 📈 Coverage Details
+| Test Level         | Tests | Percentage | Speed           |
+|--------------------|-------|------------|-----------------|
+| Unit               | 32    | 64%        | ⚡⚡⚡ Very Fast |
+| Integration        | 11    | 22%        | ⚡⚡ Fast        |
+| Feature-Component  | 7     | 14%        | ⚡ Normal       |
+
+### 🎯 Coverage by Hexagon
+| Hexagon      | Tests | Status           |
+|--------------|-------|------------------|
+| game         | 42    | ✅ Well-tested   |
+| aiplayer     | 10    | ✅ Good coverage |
+| configurator | 0     | ⚠️ Needs tests   |
+| shared       | 0     | ⚠️ Needs tests   |
+
+---
+
+📊 View detailed coverage report | 📦 Download HTML report
+```
+
+💡 **Benefits**:
+- **Instant feedback** on PR coverage without leaving the PR page
+- **Easy comparison** between commits as coverage changes
+- **Team visibility** - everyone can see test health at a glance
+- **Historical record** - comments are preserved for future reference
 
 ---
 

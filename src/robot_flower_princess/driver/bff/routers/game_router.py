@@ -11,7 +11,7 @@ from ..schemas.game_schema import (
     GameHistoryResponse,
     GamesResponse,
 )
-from ....configurator.dependencies import get_game_repository
+from configurator.dependencies import get_game_repository
 from ....domain.ports.game_repository import GameRepository
 from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery

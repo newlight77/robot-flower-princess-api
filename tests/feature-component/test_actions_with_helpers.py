@@ -32,7 +32,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     assert "robot" in data and "flowers" in data["robot"]
 
     # give: set robot next to princess and set flowers_held
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     repo = get_game_repository()
     b = repo.get(game_id)

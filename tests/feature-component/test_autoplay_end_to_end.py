@@ -26,7 +26,7 @@ def test_autoplay_end_to_end():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     # Temporarily override the app dependency to use our repo
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     # Save any existing override and set our test override
     original_override = app.dependency_overrides.get(get_game_repository)
@@ -65,7 +65,7 @@ def test_autoplay_with_obstacles():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     # Temporarily override the app dependency to use our repo
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
@@ -111,7 +111,7 @@ def test_autoplay_multiple_flowers_with_obstacles():
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
     # Temporarily override the app dependency to use our repo
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
@@ -156,7 +156,7 @@ def test_autoplay_normal_delivery_clear_path():
     repo.save(game_id, board)
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
@@ -204,7 +204,7 @@ def test_autoplay_blocked_path_drop_and_clean():
     repo.save(game_id, board)
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
@@ -252,7 +252,7 @@ def test_autoplay_no_adjacent_space_to_princess():
     repo.save(game_id, board)
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo
@@ -294,7 +294,7 @@ def test_autoplay_navigate_adjacent_to_princess():
     repo.save(game_id, board)
     repo.save_history(game_id, GameHistory(game_id=game_id))
 
-    from robot_flower_princess.configurator.dependencies import get_game_repository
+    from configurator.dependencies import get_game_repository
 
     original_override = app.dependency_overrides.get(get_game_repository)
     app.dependency_overrides[get_game_repository] = lambda: repo

@@ -8,7 +8,7 @@ from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.entities.robot import Robot
 from robot_flower_princess.domain.core.entities.game_history import GameHistory
 from robot_flower_princess.domain.core.value_objects.direction import Direction
-from robot_flower_princess.configurator.dependencies import get_game_repository
+from configurator.dependencies import get_game_repository
 from robot_flower_princess.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )

@@ -1,4 +1,4 @@
-from robot_flower_princess.configurator.dependencies import get_game_repository
+from configurator.dependencies import get_game_repository
 from robot_flower_princess.domain.core.entities.position import Position
 from robot_flower_princess.domain.core.value_objects.direction import Direction
 

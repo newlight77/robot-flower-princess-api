@@ -1,6 +1,6 @@
 from functools import lru_cache
-from ..driven.persistence.in_memory_game_repository import InMemoryGameRepository
-from ..domain.ports.game_repository import GameRepository
+from robot_flower_princess.driven.persistence.in_memory_game_repository import InMemoryGameRepository
+from robot_flower_princess.domain.ports.game_repository import GameRepository
 
 
 @lru_cache()

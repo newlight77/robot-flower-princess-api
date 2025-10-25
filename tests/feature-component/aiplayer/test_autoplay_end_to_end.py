@@ -360,12 +360,13 @@ def test_autoplay_robot_starts_blocked():
     try:
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
-        data = resp.json()
 
         final_board = repo.get(game_id)
 
         # Robot should have cleaned at least one obstacle
-        assert len(final_board.obstacles) < 2, f"Expected fewer than 2 obstacles, got {len(final_board.obstacles)}"
+        assert (
+            len(final_board.obstacles) < 2
+        ), f"Expected fewer than 2 obstacles, got {len(final_board.obstacles)}"
 
         # Robot should have successfully completed the game
         assert len(final_board.flowers) == 0, "All flowers should be picked"

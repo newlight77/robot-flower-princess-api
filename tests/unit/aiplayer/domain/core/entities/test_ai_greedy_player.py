@@ -92,7 +92,9 @@ class TestAIGreedyPlayer:
 
         # The board passed to solve is modified (it's the working board)
         # This test verifies the solver works with the board it receives
-        assert board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
+        assert (
+            board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
+        )
 
     def test_uses_bfs_pathfinding(self, simple_board):
         """
@@ -122,10 +124,7 @@ class TestAIGreedyPlayer:
         board = deepcopy(simple_board)
 
         # Add complex obstacle pattern
-        board.obstacles = {
-            Position(2, 1), Position(2, 2), Position(2, 3),
-            Position(3, 2)
-        }
+        board.obstacles = {Position(2, 1), Position(2, 2), Position(2, 3), Position(3, 2)}
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -188,9 +187,14 @@ class TestAIGreedyPlayer:
         board.flowers = {Position(3, 3)}
         # Create dense obstacle pattern
         board.obstacles = {
-            Position(1, 1), Position(1, 2), Position(1, 3),
-            Position(2, 1), Position(3, 1),
-            Position(4, 2), Position(4, 3), Position(4, 4),
+            Position(1, 1),
+            Position(1, 2),
+            Position(1, 3),
+            Position(2, 1),
+            Position(3, 1),
+            Position(4, 2),
+            Position(4, 3),
+            Position(4, 4),
         }
         board.initial_flower_count = 1
 
@@ -205,8 +209,10 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
         # Surround robot
         board.obstacles = {
-            Position(1, 2), Position(3, 2),  # North/South
-            Position(2, 1), Position(2, 3),  # West/East
+            Position(1, 2),
+            Position(3, 2),  # North/South
+            Position(2, 1),
+            Position(2, 3),  # West/East
         }
         board.flowers = {Position(4, 3)}
         board.initial_flower_count = 1
@@ -223,8 +229,10 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess_position=Position(2, 2))
         # Surround princess
         board.obstacles = {
-            Position(1, 2), Position(3, 2),
-            Position(2, 1), Position(2, 3),
+            Position(1, 2),
+            Position(3, 2),
+            Position(2, 1),
+            Position(2, 3),
         }
         board.flowers = {Position(0, 1)}
         board.initial_flower_count = 1
@@ -303,9 +311,12 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=7, robot=robot, princess_position=Position(4, 2))
         # Create corridor with obstacles on sides
         board.obstacles = {
-            Position(1, 1), Position(1, 3),
-            Position(2, 1), Position(2, 3),
-            Position(3, 1), Position(3, 3),
+            Position(1, 1),
+            Position(1, 3),
+            Position(2, 1),
+            Position(2, 3),
+            Position(3, 1),
+            Position(3, 3),
         }
         board.flowers = {Position(3, 2)}  # In the corridor
         board.initial_flower_count = 1
@@ -320,8 +331,14 @@ class TestAIGreedyPlayer:
         board = Game(rows=10, cols=10, robot=robot, princess_position=Position(9, 9))
         # Place 8 flowers
         board.flowers = {
-            Position(1, 1), Position(2, 2), Position(3, 3), Position(4, 4),
-            Position(5, 5), Position(6, 6), Position(7, 7), Position(8, 8),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(4, 4),
+            Position(5, 5),
+            Position(6, 6),
+            Position(7, 7),
+            Position(8, 8),
         }
         board.obstacles = set()
         board.initial_flower_count = 8
@@ -339,10 +356,21 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(3, 3))
         # Spiral pattern
         board.obstacles = {
-            Position(1, 1), Position(1, 2), Position(1, 3), Position(1, 4), Position(1, 5),
-            Position(2, 5), Position(3, 5), Position(4, 5), Position(5, 5),
-            Position(5, 4), Position(5, 3), Position(5, 2), Position(5, 1),
-            Position(4, 1), Position(3, 1),
+            Position(1, 1),
+            Position(1, 2),
+            Position(1, 3),
+            Position(1, 4),
+            Position(1, 5),
+            Position(2, 5),
+            Position(3, 5),
+            Position(4, 5),
+            Position(5, 5),
+            Position(5, 4),
+            Position(5, 3),
+            Position(5, 2),
+            Position(5, 1),
+            Position(4, 1),
+            Position(3, 1),
         }
         board.flowers = {Position(3, 3)}  # Center
         board.initial_flower_count = 1
@@ -370,8 +398,12 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # Diagonal line of flowers
         board.flowers = {
-            Position(1, 1), Position(2, 2), Position(3, 3),
-            Position(4, 4), Position(5, 5), Position(6, 6),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(4, 4),
+            Position(5, 5),
+            Position(6, 6),
         }
         board.obstacles = set()
         board.initial_flower_count = 6
@@ -387,8 +419,11 @@ class TestAIGreedyPlayer:
         board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
         # U-shaped barrier
         board.obstacles = {
-            Position(2, 1), Position(2, 2), Position(2, 3),
-            Position(3, 1), Position(3, 3),
+            Position(2, 1),
+            Position(2, 2),
+            Position(2, 3),
+            Position(3, 1),
+            Position(3, 3),
         }
         board.flowers = {Position(3, 2)}  # Inside the U
         board.initial_flower_count = 1
@@ -402,8 +437,11 @@ class TestAIGreedyPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         board.flowers = {
-            Position(1, 1), Position(2, 1), Position(3, 1),
-            Position(4, 1), Position(5, 1),
+            Position(1, 1),
+            Position(2, 1),
+            Position(3, 1),
+            Position(4, 1),
+            Position(5, 1),
         }
         board.obstacles = set()
         board.initial_flower_count = 5
@@ -447,9 +485,15 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Cross pattern
         board.obstacles = {
-            Position(3, 1), Position(3, 2), Position(3, 3),
-            Position(3, 4), Position(3, 5),
-            Position(1, 3), Position(2, 3), Position(4, 3), Position(5, 3),
+            Position(3, 1),
+            Position(3, 2),
+            Position(3, 3),
+            Position(3, 4),
+            Position(3, 5),
+            Position(1, 3),
+            Position(2, 3),
+            Position(4, 3),
+            Position(5, 3),
         }
         board.flowers = {Position(1, 1), Position(5, 5)}
         board.initial_flower_count = 2
@@ -496,11 +540,16 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # Zigzag wall pattern
         board.obstacles = {
-            Position(1, 1), Position(1, 2),
-            Position(2, 3), Position(2, 4),
-            Position(3, 5), Position(3, 6),
-            Position(4, 1), Position(4, 2),
-            Position(5, 3), Position(5, 4),
+            Position(1, 1),
+            Position(1, 2),
+            Position(2, 3),
+            Position(2, 4),
+            Position(3, 5),
+            Position(3, 6),
+            Position(4, 1),
+            Position(4, 2),
+            Position(5, 3),
+            Position(5, 4),
         }
         board.flowers = {Position(6, 6)}
         board.initial_flower_count = 1
@@ -528,10 +577,14 @@ class TestAIGreedyPlayer:
         board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
         # Multiple scattered groups
         board.obstacles = {
-            Position(1, 1), Position(1, 2),  # Group 1
-            Position(3, 5), Position(4, 5),  # Group 2
-            Position(6, 2), Position(6, 3),  # Group 3
-            Position(5, 7), Position(6, 7),  # Group 4
+            Position(1, 1),
+            Position(1, 2),  # Group 1
+            Position(3, 5),
+            Position(4, 5),  # Group 2
+            Position(6, 2),
+            Position(6, 3),  # Group 3
+            Position(5, 7),
+            Position(6, 7),  # Group 4
         }
         board.flowers = {Position(4, 4), Position(7, 7)}
         board.initial_flower_count = 2
@@ -546,7 +599,10 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # All flowers in row 3
         board.flowers = {
-            Position(3, 1), Position(3, 3), Position(3, 5), Position(3, 7),
+            Position(3, 1),
+            Position(3, 3),
+            Position(3, 5),
+            Position(3, 7),
         }
         board.obstacles = set()
         board.initial_flower_count = 4
@@ -562,7 +618,9 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # All flowers in column 4
         board.flowers = {
-            Position(1, 4), Position(3, 4), Position(5, 4),
+            Position(1, 4),
+            Position(3, 4),
+            Position(5, 4),
         }
         board.obstacles = set()
         board.initial_flower_count = 3
@@ -578,7 +636,10 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Circular pattern around center
         board.obstacles = {
-            Position(2, 3), Position(3, 2), Position(3, 4), Position(4, 3),
+            Position(2, 3),
+            Position(3, 2),
+            Position(3, 4),
+            Position(4, 3),
         }
         board.flowers = {Position(3, 3)}  # Center
         board.initial_flower_count = 1
@@ -593,9 +654,13 @@ class TestAIGreedyPlayer:
         board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
         # Narrow path to flower
         board.obstacles = {
-            Position(1, 1), Position(1, 2), Position(1, 3),
-            Position(2, 0), Position(2, 4),
-            Position(3, 0), Position(3, 4),
+            Position(1, 1),
+            Position(1, 2),
+            Position(1, 3),
+            Position(2, 0),
+            Position(2, 4),
+            Position(3, 0),
+            Position(3, 4),
         }
         board.flowers = {Position(2, 2)}  # In narrow space
         board.initial_flower_count = 1
@@ -610,10 +675,17 @@ class TestAIGreedyPlayer:
         board = Game(rows=10, cols=10, robot=robot, princess_position=Position(9, 9))
         # Many obstacles
         board.obstacles = {
-            Position(1, 1), Position(2, 2), Position(3, 3),
-            Position(1, 4), Position(2, 5), Position(3, 6),
-            Position(4, 1), Position(5, 2), Position(6, 3),
-            Position(7, 4), Position(8, 5),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(1, 4),
+            Position(2, 5),
+            Position(3, 6),
+            Position(4, 1),
+            Position(5, 2),
+            Position(6, 3),
+            Position(7, 4),
+            Position(8, 5),
         }
         board.flowers = {Position(5, 5), Position(7, 7)}
         board.initial_flower_count = 2
@@ -628,9 +700,15 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # Checkerboard obstacles
         board.obstacles = {
-            Position(1, 1), Position(1, 3), Position(1, 5),
-            Position(3, 1), Position(3, 3), Position(3, 5),
-            Position(5, 1), Position(5, 3), Position(5, 5),
+            Position(1, 1),
+            Position(1, 3),
+            Position(1, 5),
+            Position(3, 1),
+            Position(3, 3),
+            Position(3, 5),
+            Position(5, 1),
+            Position(5, 3),
+            Position(5, 5),
         }
         board.flowers = {Position(2, 2), Position(4, 4), Position(6, 6)}
         board.initial_flower_count = 3
@@ -645,11 +723,16 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=10, robot=robot, princess_position=Position(6, 3))
         # Long corridor
         board.obstacles = {
-            Position(1, 2), Position(1, 4),
-            Position(2, 2), Position(2, 4),
-            Position(3, 2), Position(3, 4),
-            Position(4, 2), Position(4, 4),
-            Position(5, 2), Position(5, 4),
+            Position(1, 2),
+            Position(1, 4),
+            Position(2, 2),
+            Position(2, 4),
+            Position(3, 2),
+            Position(3, 4),
+            Position(4, 2),
+            Position(4, 4),
+            Position(5, 2),
+            Position(5, 4),
         }
         board.flowers = {Position(5, 3)}  # At end of corridor
         board.initial_flower_count = 1
@@ -664,9 +747,15 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # T-shaped junction
         board.obstacles = {
-            Position(3, 1), Position(3, 2), Position(3, 3),
-            Position(3, 4), Position(3, 5),
-            Position(1, 3), Position(2, 3), Position(4, 3), Position(5, 3),
+            Position(3, 1),
+            Position(3, 2),
+            Position(3, 3),
+            Position(3, 4),
+            Position(3, 5),
+            Position(1, 3),
+            Position(2, 3),
+            Position(4, 3),
+            Position(5, 3),
         }
         board.flowers = {Position(1, 1), Position(5, 5)}
         board.initial_flower_count = 2
@@ -682,13 +771,23 @@ class TestAIGreedyPlayer:
         # Double wall with gap in middle
         board.obstacles = {
             # First wall
-            Position(2, 0), Position(2, 1), Position(2, 2),
+            Position(2, 0),
+            Position(2, 1),
+            Position(2, 2),
             # Gap at 2,3
-            Position(2, 4), Position(2, 5), Position(2, 6), Position(2, 7),
+            Position(2, 4),
+            Position(2, 5),
+            Position(2, 6),
+            Position(2, 7),
             # Second wall
-            Position(5, 0), Position(5, 1), Position(5, 2),
+            Position(5, 0),
+            Position(5, 1),
+            Position(5, 2),
             # Gap at 5,3
-            Position(5, 4), Position(5, 5), Position(5, 6), Position(5, 7),
+            Position(5, 4),
+            Position(5, 5),
+            Position(5, 6),
+            Position(5, 7),
         }
         board.flowers = {Position(6, 6)}
         board.initial_flower_count = 1
@@ -703,7 +802,9 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Shield of obstacles
         board.obstacles = {
-            Position(2, 2), Position(2, 3), Position(2, 4),
+            Position(2, 2),
+            Position(2, 3),
+            Position(2, 4),
         }
         board.flowers = {Position(3, 3)}  # Behind shield
         board.initial_flower_count = 1
@@ -744,8 +845,12 @@ class TestAIGreedyPlayer:
         board = Game(rows=10, cols=10, robot=robot, princess_position=Position(9, 9))
         # Many flowers requiring multiple trips
         board.flowers = {
-            Position(1, 1), Position(2, 1), Position(3, 1),
-            Position(4, 1), Position(5, 1), Position(6, 1),
+            Position(1, 1),
+            Position(2, 1),
+            Position(3, 1),
+            Position(4, 1),
+            Position(5, 1),
+            Position(6, 1),
             Position(7, 1),
         }
         board.obstacles = set()
@@ -764,11 +869,22 @@ class TestAIGreedyPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # Very dense obstacles
         board.obstacles = {
-            Position(1, 1), Position(1, 2), Position(1, 3), Position(1, 4),
-            Position(2, 1), Position(2, 3), Position(2, 5),
-            Position(3, 2), Position(3, 4), Position(3, 6),
-            Position(4, 1), Position(4, 3), Position(4, 5),
-            Position(5, 2), Position(5, 4), Position(5, 6),
+            Position(1, 1),
+            Position(1, 2),
+            Position(1, 3),
+            Position(1, 4),
+            Position(2, 1),
+            Position(2, 3),
+            Position(2, 5),
+            Position(3, 2),
+            Position(3, 4),
+            Position(3, 6),
+            Position(4, 1),
+            Position(4, 3),
+            Position(4, 5),
+            Position(5, 2),
+            Position(5, 4),
+            Position(5, 6),
         }
         board.flowers = {Position(6, 6)}  # Single flower
         board.initial_flower_count = 1

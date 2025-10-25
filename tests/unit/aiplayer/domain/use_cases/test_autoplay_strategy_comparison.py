@@ -38,7 +38,7 @@ def test_autoplay_greedy_and_optimal_both_callable():
         return_value=[],
     ) as greedy_mock:
         use_case = AutoplayUseCase(repo)
-        greedy_res = use_case.execute(AutoplayCommand(game_id="greedy_game", strategy="greedy"))
+        use_case.execute(AutoplayCommand(game_id="greedy_game", strategy="greedy"))
         greedy_mock.assert_called_once()
 
     with patch(
@@ -46,7 +46,7 @@ def test_autoplay_greedy_and_optimal_both_callable():
         return_value=[],
     ) as optimal_mock:
         use_case = AutoplayUseCase(repo)
-        optimal_res = use_case.execute(AutoplayCommand(game_id="optimal_game", strategy="optimal"))
+        use_case.execute(AutoplayCommand(game_id="optimal_game", strategy="optimal"))
         optimal_mock.assert_called_once()
 
 
@@ -58,15 +58,18 @@ def test_autoplay_strategy_selection_isolation():
     repo.save_history("validation", GameHistory(game_id="validation"))
 
     # Patch both strategies but only greedy should be called
-    with patch(
-        "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
-        return_value=[],
-    ) as greedy_mock, patch(
-        "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",
-        return_value=[],
-    ) as optimal_mock:
+    with (
+        patch(
+            "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
+            return_value=[],
+        ) as greedy_mock,
+        patch(
+            "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",
+            return_value=[],
+        ) as optimal_mock,
+    ):
         use_case = AutoplayUseCase(repo)
-        res = use_case.execute(AutoplayCommand(game_id="validation", strategy="greedy"))
+        use_case.execute(AutoplayCommand(game_id="validation", strategy="greedy"))
 
     greedy_mock.assert_called_once()
     optimal_mock.assert_not_called()

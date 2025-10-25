@@ -2,6 +2,7 @@
 Script to test AI player with randomly generated game boards.
 Helps identify failure patterns and improve the solver.
 """
+
 import random
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.robot import Robot
@@ -17,11 +18,7 @@ class RandomBoardGenerator:
 
     @staticmethod
     def generate_board(
-        rows: int = 5,
-        cols: int = 5,
-        num_flowers: int = 2,
-        num_obstacles: int = 5,
-        seed: int = None
+        rows: int = 5, cols: int = 5, num_flowers: int = 2, num_obstacles: int = 5, seed: int = None
     ) -> Game:
         """Generate a random solvable game board."""
         if seed is not None:
@@ -62,7 +59,10 @@ class RandomBoardGenerator:
 
         return board
 
-def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | AIOptimalPlayer = AIGreedyPlayer()):
+
+def run_iteration(
+    iteration: int, num_tests: int = 10, player: AIGreedyPlayer | AIOptimalPlayer = AIGreedyPlayer()
+):
     """Run one iteration of testing."""
     print(f"\n{'='*60}")
     print(f"ITERATION {iteration}")
@@ -83,20 +83,22 @@ def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | 
     for i in range(num_tests):
         config = configs[i % len(configs)]
         board = RandomBoardGenerator.generate_board(
-            **config,
-            seed=iteration * 1000 + i  # Deterministic but different each iteration
+            **config, seed=iteration * 1000 + i  # Deterministic but different each iteration
         )
 
-        print(f"\nTest {i+1}/{num_tests}: {config['rows']}x{config['cols']}, "
-              f"{config['num_flowers']} flowers, {config['num_obstacles']} obstacles")
+        print(
+            f"\nTest {i+1}/{num_tests}: {config['rows']}x{config['cols']}, "
+            f"{config['num_flowers']} flowers, {config['num_obstacles']} obstacles"
+        )
 
         result = tester.test_board(board, board_id=f"iter{iteration}_test{i+1}")
 
         status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
         print(f"  Result: {status}")
         if result["success"]:
-            print(f"  Actions: {result['actions_taken']}, "
-                  f"Cleaned: {result['obstacles_cleaned']}")
+            print(
+                f"  Actions: {result['actions_taken']}, " f"Cleaned: {result['obstacles_cleaned']}"
+            )
         else:
             print(f"  Reason: {result.get('failure_reason', 'unknown')}")
 
@@ -105,9 +107,9 @@ def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | 
 
 
 if __name__ == "__main__":
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("AI PLAYER ITERATIVE IMPROVEMENT TEST")
-    print("="*60)
+    print("=" * 60)
     print("Testing AI solver with randomly generated boards...")
     print("This will help identify failure patterns for improvement.")
 
@@ -118,9 +120,9 @@ if __name__ == "__main__":
         all_iterations.append(tester)
 
     # Final summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("OVERALL SUMMARY (10 ITERATIONS)")
-    print("="*60)
+    print("=" * 60)
 
     total_success = sum(t.success_count for t in all_iterations)
     total_tests = sum(t.success_count + t.failure_count for t in all_iterations)
@@ -147,4 +149,4 @@ if __name__ == "__main__":
         if count > 0:
             print(f"  - {pattern}: {count}")
 
-    print("="*60)
+    print("=" * 60)

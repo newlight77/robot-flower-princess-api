@@ -19,7 +19,7 @@ class AIPlayerTester:
             "stuck_with_flowers": 0,
             "robot_blocked": 0,
             "too_many_iterations": 0,
-            "other": 0
+            "other": 0,
         }
 
     def test_board(self, board: Game, board_id: str = "test") -> Dict:
@@ -33,9 +33,9 @@ class AIPlayerTester:
 
             # Check if solved
             success = (
-                len(board.flowers) == 0 and
-                board.robot.flowers_held == 0 and
-                board.flowers_delivered > 0
+                len(board.flowers) == 0
+                and board.robot.flowers_held == 0
+                and board.flowers_delivered > 0
             )
 
             result = {
@@ -49,7 +49,7 @@ class AIPlayerTester:
                 "remaining_obstacles": len(board.obstacles),
                 "obstacles_cleaned": initial_obstacles - len(board.obstacles),
                 "robot_final_position": f"({board.robot.position.row},{board.robot.position.col})",
-                "robot_flowers_held": board.robot.flowers_held
+                "robot_flowers_held": board.robot.flowers_held,
             }
 
             if success:
@@ -64,12 +64,7 @@ class AIPlayerTester:
 
         except Exception as e:
             self.failure_count += 1
-            result = {
-                "board_id": board_id,
-                "success": False,
-                "error": str(e),
-                "actions_taken": 0
-            }
+            result = {"board_id": board_id, "success": False, "error": str(e), "actions_taken": 0}
             self.results.append(result)
             self.failure_patterns["other"] += 1
             return result
@@ -96,13 +91,17 @@ class AIPlayerTester:
             # Robot has flowers but didn't deliver
             self.failure_patterns["stuck_with_flowers"] += 1
             result["failure_reason"] = "stuck_with_flowers"
-            result["failure_detail"] = f"Holding {board.robot.flowers_held} flowers, can't reach princess"
+            result["failure_detail"] = (
+                f"Holding {board.robot.flowers_held} flowers, can't reach princess"
+            )
         elif len(board.flowers) > 0:
             # Couldn't pick all flowers
             flowers_picked = initial_flowers - len(board.flowers)
             self.failure_patterns["no_path_to_flower"] += 1
             result["failure_reason"] = "no_path_to_flower"
-            result["failure_detail"] = f"Picked {flowers_picked}/{initial_flowers}, can't reach remaining"
+            result["failure_detail"] = (
+                f"Picked {flowers_picked}/{initial_flowers}, can't reach remaining"
+            )
         elif board.flowers_delivered == 0:
             # No flowers picked or delivered - complete failure
             self.failure_patterns["robot_blocked"] += 1
@@ -119,9 +118,9 @@ class AIPlayerTester:
         total = self.success_count + self.failure_count
         success_rate = (self.success_count / total * 100) if total > 0 else 0
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("AI PLAYER TEST SUMMARY")
-        print("="*60)
+        print("=" * 60)
         print(f"Total Tests: {total}")
         print(f"Successes: {self.success_count} ({success_rate:.1f}%)")
         print(f"Failures: {self.failure_count} ({100-success_rate:.1f}%)")
@@ -133,10 +132,14 @@ class AIPlayerTester:
         if self.results:
             successful_results = [r for r in self.results if r.get("success")]
             if successful_results:
-                avg_actions = sum(r["actions_taken"] for r in successful_results) / len(successful_results)
-                avg_cleaned = sum(r["obstacles_cleaned"] for r in successful_results) / len(successful_results)
-                print(f"\nSuccessful Runs Stats:")
+                avg_actions = sum(r["actions_taken"] for r in successful_results) / len(
+                    successful_results
+                )
+                avg_cleaned = sum(r["obstacles_cleaned"] for r in successful_results) / len(
+                    successful_results
+                )
+                print("\nSuccessful Runs Stats:")
                 print(f"  - Avg actions: {avg_actions:.1f}")
                 print(f"  - Avg obstacles cleaned: {avg_cleaned:.1f}")
 
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")

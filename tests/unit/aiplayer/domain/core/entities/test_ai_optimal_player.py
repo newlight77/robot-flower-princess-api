@@ -92,7 +92,9 @@ class TestAIOptimalPlayer:
 
         # The board passed to solve is modified (it's the working board)
         # This test verifies the solver works with the board it receives
-        assert board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
+        assert (
+            board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
+        )
 
     def test_solve_complex_board_with_multiple_flowers(self):
         """
@@ -363,7 +365,8 @@ class TestAIOptimalPlayer:
 
         # Create wall of obstacles blocking princess
         board.obstacles = {
-            Position(3, 3), Position(3, 4),
+            Position(3, 3),
+            Position(3, 4),
             Position(4, 3),
         }
         board.flowers = {Position(1, 1)}
@@ -415,9 +418,15 @@ class TestAIOptimalPlayer:
 
         # Create maze-like obstacles
         board.obstacles = {
-            Position(1, 0), Position(1, 1), Position(1, 2),
-            Position(3, 1), Position(3, 2), Position(3, 3),
-            Position(5, 2), Position(5, 3), Position(5, 4),
+            Position(1, 0),
+            Position(1, 1),
+            Position(1, 2),
+            Position(3, 1),
+            Position(3, 2),
+            Position(3, 3),
+            Position(5, 2),
+            Position(5, 3),
+            Position(5, 4),
         }
         board.flowers = {Position(4, 4)}
         board.initial_flower_count = len(board.flowers)
@@ -440,9 +449,15 @@ class TestAIOptimalPlayer:
 
         # Place many flowers (10 flowers)
         board.flowers = {
-            Position(1, 1), Position(2, 2), Position(3, 3),
-            Position(4, 4), Position(5, 5), Position(6, 6),
-            Position(7, 7), Position(8, 8), Position(1, 8),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(4, 4),
+            Position(5, 5),
+            Position(6, 6),
+            Position(7, 7),
+            Position(8, 8),
+            Position(1, 8),
             Position(8, 1),
         }
         board.obstacles = set()
@@ -467,8 +482,12 @@ class TestAIOptimalPlayer:
 
         # Create checkerboard-like obstacle pattern
         board.obstacles = {
-            Position(1, 1), Position(1, 3), Position(1, 5),
-            Position(3, 1), Position(3, 3), Position(3, 5),
+            Position(1, 1),
+            Position(1, 3),
+            Position(1, 5),
+            Position(3, 1),
+            Position(3, 3),
+            Position(3, 5),
         }
         board.flowers = {Position(2, 2), Position(4, 4)}
         board.initial_flower_count = len(board.flowers)
@@ -525,8 +544,10 @@ class TestAIOptimalPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
         board.flowers = {
-            Position(1, 1), Position(1, 4),
-            Position(4, 1), Position(4, 4),
+            Position(1, 1),
+            Position(1, 4),
+            Position(4, 1),
+            Position(4, 4),
         }
         board.obstacles = set()
         board.initial_flower_count = 4
@@ -541,8 +562,11 @@ class TestAIOptimalPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         board.flowers = {
-            Position(1, 1), Position(2, 2), Position(3, 3),
-            Position(4, 4), Position(5, 5),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(4, 4),
+            Position(5, 5),
         }
         board.obstacles = set()
         board.initial_flower_count = 5
@@ -558,9 +582,12 @@ class TestAIOptimalPlayer:
         board = Game(rows=5, cols=8, robot=robot, princess_position=Position(4, 2))
         # Corridor with obstacles
         board.obstacles = {
-            Position(1, 1), Position(1, 3),
-            Position(2, 1), Position(2, 3),
-            Position(3, 1), Position(3, 3),
+            Position(1, 1),
+            Position(1, 3),
+            Position(2, 1),
+            Position(2, 3),
+            Position(3, 1),
+            Position(3, 3),
         }
         board.flowers = {Position(3, 2)}
         board.initial_flower_count = 1
@@ -576,7 +603,10 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Diagonal wall
         board.obstacles = {
-            Position(1, 2), Position(2, 3), Position(3, 4), Position(4, 5),
+            Position(1, 2),
+            Position(2, 3),
+            Position(3, 4),
+            Position(4, 5),
         }
         board.flowers = {Position(3, 3)}
         board.initial_flower_count = 1
@@ -591,8 +621,11 @@ class TestAIOptimalPlayer:
         board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
         # L-shaped barrier
         board.obstacles = {
-            Position(2, 1), Position(2, 2), Position(2, 3),
-            Position(3, 3), Position(4, 3),
+            Position(2, 1),
+            Position(2, 2),
+            Position(2, 3),
+            Position(3, 3),
+            Position(4, 3),
         }
         board.flowers = {Position(4, 4)}
         board.initial_flower_count = 1
@@ -607,10 +640,14 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Staggered obstacles requiring zigzag
         board.obstacles = {
-            Position(1, 1), Position(1, 2),
-            Position(2, 3), Position(2, 4),
-            Position(3, 1), Position(3, 2),
-            Position(4, 3), Position(4, 4),
+            Position(1, 1),
+            Position(1, 2),
+            Position(2, 3),
+            Position(2, 4),
+            Position(3, 1),
+            Position(3, 2),
+            Position(4, 3),
+            Position(4, 4),
         }
         board.flowers = {Position(5, 5)}
         board.initial_flower_count = 1
@@ -639,7 +676,10 @@ class TestAIOptimalPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
         # Wall forcing detour
         board.obstacles = {
-            Position(2, 0), Position(2, 1), Position(2, 2), Position(2, 3),
+            Position(2, 0),
+            Position(2, 1),
+            Position(2, 2),
+            Position(2, 3),
         }
         board.flowers = {Position(3, 2)}
         board.initial_flower_count = 1
@@ -654,9 +694,12 @@ class TestAIOptimalPlayer:
         board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
         # Multiple clusters
         board.obstacles = {
-            Position(1, 1), Position(1, 2),  # Cluster 1
-            Position(3, 3), Position(3, 4),  # Cluster 2
-            Position(5, 5), Position(5, 6),  # Cluster 3
+            Position(1, 1),
+            Position(1, 2),  # Cluster 1
+            Position(3, 3),
+            Position(3, 4),  # Cluster 2
+            Position(5, 5),
+            Position(5, 6),  # Cluster 3
         }
         board.flowers = {Position(2, 2), Position(6, 6)}
         board.initial_flower_count = 2
@@ -698,8 +741,11 @@ class TestAIOptimalPlayer:
         board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
         # Scattered pattern
         board.flowers = {
-            Position(1, 7), Position(3, 2), Position(5, 5),
-            Position(7, 1), Position(6, 6),
+            Position(1, 7),
+            Position(3, 2),
+            Position(5, 5),
+            Position(7, 1),
+            Position(6, 6),
         }
         board.obstacles = set()
         board.initial_flower_count = 5
@@ -714,8 +760,13 @@ class TestAIOptimalPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
         board.flowers = {
-            Position(1, 1), Position(2, 2), Position(3, 3), Position(4, 4),
-            Position(5, 5), Position(6, 6), Position(7, 7),
+            Position(1, 1),
+            Position(2, 2),
+            Position(3, 3),
+            Position(4, 4),
+            Position(5, 5),
+            Position(6, 6),
+            Position(7, 7),
         }
         board.obstacles = set()
         board.initial_flower_count = 7
@@ -731,9 +782,14 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Box/square of obstacles
         board.obstacles = {
-            Position(2, 2), Position(2, 3), Position(2, 4),
-            Position(3, 2), Position(3, 4),
-            Position(4, 2), Position(4, 3), Position(4, 4),
+            Position(2, 2),
+            Position(2, 3),
+            Position(2, 4),
+            Position(3, 2),
+            Position(3, 4),
+            Position(4, 2),
+            Position(4, 3),
+            Position(4, 4),
         }
         board.flowers = {Position(3, 3), Position(5, 5)}  # One inside box
         board.initial_flower_count = 2
@@ -747,11 +803,17 @@ class TestAIOptimalPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=15, cols=15, robot=robot, princess_position=Position(14, 14))
         board.flowers = {
-            Position(2, 2), Position(4, 4), Position(6, 6),
-            Position(8, 8), Position(10, 10), Position(12, 12),
+            Position(2, 2),
+            Position(4, 4),
+            Position(6, 6),
+            Position(8, 8),
+            Position(10, 10),
+            Position(12, 12),
         }
         board.obstacles = {
-            Position(3, 3), Position(7, 7), Position(11, 11),
+            Position(3, 3),
+            Position(7, 7),
+            Position(11, 11),
         }
         board.initial_flower_count = 6
 
@@ -792,7 +854,10 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=10, robot=robot, princess_position=Position(3, 9))
         # Horizontal line
         board.flowers = {
-            Position(3, 2), Position(3, 4), Position(3, 6), Position(3, 8),
+            Position(3, 2),
+            Position(3, 4),
+            Position(3, 6),
+            Position(3, 8),
         }
         board.obstacles = set()
         board.initial_flower_count = 4
@@ -808,7 +873,10 @@ class TestAIOptimalPlayer:
         board = Game(rows=10, cols=7, robot=robot, princess_position=Position(9, 3))
         # Vertical line
         board.flowers = {
-            Position(2, 3), Position(4, 3), Position(6, 3), Position(8, 3),
+            Position(2, 3),
+            Position(4, 3),
+            Position(6, 3),
+            Position(8, 3),
         }
         board.obstacles = set()
         board.initial_flower_count = 4
@@ -824,9 +892,15 @@ class TestAIOptimalPlayer:
         board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
         # Grid pattern (every other cell)
         board.flowers = {
-            Position(2, 2), Position(2, 4), Position(2, 6),
-            Position(4, 2), Position(4, 4), Position(4, 6),
-            Position(6, 2), Position(6, 4), Position(6, 6),
+            Position(2, 2),
+            Position(2, 4),
+            Position(2, 6),
+            Position(4, 2),
+            Position(4, 4),
+            Position(4, 6),
+            Position(6, 2),
+            Position(6, 4),
+            Position(6, 6),
         }
         board.obstacles = set()
         board.initial_flower_count = 9
@@ -842,8 +916,10 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(3, 3))
         # Perimeter
         board.flowers = {
-            Position(0, 0), Position(0, 6),  # Top corners
-            Position(6, 0), Position(6, 6),  # Bottom corners
+            Position(0, 0),
+            Position(0, 6),  # Top corners
+            Position(6, 0),
+            Position(6, 6),  # Bottom corners
         }
         board.obstacles = set()
         board.initial_flower_count = 4
@@ -859,9 +935,13 @@ class TestAIOptimalPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
         # Wall with one gap
         board.obstacles = {
-            Position(3, 0), Position(3, 1), Position(3, 2),
+            Position(3, 0),
+            Position(3, 1),
+            Position(3, 2),
             # Gap at Position(3, 3)
-            Position(3, 4), Position(3, 5), Position(3, 6),
+            Position(3, 4),
+            Position(3, 5),
+            Position(3, 6),
         }
         board.flowers = {Position(5, 5)}
         board.initial_flower_count = 1

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import Literal
 from shared.logging import get_logger
 from configurator.dependencies import get_game_repository
 from hexagons.game.domain.ports.game_repository import GameRepository
@@ -37,7 +36,7 @@ def autoplay(
     game_id: str,
     strategy: AIStrategy = Query(
         default="greedy",
-        description="AI strategy: 'greedy' (safe, 75% success) or 'optimal' (fast, 62% success, -25% actions)"
+        description="AI strategy: 'greedy' (safe, 75% success) or 'optimal' (fast, 62% success, -25% actions)",
     ),
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:

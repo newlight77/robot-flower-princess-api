@@ -45,9 +45,7 @@ class AutoplayUseCase:
     def execute(self, command: AutoplayCommand) -> AutoplayResult:
         """Let AI solve the game automatically."""
         self.logger.info(
-            "execute: AutoplayCommand game_id=%s strategy=%s",
-            command.game_id,
-            command.strategy
+            "execute: AutoplayCommand game_id=%s strategy=%s", command.game_id, command.strategy
         )
         board = self.repository.get(command.game_id)
         if board is None:

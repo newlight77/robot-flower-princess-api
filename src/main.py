@@ -23,18 +23,14 @@ app.include_router(game_router.router)
 app.include_router(aiplayer_router.router)
 
 
-@app.get("/")
-def root() -> dict:
-    """Root endpoint."""
+@app.get("/health")
+def health_check() -> dict:
+    """Health check endpoint."""
     return {
         "message": "Welcome to Robot-Flower-Princess Game API",
         "version": "1.0.0",
         "docs": "/docs",
         "redoc": "/redoc",
+        "status": "healthy",
+        "service": "robot-flower-princess-api",
     }
-
-
-@app.get("/health")
-def health_check() -> dict:
-    """Health check endpoint."""
-    return {"status": "healthy", "service": "robot-flower-princess-api"}

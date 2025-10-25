@@ -1,6 +1,6 @@
 # Testing Guide
 
-> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 50 tests
+> **🎯 Purpose**: Comprehensive **analysis and inventory** of all 49 tests
 >
 > This document is your go-to resource when you need to:
 > - 📊 Understand what tests exist and why
@@ -44,9 +44,9 @@ Our testing strategy follows a **layered approach** with three distinct levels:
 | Level | Count | Execution Time | Coverage Type |
 |-------|-------|----------------|---------------|
 | **Unit Tests** | 32 | < 0.1s | Technical |
-| **Integration Tests** | 11 | ~0.1s | Technical + Functional |
+| **Integration Tests** | 10 | ~0.1s | Technical + Functional |
 | **Feature-Component Tests** | 7 | ~0.2s | Functional |
-| **Total** | **50** | **~0.3s** | Comprehensive |
+| **Total** | **49** | **~0.3s** | Comprehensive |
 
 ---
 
@@ -150,7 +150,7 @@ This document is designed for **different audiences** with varying needs. Naviga
 **If you want to understand test coverage:**
 
 1. **Start here**: [Overview](#overview) - See the big picture
-   - Understand we have 50 tests running in < 1 second
+   - Understand we have 49 tests running in < 1 second
    - See test distribution (unit, integration, feature)
 
 2. **Then review**: Feature-specific sections
@@ -651,25 +651,16 @@ def test_autoplay_handles_solver_exception_gracefully():
 
 ### API Endpoint Tests
 
-#### 9. `test_root_endpoint.py` - Health & Discovery
+#### 9. `test_health_endpoint.py` - Health Check
 
 **Intention**: **Functional + Technical** - Validates API availability
 
 **Purpose**:
-- Ensure root endpoint provides API discovery information
 - Verify health check endpoint responds correctly
-- Test basic API availability
+- Test basic API availability and service status
 
 **How It's Tested**:
 ```python
-def test_root_endpoint(client):
-    resp = client.get("/")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "message" in data
-    assert "version" in data
-    assert "docs" in data
-
 def test_health_check(client):
     resp = client.get("/health")
     assert resp.status_code == 200
@@ -1396,7 +1387,7 @@ Add these if resources permit:
 
 ### Executive Summary
 
-Our test suite is **exceptionally well-designed** with 50 tests running in under 1 second, following test pyramid best practices.
+Our test suite is **exceptionally well-designed** with 49 tests running in under 1 second, following test pyramid best practices.
 
 **Bottom Line**: ✅ **Keep all current tests** - they provide excellent value and cannot be replaced by E2E tests.
 
@@ -1442,13 +1433,13 @@ Analysis of whether E2E tests would duplicate our current test coverage:
 | **Workflow Tests** | 3 | ✅ High (70-90%) | ⚠️ Evaluate | May be redundant with E2E |
 | **AI Solver Tests** | 7 | ⚠️ Partial (30-50%) | ✅ Keep All | Critical, needs thorough testing |
 
-**Key Takeaway**: Only **3 out of 50 tests** (6%) might be redundant if comprehensive E2E exists. The other 94% provide unique value.
+**Key Takeaway**: Only **3 out of 49 tests** (6%) might be redundant if comprehensive E2E exists. The other 94% provide unique value.
 
 ---
 
 ### 📊 Test Value Matrix
 
-Classification of all 50 tests by value and E2E overlap:
+Classification of all 49 tests by value and E2E overlap:
 
 ```
                            E2E OVERLAP
@@ -1469,8 +1460,8 @@ Classification of all 50 tests by value and E2E overlap:
 ```
 
 **Verdict**:
-- ✅ **Keep 94%** (47/50 tests) - Essential regardless of E2E
-- ⚠️ **Evaluate 6%** (3/50 tests) - Only if comprehensive E2E exists
+- ✅ **Keep 94%** (46/49 tests) - Essential regardless of E2E
+- ⚠️ **Evaluate 6%** (3/49 tests) - Only if comprehensive E2E exists
 
 ---
 
@@ -1520,8 +1511,8 @@ Complete analysis showing technical/functional intent, E2E overlap, and recommen
 | `test_error_branch_*.py` | 5 | ⚡⚡⚡ | Technical | ❌ Low | ✅ Yes | Error paths essential |
 | `test_rotate_then_fail.py` | 1 | ⚡⚡⚡ | Technical | ❌ None | ✅ Yes | Edge case coverage |
 | `test_autoplay.py` | 2 | ⚡⚡⚡ | Technical | ⚠️ Medium | ✅ Yes | Fast AI integration |
-| **Integration Tests (11)** |
-| `test_root_endpoint.py` | 2 | ⚡⚡ | Functional | ✅ High | ✅ Yes | Smoke test, very fast |
+| **Integration Tests (10)** |
+| `test_health_endpoint.py` | 1 | ⚡⚡ | Functional | ✅ High | ✅ Yes | Smoke test, very fast |
 | `test_create_game.py` | 1 | ⚡⚡ | Functional | ✅ High | ✅ Yes | API contract |
 | `test_get_game_state.py` | 1 | ⚡⚡ | Functional | ✅ High | ✅ Yes | API contract |
 | `test_action_endpoint.py` | 4 | ⚡⚡ | Functional | ✅ High | ✅ Yes | Validation testing |
@@ -1544,7 +1535,7 @@ Complete analysis showing technical/functional intent, E2E overlap, and recommen
 
 #### 1. **Test Suite Strengths** ✅
 
-- ⚡ **Exceptional Speed**: 50 tests in 0.3s enables TDD workflow
+- ⚡ **Exceptional Speed**: 49 tests in 0.3s enables TDD workflow
 - 🎯 **Perfect Balance**: Nearly ideal pyramid distribution
 - 🔒 **Comprehensive**: Tests domain logic, API contracts, and workflows
 - 🧪 **Quality**: Zero flaky tests, clear naming, good documentation
@@ -1657,9 +1648,9 @@ Testing Pyramid (Actual vs Ideal)
 | Test Level | Count | Avg Time/Test | Total Time | % of Total |
 |------------|-------|---------------|------------|------------|
 | Unit | 32 | 0.003s | 0.10s | 33% |
-| Integration | 11 | 0.009s | 0.10s | 33% |
+| Integration | 10 | 0.010s | 0.10s | 33% |
 | Feature-Component | 7 | 0.014s | 0.10s | 33% |
-| **Total** | **50** | **0.006s** | **~0.3s** | **100%** |
+| **Total** | **49** | **0.006s** | **~0.3s** | **100%** |
 
 **Analysis**: ✅ Excellent - all tests run in under 1 second!
 
@@ -1759,11 +1750,11 @@ Low Value + Low Overlap (Keep)     │  Low Value + High Overlap (Evaluate)
 | `test_rotate_then_fail.py` | 1 | Complex error scenarios | Partial success handling |
 | `test_autoplay.py` | 2 | AI solver integration | Mocked solver validation |
 
-#### Integration Tests (11 tests, ~0.1s)
+#### Integration Tests (10 tests, ~0.1s)
 
 | File | Tests | Focus | Key Insight |
 |------|-------|-------|-------------|
-| `test_root_endpoint.py` | 2 | Health checks | Smoke tests for API availability |
+| `test_health_endpoint.py` | 1 | Health check | Smoke test for API availability |
 | `test_create_game.py` | 1 | Game creation | API contract validation |
 | `test_get_game_state.py` | 1 | State retrieval | Serialization testing |
 | `test_action_endpoint.py` | 4 | Game actions | Input validation + direction handling |
@@ -2063,4 +2054,4 @@ with patch("hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolver
 
 **Document Version**: 1.0
 **Last Updated**: 2025-10-25
-**Total Tests Documented**: 50
+**Total Tests Documented**: 49

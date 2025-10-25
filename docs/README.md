@@ -9,7 +9,7 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, DDD patterns, design decisions | 38KB |
 | [API.md](API.md) | Complete API reference with examples | 24KB |
 | [TESTING_STRATEGY.md](TESTING_STRATEGY.md) | Testing best practices and examples | 28KB |
-| [TESTING_GUIDE.md](TESTING_GUIDE.md) | Complete analysis of all 50 tests with E2E overlap evaluation | 55KB |
+| [TESTING_GUIDE.md](TESTING_GUIDE.md) | Complete analysis of all 49 tests with E2E overlap evaluation | 55KB |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment guide for various platforms | 20KB |
 | [CI_CD.md](CI_CD.md) | GitHub Actions workflow and pipeline | 27KB |
 | [COVERAGE.md](COVERAGE.md) | Code coverage strategy and tools | 19KB |
@@ -49,7 +49,7 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 ### For QA/Testers
 
 **Testing**:
-1. [Testing Guide](TESTING_GUIDE.md) - Complete analysis of all 50 tests
+1. [Testing Guide](TESTING_GUIDE.md) - Complete analysis of all 49 tests
 2. [Testing Types](TESTING_STRATEGY.md#test-types) - Unit, integration, feature-component
 3. [E2E Overlap Analysis](TESTING_GUIDE.md#e2e-overlap-analysis) - When to use E2E tests
 4. [Test Examples](TESTING_STRATEGY.md#examples) - Real test examples
@@ -94,7 +94,7 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 ### Testing
 
 - [Test Strategy Overview](TESTING_STRATEGY.md#overview) - Testing approach
-- [Testing Guide](TESTING_GUIDE.md) - Complete analysis of all 50 tests
+- [Testing Guide](TESTING_GUIDE.md) - Complete analysis of all 49 tests
 - [Unit Tests](TESTING_STRATEGY.md#unit-tests) - Testing domain logic
 - [Integration Tests](TESTING_STRATEGY.md#integration-tests) - Testing API
 - [Feature-Component Tests](TESTING_STRATEGY.md#feature-component-tests) - E2E tests

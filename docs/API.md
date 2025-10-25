@@ -71,27 +71,6 @@ See [Deployment Documentation](DEPLOYMENT.md) for security recommendations.
 
 ### Health & Status
 
-#### GET / - Root Endpoint
-
-Get API information.
-
-**Response 200 OK**
-```json
-{
-  "message": "Welcome to Robot-Flower-Princess Game API",
-  "version": "1.0.0",
-  "docs": "/docs",
-  "redoc": "/redoc"
-}
-```
-
-**cURL Example**
-```bash
-curl http://localhost:8000/
-```
-
----
-
 #### GET /health - Health Check
 
 Check API health status.

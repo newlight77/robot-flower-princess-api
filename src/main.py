@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from hexagons.game.driver.bff.routers import game_router
+from hexagons.aiplayer.driver.bff.routers import aiplayer_router
 
 app = FastAPI(
     title="Robot-Flower-Princess Game API",
@@ -19,6 +20,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(game_router.router)
+app.include_router(aiplayer_router.router)
 
 
 @app.get("/")

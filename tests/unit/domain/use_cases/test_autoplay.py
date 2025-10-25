@@ -8,7 +8,7 @@ from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
-from hexagons.game.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
+from hexagons.aiplayer.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
 
 def make_small_board():
@@ -28,7 +28,7 @@ def test_autoplay_applies_solver_actions_and_records_direction():
 
     # stub solver to rotate north then move
     with patch(
-        "hexagons.game.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
         return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
     ):
         use_case = AutoplayUseCase(repo)
@@ -54,7 +54,7 @@ def test_autoplay_handles_solver_exception_gracefully():
     repo.save_history("a2", GameHistory())
 
     with patch(
-        "hexagons.game.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
+        "hexagons.aiplayer.domain.core.entities.game_solver_player.GameSolverPlayer.solve",
         side_effect=Exception("solver fail"),
     ):
         use_case = AutoplayUseCase(repo)

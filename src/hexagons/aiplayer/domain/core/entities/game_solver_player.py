@@ -1,9 +1,9 @@
 from typing import List, Optional, Tuple
 from collections import deque
-from .game import Game
-from .position import Position
-from ..value_objects.direction import Direction
-from ...services.game_service import GameService
+from hexagons.game.domain.core.entities.game import Game
+from hexagons.game.domain.core.entities.position import Position
+from hexagons.game.domain.core.value_objects.direction import Direction
+from hexagons.game.domain.services.game_service import GameService
 
 
 class GameSolverPlayer:

@@ -24,7 +24,6 @@ from ....domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCom
 from ....domain.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
 from ....domain.use_cases.get_games import GetGamesResult, GetGamesUseCase, GetGamesQuery
 from ....domain.core.value_objects.direction import Direction
-from ....domain.use_cases.autoplay import AutoplayResult
 from ....domain.use_cases.create_game import CreateGameResult
 from ....domain.use_cases.get_game_state import GetGameStateResult
 from ....domain.use_cases.get_game_history import GetGameHistoryResult
@@ -293,44 +292,6 @@ def perform_action(
             obstacles=obstacles_to_dict(result.obstacles, result.robot),
             flowers=flowers_to_dict(result.flowers),
             message=result.message,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.post("/{game_id}/autoplay", response_model=ActionResponse)
-def autoplay(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> ActionResponse:
-    """Let AI solve the game automatically."""
-
-    logger.info("autoplay: game_id=%s", game_id)
-
-    try:
-        from ....domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
-
-        use_case = AutoplayUseCase(repository)
-        result: AutoplayResult = use_case.execute(AutoplayCommand(game_id=game_id))
-
-        # Convert Board, Robot, Princess objects to dicts for the API response
-        board_dict = result.board.to_dict(
-            robot_pos=result.robot.position,
-            princess_pos=result.princess.position,
-            flowers=result.flowers,
-            obstacles=result.obstacles,
-        )
-
-        return ActionResponse(
-            success=result.success,
-            id=game_id,
-            status=result.status,
-            board=board_dict,
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=obstacles_to_dict(result.obstacles, result.robot),
-            flowers=flowers_to_dict(result.flowers),
-            message=f"{result.message} (Actions taken: {result.actions_taken})",
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

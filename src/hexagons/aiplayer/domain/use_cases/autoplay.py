@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from typing import Set
 from copy import deepcopy
-from ..ports.game_repository import GameRepository
-from ..core.entities.game_solver_player import GameSolverPlayer
-from ..core.value_objects.action_type import ActionType
-from ..core.entities.game_history import Action, GameHistory
-from ..core.entities.board import Board
-from ..core.entities.robot import Robot
-from ..core.entities.princess import Princess
-from ..core.entities.position import Position
+from hexagons.game.domain.ports.game_repository import GameRepository
+from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
+from hexagons.game.domain.core.value_objects.action_type import ActionType
+from hexagons.game.domain.core.entities.game_history import Action, GameHistory
+from hexagons.game.domain.core.entities.board import Board
+from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
+from hexagons.game.domain.core.entities.position import Position
 from shared.logging import get_logger
 
 

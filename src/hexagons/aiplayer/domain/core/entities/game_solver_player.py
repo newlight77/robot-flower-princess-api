@@ -47,9 +47,14 @@ class GameSolverPlayer:
                     break
 
             # If holding flowers and need to deliver
-            if board.robot.flowers_held > 0 and (
-                board.robot.flowers_held == board.robot.max_flowers or len(board.flowers) == 0
-            ):
+            # Strategy: Deliver incrementally (every 2-3 flowers) to avoid getting stuck
+            should_deliver = board.robot.flowers_held > 0 and (
+                board.robot.flowers_held >= min(3, board.robot.max_flowers) or  # Deliver after 3 flowers
+                board.robot.flowers_held == board.robot.max_flowers or  # Or when at max capacity
+                len(board.flowers) == 0  # Or when no more flowers left
+            )
+
+            if should_deliver:
                 # Navigate adjacent to princess (not TO princess)
                 adjacent_positions = GameSolverPlayer._get_adjacent_positions(
                     board.princess_position, board

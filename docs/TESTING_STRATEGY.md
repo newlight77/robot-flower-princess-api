@@ -74,9 +74,9 @@ tests/
 ```python
 # tests/unit/domain/test_robot.py
 
-from src.robot_flower_princess.domain.core.entities.robot import Robot
-from src.robot_flower_princess.domain.core.value_objects.position import Position
-from src.robot_flower_princess.domain.core.value_objects.direction import Direction
+from src.hexagons.game.domain.core.entities.robot import Robot
+from src.hexagons.game.domain.core.value_objects.position import Position
+from src.hexagons.game.domain.core.value_objects.direction import Direction
 
 
 def test_robot_initialization():
@@ -159,11 +159,11 @@ def test_robot_cannot_pick_when_full():
 # tests/integration/test_action_endpoint.py
 
 import pytest
-from src.robot_flower_princess.domain.core.entities.game import Game
-from src.robot_flower_princess.domain.core.entities.robot import Robot
-from src.robot_flower_princess.domain.core.entities.princess import Princess
-from src.robot_flower_princess.domain.core.value_objects.position import Position
-from src.robot_flower_princess.domain.core.value_objects.direction import Direction
+from src.hexagons.game.domain.core.entities.game import Game
+from src.hexagons.game.domain.core.entities.robot import Robot
+from src.hexagons.game.domain.core.entities.princess import Princess
+from src.hexagons.game.domain.core.value_objects.position import Position
+from src.hexagons.game.domain.core.value_objects.direction import Direction
 
 
 @pytest.fixture
@@ -274,13 +274,13 @@ def test_invalid_direction_payload(client, seeded_board):
 # tests/feature-component/test_autoplay_end_to_end.py
 
 import pytest
-from src.robot_flower_princess.domain.core.entities.game import Game
-from src.robot_flower_princess.domain.core.entities.robot import Robot
-from src.robot_flower_princess.domain.core.entities.princess import Princess
-from src.robot_flower_princess.domain.core.value_objects.position import Position
-from src.robot_flower_princess.domain.core.value_objects.direction import Direction
-from src.robot_flower_princess.domain.use_cases.autoplay import AutoplayUseCase
-from src.robot_flower_princess.domain.core.entities.game_history import GameHistory
+from src.hexagons.game.domain.core.entities.game import Game
+from src.hexagons.game.domain.core.entities.robot import Robot
+from src.hexagons.game.domain.core.entities.princess import Princess
+from src.hexagons.game.domain.core.value_objects.position import Position
+from src.hexagons.game.domain.core.value_objects.direction import Direction
+from src.hexagons.game.domain.use_cases.autoplay import AutoplayUseCase
+from src.hexagons.game.domain.core.entities.game_history import GameHistory
 
 
 def test_autoplay_normal_delivery_clear_path():
@@ -474,8 +474,8 @@ def test_autoplay_multiple_flowers_with_obstacles():
    @pytest.fixture
    def client(game_repository):
        """Provide a FastAPI test client."""
-       from src.robot_flower_princess.driver.bff.app import app
-       from src.robot_flower_princess.driver.bff.dependencies import get_game_repository
+       from src.hexagons.game.driver.bff.app import app
+       from src.hexagons.game.driver.bff.dependencies import get_game_repository
 
        app.dependency_overrides[get_game_repository] = lambda: game_repository
        return TestClient(app)
@@ -715,22 +715,22 @@ CI runs the following checks on every PR:
 
 ### Critical Paths Requiring 100% Coverage
 
-1. **Game Logic** (`src/robot_flower_princess/domain/core/entities/game.py`)
+1. **Game Logic** (`src/hexagons/game/domain/core/entities/game.py`)
    - Cell validation
    - Move validation
    - Flower/obstacle management
 
-2. **Robot Entity** (`src/robot_flower_princess/domain/core/entities/robot.py`)
+2. **Robot Entity** (`src/hexagons/game/domain/core/entities/robot.py`)
    - Flower collection/delivery
    - Movement and rotation
    - State tracking
 
-3. **AI Solver** (`src/robot_flower_princess/domain/core/entities/game_solver_player.py`)
+3. **AI Solver** (`src/hexagons/game/domain/core/entities/game_solver_player.py`)
    - Pathfinding logic
    - Obstacle handling
    - Delivery strategy
 
-4. **Use Cases** (`src/robot_flower_princess/domain/use_cases/`)
+4. **Use Cases** (`src/hexagons/game/domain/use_cases/`)
    - All business operations
    - Error handling
    - State transitions
@@ -753,8 +753,8 @@ open htmlcov/index.html
 ```
 Name                                                    Stmts   Miss  Cover   Missing
 -------------------------------------------------------------------------------------
-src/robot_flower_princess/domain/core/entities/game.py    127      5    96%   45-47
-src/robot_flower_princess/domain/core/entities/robot.py    89      2    98%   78-79
+src/hexagons/game/domain/core/entities/game.py    127      5    96%   45-47
+src/hexagons/game/domain/core/entities/robot.py    89      2    98%   78-79
 -------------------------------------------------------------------------------------
 TOTAL                                                    1842    147    92%
 ```
@@ -970,8 +970,8 @@ Override dependencies properly:
 ```python
 @pytest.fixture
 def client(game_repository):
-    from src.robot_flower_princess.driver.bff.app import app
-    from src.robot_flower_princess.driver.bff.dependencies import get_game_repository
+    from src.hexagons.game.driver.bff.app import app
+    from src.hexagons.game.driver.bff.dependencies import get_game_repository
 
     # Override dependency
     app.dependency_overrides[get_game_repository] = lambda: game_repository

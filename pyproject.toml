@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "A strategic puzzle game where a robot delivers flowers to a princess"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-packages = [{include = "robot_flower_princess", from = "src"}]
+packages = [{include = "hexagons", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.13"

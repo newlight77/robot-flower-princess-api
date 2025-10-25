@@ -546,7 +546,7 @@ WORKDIR /app
 COPY --from=builder /app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
-CMD ["uvicorn", "robot_flower_princess.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", ".main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### Push to Registry (Future)

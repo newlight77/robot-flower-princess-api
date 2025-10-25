@@ -234,52 +234,63 @@ This application has a single **bounded context**: **Game Management**
 ```
 Robot-Flower-Princess-Claude-API-FastAPI-v4/
 ├── src/
-│   └── robot_flower_princess/
-│       ├── domain/                          # Domain Layer (Business Logic)
-│       │   ├── core/
-│       │   │   ├── entities/                # Domain Entities
-│       │   │   │   ├── game.py             # Game aggregate root
-│       │   │   │   ├── board.py            # Board entity
-│       │   │   │   ├── robot.py            # Robot entity
-│       │   │   │   ├── princess.py         # Princess entity
-│       │   │   │   ├── game_history.py     # Game history entity
-│       │   │   │   └── game_solver_player.py  # AI solver
-│       │   │   ├── value_objects/          # Immutable Value Objects
-│       │   │   │   ├── position.py         # Position (row, col)
-│       │   │   │   ├── direction.py        # Direction enum
-│       │   │   │   ├── action_type.py      # Action type enum
-│       │   │   │   └── game_status.py      # Game status enum
-│       │   │   └── exceptions/             # Domain Exceptions
-│       │   │       └── game_exceptions.py  # Custom exceptions
-│       │   ├── ports/                      # Domain Interfaces
-│       │   │   └── game_repository.py      # Repository interface
-│       │   ├── services/                   # Domain Services
-│       │   │   └── game_service.py         # Game operations service
-│       │   └── use_cases/                  # Application Use Cases
-│       │       ├── create_game.py          # Create new game
-│       │       ├── get_game_state.py       # Retrieve game state
-│       │       ├── get_game_history.py     # Retrieve game history
-│       │       ├── move_robot.py           # Move robot action
-│       │       ├── rotate_robot.py         # Rotate robot action
-│       │       ├── pick_flower.py          # Pick flower action
-│       │       ├── drop_flower.py          # Drop flower action
-│       │       ├── give_flowers.py         # Give flowers action
-│       │       ├── clean_obstacle.py       # Clean obstacle action
-│       │       └── autoplay.py             # AI autoplay
-│       ├── driven/                         # Infrastructure (Driven Adapters)
-│       │   └── persistence/
-│       │       └── in_memory_game_repository.py  # In-memory storage
-│       ├── driver/                         # Infrastructure (Driver Adapters)
-│       │   └── bff/                        # Backend-for-Frontend
-│       │       ├── routers/
-│       │       │   └── game_router.py      # API endpoints
-│       │       └── schemas/
-│       │           └── game_schema.py      # Pydantic schemas
-│       ├── configurator/                   # Configuration
-│       │   ├── settings.py                 # App settings
-│       │   └── dependencies.py             # Dependency injection
-│       ├── logging.py                      # Logging setup
-│       └── main.py                         # FastAPI app entry point
+│   ├── hexagons/                            # Hexagonal Architecture Modules
+│   │   ├── game/                            # Game Hexagon (Core Domain)
+│   │   │   ├── domain/                      # Domain Layer (Business Logic)
+│   │   │   │   ├── core/
+│   │   │   │   │   ├── entities/            # Domain Entities
+│   │   │   │   │   │   ├── game.py          # Game aggregate root
+│   │   │   │   │   │   ├── board.py         # Board entity
+│   │   │   │   │   │   ├── robot.py         # Robot entity
+│   │   │   │   │   │   ├── princess.py      # Princess entity
+│   │   │   │   │   │   └── game_history.py  # Game history entity
+│   │   │   │   │   ├── value_objects/       # Immutable Value Objects
+│   │   │   │   │   │   ├── position.py      # Position (row, col)
+│   │   │   │   │   │   ├── direction.py     # Direction enum
+│   │   │   │   │   │   ├── action_type.py   # Action type enum
+│   │   │   │   │   │   └── game_status.py   # Game status enum
+│   │   │   │   │   └── exceptions/          # Domain Exceptions
+│   │   │   │   │       └── game_exceptions.py  # Custom exceptions
+│   │   │   │   ├── ports/                   # Domain Interfaces
+│   │   │   │   │   └── game_repository.py   # Repository interface
+│   │   │   │   ├── services/                # Domain Services
+│   │   │   │   │   └── game_service.py      # Game operations service
+│   │   │   │   └── use_cases/               # Application Use Cases
+│   │   │   │       ├── create_game.py       # Create new game
+│   │   │   │       ├── get_game_state.py        # Retrieve game state
+│   │   │   │       ├── get_game_history.py      # Retrieve game history
+│   │   │   │       ├── move_robot.py            # Move robot action
+│   │   │   │       ├── rotate_robot.py          # Rotate robot action
+│   │   │   │       ├── pick_flower.py           # Pick flower action
+│   │   │   │       ├── drop_flower.py           # Drop flower action
+│   │   │   │       ├── give_flowers.py          # Give flowers action
+│   │   │   │       └── clean_obstacle.py        # Clean obstacle action
+│   │   │   ├── driven/                      # Infrastructure (Driven Adapters)
+│   │   │   │   └── persistence/
+│   │   │   │       └── in_memory_game_repository.py  # In-memory storage
+│   │   │   └── driver/                      # Infrastructure (Driver Adapters)
+│   │   │       └── bff/                     # Backend-for-Frontend
+│   │   │           ├── routers/
+│   │   │           │   └── game_router.py   # Game API endpoints
+│   │   │           └── schemas/
+│   │   │               └── game_schema.py   # Pydantic schemas
+│   │   └── aiplayer/                        # AIPlayer Hexagon (AI Solver)
+│   │       ├── domain/
+│   │       │   ├── core/
+│   │       │   │   └── entities/
+│   │       │   │       └── game_solver_player.py  # AI solver logic
+│   │       │   └── use_cases/
+│   │       │       └── autoplay.py          # Autoplay use case
+│   │       └── driver/
+│   │           └── bff/
+│   │               └── routers/
+│   │                   └── aiplayer_router.py  # Autoplay API endpoint
+│   ├── configurator/                        # Configuration (Shared)
+│   │   ├── settings.py                      # App settings
+│   │   └── dependencies.py                  # Dependency injection
+│   ├── shared/                              # Shared Utilities
+│   │   └── logging.py                       # Logging setup
+│   └── main.py                              # FastAPI app entry point
 ├── tests/                                  # Test Suite
 │   ├── unit/                               # Unit tests
 │   ├── integration/                        # Integration tests

@@ -45,7 +45,7 @@ test:
 test-all: test-unit test-integration test-feature-component
 
 test-cov:
-	poetry run pytest --cov=src/robot_flower_princess --cov-report=html --cov-report=term
+	poetry run pytest --cov=src/hexagons/game --cov-report=html --cov-report=term
 
 test-unit:
 	poetry run pytest tests/unit

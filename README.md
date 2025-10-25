@@ -54,7 +54,7 @@ poetry env activate
 # Run
 make run
 # or
-poetry run uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn .main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## 📚 API Documentation
@@ -101,7 +101,7 @@ open .coverage/coverage_html/index.html
 This project follows **Hexagonal Architecture** (Ports and Adapters):
 
 ```
-src/robot_flower_princess/
+src/hexagons/
 ├── domain/              # Core business logic
 │   ├── entities/        # Game entities
 │   ├── value_objects/   # Immutable values

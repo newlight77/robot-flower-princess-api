@@ -115,7 +115,7 @@ poetry shell
 
 **Using Poetry**:
 ```bash
-poetry run uvicorn robot_flower_princess.main:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **Using Makefile**:
@@ -270,7 +270,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
 # Run application
-CMD ["uvicorn", "robot_flower_princess.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 **Benefits**:
@@ -425,7 +425,7 @@ az container create \
 
 1. **Create `Procfile`**:
 ```
-web: uvicorn robot_flower_princess.main:app --host 0.0.0.0 --port $PORT
+web: uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
 2. **Deploy**:
@@ -448,7 +448,7 @@ heroku open
 1. Connect GitHub repository
 2. Select Python 3.13
 3. Add build command: `poetry install --only main`
-4. Add run command: `uvicorn robot_flower_princess.main:app --host 0.0.0.0 --port 8080`
+4. Add run command: `uvicorn main:app --host 0.0.0.0 --port 8080`
 5. Deploy
 
 **Cost**: $5/month for basic droplet
@@ -565,7 +565,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/robot-flower-princess
 Environment="PATH=/opt/robot-flower-princess/.venv/bin"
-ExecStart=/opt/robot-flower-princess/.venv/bin/uvicorn robot_flower_princess.main:app --host 127.0.0.1 --port 8000 --workers 4
+ExecStart=/opt/robot-flower-princess/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --workers 4
 Restart=always
 RestartSec=5
 
@@ -624,7 +624,7 @@ WORKERS=4
 
 **Load Environment Variables**:
 ```python
-# src/robot_flower_princess/configurator/settings.py
+# src/configurator/settings.py
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -647,7 +647,7 @@ class Settings(BaseSettings):
 **Structured Logging** (JSON format):
 
 ```python
-# src/robot_flower_princess/logging.py
+# src/shared/logging.py
 import logging
 import sys
 
@@ -820,7 +820,7 @@ lsof -i :8000
 kill -9 <PID>
 
 # Or use a different port
-uvicorn robot_flower_princess.main:app --port 8001
+uvicorn main:app --port 8001
 ```
 
 #### 2. Poetry Installation Fails
@@ -860,7 +860,7 @@ docker build --no-cache -t robot-flower-princess:latest .
 journalctl -u robot-flower-princess -n 50
 
 # Reduce workers
-uvicorn robot_flower_princess.main:app --workers 1
+uvicorn main:app --workers 1
 
 # Check memory
 free -h
@@ -890,7 +890,7 @@ app.add_middleware(
 
 Run multiple workers for production:
 ```bash
-uvicorn robot_flower_princess.main:app --workers 4
+uvicorn main:app --workers 4
 ```
 
 **Rule of thumb**: `workers = (2 x CPU cores) + 1`

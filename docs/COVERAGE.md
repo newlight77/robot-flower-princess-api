@@ -166,10 +166,10 @@ coverage report
 ```
 Name                                                     Stmts   Miss  Cover
 ----------------------------------------------------------------------------
-src/robot_flower_princess/domain/core/entities/game.py     127      5    96%
-src/robot_flower_princess/domain/core/entities/robot.py     89      2    98%
-src/robot_flower_princess/domain/use_cases/create_game.py   45      0   100%
-src/robot_flower_princess/domain/services/game_service.py    78      8    90%
+src/hexagons/game/domain/core/entities/game.py     127      5    96%
+src/hexagons/game/domain/core/entities/robot.py     89      2    98%
+src/hexagons/game/domain/use_cases/create_game.py   45      0   100%
+src/hexagons/game/domain/services/game_service.py    78      8    90%
 ----------------------------------------------------------------------------
 TOTAL                                                      1842    147    92%
 ```
@@ -376,11 +376,11 @@ code-coverage:
 
 **To Improve**:
 ```
-src/robot_flower_princess/domain/services/game_service.py
+src/hexagons/game/domain/services/game_service.py
   Lines not covered: 45-47, 78-80
   Reason: Edge cases in obstacle validation
 
-src/robot_flower_princess/driver/bff/routers/game_router.py
+src/hexagons/game/driver/bff/routers/game_router.py
   Lines not covered: 125-130
   Reason: Error handling for specific edge case
 ```

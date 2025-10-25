@@ -101,7 +101,11 @@ version = "1.0.0"
 description = "A strategic puzzle game where a robot delivers flowers to a princess"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-packages = [{include = "robot_flower_princess", from = "src"}]
+packages = [
+    {include = "hexagons", from = "src"},
+    {include = "configurator", from = "src"},
+    {include = "shared", from = "src"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -178,7 +182,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\
   CMD curl -f http://localhost:8000/health || exit 1
 
 # Run with uvicorn
-CMD ["uvicorn", "robot_flower_princess..main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 """,
 
     "docker-compose.yml": """version: '3.8'
@@ -194,7 +198,7 @@ services:
       - LOG_LEVEL=info
     volumes:
       - ./src:/app/src
-    command: uvicorn robot_flower_princess..main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -224,7 +228,7 @@ test:
 \tpoetry run pytest -v
 
 test-cov:
-\tpoetry run pytest --cov=src/robot_flower_princess --cov-report=html --cov-report=term
+\tpoetry run pytest --cov=src/hexagons --cov=src/configurator --cov=src/shared --cov-report=html --cov-report=term
 
 lint:
 \tpoetry run ruff check src/ tests/
@@ -235,7 +239,7 @@ format:
 \tpoetry run ruff check --fix src/ tests/
 
 run:
-\tpoetry run uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
+\tpoetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 docker-up:
 \tdocker-compose up --build
@@ -287,7 +291,7 @@ jobs:
         poetry run mypy src/
 
     - name: Run tests with coverage
-      run: poetry run pytest --cov=src/robot_flower_princess --cov-report=xml --cov-report=term
+      run: poetry run pytest --cov=src/hexagons --cov=src/configurator --cov=src/shared --cov-report=xml --cov-report=term
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
@@ -364,7 +368,7 @@ poetry install
 # Run
 make run
 # or
-poetry run uvicorn robot_flower_princess..main:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## 📚 API Documentation
@@ -405,7 +409,7 @@ make format        # Format code
 This project follows **Hexagonal Architecture** (Ports and Adapters):
 
 ```
-src/robot_flower_princess/
+src/hexagons/game/
 ├── domain/              # Core business logic
 │   ├── entities/        # Game entities
 │   ├── value_objects/   # Immutable values
@@ -473,7 +477,7 @@ Built with:
 """,
     # ⬇️ PART 1: Domain Layer (from robot_princess_part1)
     # Domain Layer - Value Objects
-    "src/robot_flower_princess/domain/value_objects/direction.py": """from enum import Enum
+    "src/hexagons/game/domain/value_objects/direction.py": """from enum import Enum
 
 class Direction(str, Enum):
     NORTH = "north"
@@ -502,7 +506,7 @@ class Direction(str, Enum):
         return opposites[self]
 """,
 
-    "src/robot_flower_princess/domain/value_objects/game_status.py": """from enum import Enum
+    "src/hexagons/game/domain/value_objects/game_status.py": """from enum import Enum
 
 class GameStatus(str, Enum):
     IN_PROGRESS = "in_progress"
@@ -510,7 +514,7 @@ class GameStatus(str, Enum):
     GAME_OVER = "game_over"
 """,
 
-    "src/robot_flower_princess/domain/value_objects/action_type.py": """from enum import Enum
+    "src/hexagons/game/domain/value_objects/action_type.py": """from enum import Enum
 
 class ActionType(str, Enum):
     ROTATE = "rotate"
@@ -522,7 +526,7 @@ class ActionType(str, Enum):
 """,
 
     # Domain Layer - Entities
-    "src/robot_flower_princess/domain/entities/cell.py": """from enum import Enum
+    "src/hexagons/game/domain/entities/cell.py": """from enum import Enum
 
 class CellType(str, Enum):
     EMPTY = "empty"
@@ -532,7 +536,7 @@ class CellType(str, Enum):
     OBSTACLE = "obstacle"
 """,
 
-    "src/robot_flower_princess/domain/entities/position.py": """from dataclasses import dataclass
+    "src/hexagons/game/domain/entities/position.py": """from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Position:
@@ -550,7 +554,7 @@ class Position:
         return abs(self.row - other.row) + abs(self.col - other.col)
 """,
 
-    "src/robot_flower_princess/domain/entities/robot.py": """from dataclasses import dataclass
+    "src/hexagons/game/domain/entities/robot.py": """from dataclasses import dataclass
 from .position import Position
 from ..value_objects.direction import Direction
 
@@ -589,7 +593,7 @@ class Robot:
         return self.flowers_held < self.max_flowers
 """,
 
-    "src/robot_flower_princess/domain/entities/board.py": """from dataclasses import dataclass, field
+    "src/hexagons/game/domain/entities/board.py": """from dataclasses import dataclass, field
 import random
 from typing import Optional
 from .position import Position
@@ -714,7 +718,7 @@ class Game:
         }
 """,
 
-    "src/robot_flower_princess/domain/entities/game_history.py": """from dataclasses import dataclass, field
+    "src/hexagons/game/domain/entities/game_history.py": """from dataclasses import dataclass, field
 from typing import List
 from ..value_objects.action_type import ActionType
 from ..value_objects.direction import Direction
@@ -755,7 +759,7 @@ class GameHistory:
 """,
 
     # Domain Layer - Exceptions
-    "src/robot_flower_princess/domain/exceptions/game_exceptions.py": """class GameException(Exception):
+    "src/hexagons/game/domain/exceptions/game_exceptions.py": """class GameException(Exception):
     \"\"\"Base exception for game-related errors.\"\"\"
     pass
 
@@ -793,7 +797,7 @@ class InvalidCleanException(GameException):
 """,
 
     # Domain Layer - Services
-    "src/robot_flower_princess/domain/services/game_service.py": """from ..entities.game import Game
+    "src/hexagons/game/domain/services/game_service.py": """from ..entities.game import Game
 from ..entities.position import Position
 from ..value_objects.direction import Direction
 from ..value_objects.game_status import GameStatus
@@ -932,7 +936,7 @@ class GameService:
 """,
     # ⬇️ PART 2: Application Layer (from robot_princess_part2)
     # Application Layer - Ports
-    "src/robot_flower_princess/application/ports/game_repository.py": """from abc import ABC, abstractmethod
+    "src/hexagons/game/application/ports/game_repository.py": """from abc import ABC, abstractmethod
 from typing import Optional
 from ...domain.entities.game import Game
 from ...domain.entities.game_history import GameHistory
@@ -972,7 +976,7 @@ class GameRepository(ABC):
 """,
 
     # Application Layer - Use Cases
-    "src/robot_flower_princess/application/use_cases/create_game.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/create_game.py": """from dataclasses import dataclass
 import uuid
 from ..ports.game_repository import GameRepository
 from ...domain.entities.game import Game
@@ -1012,7 +1016,7 @@ class CreateGameUseCase:
         )
 """,
 
-    "src/robot_flower_princess/application/use_cases/get_game_state.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/get_game_state.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 
 @dataclass
@@ -1038,7 +1042,7 @@ class GetGameStateUseCase:
         )
 """,
 
-    "src/robot_flower_princess/application/use_cases/get_game_history.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/get_game_history.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 
 @dataclass
@@ -1064,7 +1068,7 @@ class GetGameHistoryUseCase:
         )
 """,
 
-    "src/robot_flower_princess/application/use_cases/rotate_robot.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/rotate_robot.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.direction import Direction
@@ -1130,7 +1134,7 @@ class RotateRobotUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/move_robot.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/move_robot.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
@@ -1200,7 +1204,7 @@ class MoveRobotUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/pick_flower.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/pick_flower.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
@@ -1265,7 +1269,7 @@ class PickFlowerUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/drop_flower.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/drop_flower.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
@@ -1330,7 +1334,7 @@ class DropFlowerUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/give_flowers.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/give_flowers.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
@@ -1400,7 +1404,7 @@ class GiveFlowersUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/clean_obstacle.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/clean_obstacle.py": """from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ...domain.value_objects.action_type import ActionType
@@ -1465,7 +1469,7 @@ class CleanObstacleUseCase:
             )
 """,
 
-    "src/robot_flower_princess/application/use_cases/autoplay.py": """from dataclasses import dataclass
+    "src/hexagons/game/application/use_cases/autoplay.py": """from dataclasses import dataclass
 from copy import deepcopy
 from ..ports.game_repository import GameRepository
 from ...infrastructure.ai.solver import GameSolver
@@ -1572,7 +1576,7 @@ class AutoplayUseCase:
 """,
    # ⬇️ PART 3: Infrastructure & Tests (from robot_princess_part3)
    # Infrastructure Layer - Persistence
-    "src/robot_flower_princess/infrastructure/persistence/in_memory_game_repository.py": """from typing import Optional, Dict
+    "src/hexagons/game/infrastructure/persistence/in_memory_game_repository.py": """from typing import Optional, Dict
 from ...application.ports.game_repository import GameRepository
 from ...domain.entities.game import Game
 from ...domain.entities.game_history import GameHistory
@@ -1607,7 +1611,7 @@ class InMemoryGameRepository(GameRepository):
 """,
 
     # Infrastructure Layer - API Schemas
-    "src/robot_flower_princess/infrastructure/api/schemas/game_schema.py": """from pydantic import BaseModel, Field
+    "src/hexagons/game/infrastructure/api/schemas/game_schema.py": """from pydantic import BaseModel, Field
 from typing import Literal
 
 class CreateGameRequest(BaseModel):
@@ -1634,7 +1638,7 @@ class GameHistoryResponse(BaseModel):
 """,
 
     # Infrastructure Layer - API Dependencies
-    "src/robot_flower_princess/infrastructure/api/dependencies.py": """from functools import lru_cache
+    "src/hexagons/game/infrastructure/api/dependencies.py": """from functools import lru_cache
 from ..persistence.in_memory_game_repository import InMemoryGameRepository
 from ...application.ports.game_repository import GameRepository
 
@@ -1645,7 +1649,7 @@ def get_game_repository() -> GameRepository:
 """,
 
     # Infrastructure Layer - API Router
-    "src/robot_flower_princess/infrastructure/api/routers/game_router.py": """from fastapi import APIRouter, Depends, HTTPException
+    "src/hexagons/game/infrastructure/api/routers/game_router.py": """from fastapi import APIRouter, Depends, HTTPException
 from ..schemas.game_schema import (
     CreateGameRequest,
     RotateRequest,
@@ -1863,7 +1867,7 @@ def autoplay(
 """,
 
     # Infrastructure Layer - Main API
-    "src/robot_flower_princess/infrastructure/api/main.py": """from fastapi import FastAPI
+    "src/hexagons/game/infrastructure/api/main.py": """from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import game_router
 
@@ -1904,7 +1908,7 @@ def health_check() -> dict:
 """,
 
     # Config
-    "src/robot_flower_princess/config/settings.py": """from pydantic_settings import BaseSettings
+    "src/hexagons/game/config/settings.py": """from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     environment: str = "development"
@@ -1920,7 +1924,7 @@ settings = Settings()
 """,
 
     # AI Solver
-    "src/robot_flower_princess/infrastructure/ai/solver.py": """from typing import List, Optional, Tuple
+    "src/hexagons/game/infrastructure/ai/solver.py": """from typing import List, Optional, Tuple
 from collections import deque
 from copy import deepcopy
 from ...domain.entities.game import Game
@@ -2064,11 +2068,11 @@ class GameSolver:
 
     # Tests - conftest
     "tests/conftest.py": """import pytest
-from robot_flower_princess.infrastructure.persistence.in_memory_game_repository import InMemoryGameRepository
-from robot_flower_princess.domain.entities.game import Game
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.value_objects.direction import Direction
+from hexagons.game.infrastructure.persistence.in_memory_game_repository import InMemoryGameRepository
+from hexagons.game.domain.entities.game import Game
+from hexagons.game.domain.entities.position import Position
+from hexagons.game.domain.entities.robot import Robot
+from hexagons.game.domain.value_objects.direction import Direction
 
 
 @pytest.fixture
@@ -2099,7 +2103,7 @@ def sample_board():
 
     # Tests - Unit Tests
     "tests/unit/domain/test_position.py": """import pytest
-from robot_flower_princess.domain.entities.position import Position
+from hexagons.game.domain.entities.position import Position
 
 
 def test_position_creation():
@@ -2122,9 +2126,9 @@ def test_position_manhattan_distance():
 """,
 
     "tests/unit/domain/test_robot.py": """import pytest
-from robot_flower_princess.domain.entities.robot import Robot
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.value_objects.direction import Direction
+from hexagons.game.domain.entities.robot import Robot
+from hexagons.game.domain.entities.position import Position
+from hexagons.game.domain.value_objects.direction import Direction
 
 
 def test_robot_creation():
@@ -2171,9 +2175,9 @@ def test_robot_give_flowers():
 """,
 
     "tests/unit/domain/test_board.py": """import pytest
-from robot_flower_princess.domain.entities.game import Game
-from robot_flower_princess.domain.entities.position import Position
-from robot_flower_princess.domain.value_objects.game_status import GameStatus
+from hexagons.game.domain.entities.game import Game
+from hexagons.game.domain.entities.position import Position
+from hexagons.game.domain.value_objects.game_status import GameStatus
 
 
 def test_board_creation():
@@ -2202,7 +2206,7 @@ def test_board_victory():
 
     "tests/integration/test_api.py": """import pytest
 from fastapi.testclient import TestClient
-from robot_flower_princess..main import app
+from hexagons.game..main import app
 
 client = TestClient(app)
 
@@ -2284,17 +2288,17 @@ def create_project():
 
     # Create all directories
     dirs = [
-        "src/robot_flower_princess/domain/entities",
-        "src/robot_flower_princess/domain/value_objects",
-        "src/robot_flower_princess/domain/exceptions",
-        "src/robot_flower_princess/domain/services",
-        "src/robot_flower_princess/application/ports",
-        "src/robot_flower_princess/application/use_cases",
-        "src/robot_flower_princess/infrastructure/persistence",
-        "src/robot_flower_princess/infrastructure/api/routers",
-        "src/robot_flower_princess/infrastructure/api/schemas",
-        "src/robot_flower_princess/infrastructure/ai",
-        "src/robot_flower_princess/config",
+        "src/hexagons/game/domain/entities",
+        "src/hexagons/game/domain/value_objects",
+        "src/hexagons/game/domain/exceptions",
+        "src/hexagons/game/domain/services",
+        "src/hexagons/game/application/ports",
+        "src/hexagons/game/application/use_cases",
+        "src/hexagons/game/infrastructure/persistence",
+        "src/hexagons/game/infrastructure/api/routers",
+        "src/hexagons/game/infrastructure/api/schemas",
+        "src/hexagons/game/infrastructure/ai",
+        "src/hexagons/game/config",
         "tests/unit/domain",
         "tests/unit/application",
         "tests/integration",

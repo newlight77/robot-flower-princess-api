@@ -206,7 +206,7 @@ From **`robot_princess_part1`** artifact, copy ALL content starting from:
 
 ```python
     # Domain Layer - Value Objects
-    "src/robot_flower_princess/domain/value_objects/direction.py": """from enum import Enum
+    "src/hexagons/game/domain/value_objects/direction.py": """from enum import Enum
 ```
 
 Paste it directly after the root config files in the FILES dictionary.
@@ -217,7 +217,7 @@ From **`robot_princess_part2`** artifact, copy ALL content starting from:
 
 ```python
     # Application Layer - Ports
-    "src/robot_flower_princess/application/ports/game_repository.py": """from abc import ABC
+    "src/hexagons/game/application/ports/game_repository.py": """from abc import ABC
 ```
 
 Paste it directly after Part 1 content.
@@ -228,7 +228,7 @@ From **`robot_princess_part3`** artifact, copy ALL content starting from:
 
 ```python
     # Infrastructure Layer - Persistence
-    "src/robot_flower_princess/infrastructure/persistence/in_memory_game_repository.py":
+    "src/hexagons/game/infrastructure/persistence/in_memory_game_repository.py":
 ```
 
 Paste it directly after Part 2 content.
@@ -273,7 +273,7 @@ python3 -m py_compile generate_robot_flower_princess.py
 wc -l generate_robot_flower_princess.py
 
 # Check structure
-grep -c '"src/robot_flower_princess' generate_robot_flower_princess.py
+grep -c '"src/hexagons/game' generate_robot_flower_princess.py
 # Should return ~40 (number of source files)
 ```
 
@@ -630,7 +630,7 @@ SyntaxError: unexpected EOF while parsing
 
 **Solution:**
 - Verify all 3 parts are copied into FILES dictionary
-- Check file count: `grep -c '"src/robot_flower_princess' generate_robot_flower_princess.py` should return ~40
+- Check file count: `grep -c '"src/hexagons/game' generate_robot_flower_princess.py` should return ~40
 - Re-run the generator
 
 #### Issue 3: Poetry Installation Fails

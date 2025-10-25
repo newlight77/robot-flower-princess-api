@@ -541,8 +541,68 @@ For most game scenarios, **75% is excellent performance** and the AI provides a 
 
 ---
 
+## Iteration 4: A* Pathfinding + Multi-Step Planning (Optional Strategy)
+
+### Changes Implemented
+1. **A* Pathfinding**: Replaced BFS with A* algorithm using Manhattan distance heuristic
+2. **Multi-Step Flower Planning**: Evaluates flower sequences using permutations (<=4 flowers) or 2-step look-ahead (>4 flowers)
+3. **Smart Obstacle Cleaning**: Scores obstacles by how many flowers they unlock and princess accessibility
+
+### Test Results (100 random boards)
+
+**Overall Success Rate**: **62%** (62/100 tests) ❌ -13% vs Iteration 3
+
+| Metric | Iteration 3 (Greedy) | Iteration 4 (Optimal) | Change |
+|--------|----------------------|-----------------------|--------|
+| **Success Rate** | 75% | **62%** | ❌ **-13%** (worse) |
+| **Avg Actions** | 36.6 | **27.3** | ✅ **-25%** (more efficient) |
+| **"Stuck with Flowers"** | 11 | **23** | ❌ **+109%** (worse) |
+| **Obstacles Cleaned** | 0.6 | 0.5 | Similar |
+
+### Analysis
+
+**Surprising Result**: More sophisticated algorithms performed WORSE on success rate!
+
+**Why This Happened**:
+- **Greedy strategy** (Iteration 3): Picks nearest flower IF safe → Slower but safer (75%)
+- **Optimal strategy** (Iteration 4): Plans best sequence for minimum actions → Faster but riskier (62%)
+
+The optimal strategy makes aggressive choices that lead to getting stuck more often. It optimizes for fewest actions but doesn't account for all the dynamic obstacles and state changes during execution.
+
+### Conclusion
+
+**✅ BOTH STRATEGIES ARE NOW AVAILABLE**:
+
+1. **GameSolverPlayer** (Iteration 3) - **"greedy" strategy**
+   - Safe & Reliable: 75% success rate
+   - Default strategy
+   - Best for most use cases
+
+2. **GamePlanningPlayer** (Iteration 4) - **"optimal" strategy**
+   - Fast & Efficient: 62% success rate, 25% fewer actions
+   - Uses A* pathfinding and multi-step planning
+   - Best when efficiency matters more than reliability
+
+**API Usage**:
+```bash
+# Use default (greedy) strategy
+POST /api/games/{game_id}/autoplay
+
+# Use optimal strategy
+POST /api/games/{game_id}/autoplay?strategy=optimal
+```
+
+### Key Insights
+
+1. **Greedy+Safety > Optimal Planning** for this problem domain
+2. **Simple strategies with safety checks outperform complex optimization** when the environment is dynamic
+3. **Multi-step planning works best when the state space is static**, but our game has dynamic obstacles and flowers
+4. **Trade-off between efficiency and reliability** is real - users can now choose based on their needs
+
+---
+
 *Last Updated: 2025-10-25*
-*AI Player Version: v0.3 (Iteration 3 Complete)*
+*AI Player Version: v0.4 (Dual Strategy)*
+*Strategies Available: "greedy" (75% success, default) | "optimal" (62% success, -25% actions)*
 *Test Framework: Random Board Generator v1.0*
-*Status: 75% Success Rate - Stable at Algorithmic Ceiling*
-*Production Ready: ✅ YES*
+*Status: Production Ready with Strategy Selection ✅*

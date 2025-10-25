@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Set
+from typing import Set, Literal
 from copy import deepcopy
 from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.aiplayer.domain.core.entities.game_solver_player import GameSolverPlayer
+from hexagons.aiplayer.domain.core.entities.game_planning_player import GamePlanningPlayer
 from hexagons.game.domain.core.value_objects.action_type import ActionType
 from hexagons.game.domain.core.entities.game_history import Action, GameHistory
 from hexagons.game.domain.core.entities.board import Board
@@ -13,9 +14,13 @@ from hexagons.game.domain.services.game_service import GameService
 from shared.logging import get_logger
 
 
+AIStrategy = Literal["greedy", "optimal"]
+
+
 @dataclass
 class AutoplayCommand:
     game_id: str
+    strategy: AIStrategy = "greedy"  # Default to safe & reliable strategy
 
 
 @dataclass
@@ -39,7 +44,11 @@ class AutoplayUseCase:
 
     def execute(self, command: AutoplayCommand) -> AutoplayResult:
         """Let AI solve the game automatically."""
-        self.logger.info("execute: AutoplayCommand game_id=%s", command.game_id)
+        self.logger.info(
+            "execute: AutoplayCommand game_id=%s strategy=%s",
+            command.game_id,
+            command.strategy
+        )
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -52,8 +61,17 @@ class AutoplayUseCase:
         board_copy = deepcopy(board)
 
         try:
-            # Get solution from AI
-            actions = GameSolverPlayer.solve(board_copy)
+            # Select AI player based on strategy
+            if command.strategy == "optimal":
+                # Fast & efficient (25% fewer actions, but 13% lower success rate)
+                actions = GamePlanningPlayer.solve(board_copy)
+                strategy_name = "Optimal AI (A* + Planning)"
+            else:  # "greedy" (default)
+                # Safe & reliable (75% success rate)
+                actions = GameSolverPlayer.solve(board_copy)
+                strategy_name = "Greedy AI (Safe)"
+
+            self.logger.info("Using %s, generated %d actions", strategy_name, len(actions))
 
             # Apply actions to original board
             for action_type, direction in actions:

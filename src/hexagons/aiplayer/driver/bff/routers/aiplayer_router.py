@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Literal
 from shared.logging import get_logger
 from configurator.dependencies import get_game_repository
 from hexagons.game.domain.ports.game_repository import GameRepository
@@ -6,6 +7,7 @@ from hexagons.aiplayer.domain.use_cases.autoplay import (
     AutoplayUseCase,
     AutoplayCommand,
     AutoplayResult,
+    AIStrategy,
 )
 from hexagons.game.driver.bff.schemas.game_schema import ActionResponse
 
@@ -33,15 +35,27 @@ def flowers_to_dict(flowers: set, total: int = None) -> dict:
 @router.post("/{game_id}/autoplay", response_model=ActionResponse)
 def autoplay(
     game_id: str,
+    strategy: AIStrategy = Query(
+        default="greedy",
+        description="AI strategy: 'greedy' (safe, 75% success) or 'optimal' (fast, 62% success, -25% actions)"
+    ),
     repository: GameRepository = Depends(get_game_repository),
 ) -> ActionResponse:
-    """Let AI solve the game automatically."""
+    """
+    Let AI solve the game automatically.
 
-    logger.info("autoplay: game_id=%s", game_id)
+    Two strategies available:
+    - **greedy** (default): Safe & reliable. 75% success rate. Checks safety before picking flowers.
+    - **optimal**: Fast & efficient. 62% success rate, but 25% fewer actions. Uses A* pathfinding and multi-step planning.
+    """
+
+    logger.info("autoplay: game_id=%s strategy=%s", game_id, strategy)
 
     try:
         use_case = AutoplayUseCase(repository)
-        result: AutoplayResult = use_case.execute(AutoplayCommand(game_id=game_id))
+        result: AutoplayResult = use_case.execute(
+            AutoplayCommand(game_id=game_id, strategy=strategy)
+        )
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(

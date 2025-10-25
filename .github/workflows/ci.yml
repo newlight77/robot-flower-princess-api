@@ -184,7 +184,7 @@ jobs:
           echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "Coverage: $COVERAGE%"
 
-      - name: Generate Job Summary
+      - name: Coverage Summary
         if: always()
         run: |
           COVERAGE=${{ steps.coverage.outputs.percentage }}

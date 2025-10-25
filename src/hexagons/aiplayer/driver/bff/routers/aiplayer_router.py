@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from shared.logging import get_logger
 from configurator.dependencies import get_game_repository
 from hexagons.game.domain.ports.game_repository import GameRepository
-from hexagons.aiplayer.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand, AutoplayResult
+from hexagons.aiplayer.domain.use_cases.autoplay import (
+    AutoplayUseCase,
+    AutoplayCommand,
+    AutoplayResult,
+)
 from hexagons.game.driver.bff.schemas.game_schema import ActionResponse
 
 router = APIRouter(prefix="/api/games", tags=["aiplayer"])

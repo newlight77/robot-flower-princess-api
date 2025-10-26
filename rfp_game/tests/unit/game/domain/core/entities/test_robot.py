@@ -47,6 +47,62 @@ def test_robot_drop_flower():
     assert action.message is None  # Success
 
 
+def test_robot_drop_flower_different_position():
+    """Test dropping a flower at a position different from where it was picked."""
+    robot = Robot(position=Position(5, 5))
+
+    # Pick flower from one position
+    pick_pos = Position(3, 3)
+    robot.pick_flower(pick_pos)
+    assert robot.flowers_held == 1
+    assert pick_pos in robot.flowers_collected
+
+    # Drop flower at a different position (this is the bug we fixed)
+    drop_pos = Position(6, 6)
+    action = robot.drop_flower(drop_pos)
+
+    # Should succeed - flower is removed from collected (LIFO)
+    assert robot.flowers_held == 0
+    assert action.message is None  # Success
+    assert len(robot.flowers_collected) == 0
+
+
+def test_robot_drop_flower_multiple():
+    """Test dropping multiple flowers - LIFO (last in, first out)."""
+    robot = Robot(position=Position(5, 5))
+
+    # Pick three flowers from different positions
+    pos1 = Position(1, 1)
+    pos2 = Position(2, 2)
+    pos3 = Position(3, 3)
+
+    robot.pick_flower(pos1)
+    robot.pick_flower(pos2)
+    robot.pick_flower(pos3)
+    assert robot.flowers_held == 3
+
+    # Drop first flower - should remove pos3 (last picked)
+    drop_pos1 = Position(6, 6)
+    robot.drop_flower(drop_pos1)
+    assert robot.flowers_held == 2
+    assert pos3 not in robot.flowers_collected
+    assert pos1 in robot.flowers_collected
+    assert pos2 in robot.flowers_collected
+
+    # Drop second flower - should remove pos2
+    drop_pos2 = Position(7, 7)
+    robot.drop_flower(drop_pos2)
+    assert robot.flowers_held == 1
+    assert pos2 not in robot.flowers_collected
+    assert pos1 in robot.flowers_collected
+
+    # Drop third flower - should remove pos1
+    drop_pos3 = Position(8, 8)
+    robot.drop_flower(drop_pos3)
+    assert robot.flowers_held == 0
+    assert len(robot.flowers_collected) == 0
+
+
 def test_robot_give_flowers():
     robot = Robot(position=Position(0, 0))
     robot.pick_flower(Position(1, 1))

@@ -56,7 +56,8 @@ class Robot:
             action.message = "No position to drop flowers"
             return action
 
-        self.flowers_collected.remove(drop_position)
+        # Remove the last collected flower (LIFO - stack behavior)
+        self.flowers_collected.pop()
         return action
 
     def give_flowers(self, princess_position: Position = None) -> Action:

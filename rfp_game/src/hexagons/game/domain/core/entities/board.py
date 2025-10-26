@@ -77,6 +77,14 @@ class Board:
         """Remove an obstacle from the board."""
         self.obstacles_positions.discard(position)
 
+    def get_remaining_flowers_count(self) -> int:
+        """Get the number of remaining flowers on the board."""
+        return self.initial_flowers_count - len(self.flowers_positions)
+
+    def get_remaining_obstacles_count(self) -> int:
+        """Get the number of remaining obstacles on the board."""
+        return self.initial_obstacles_count - len(self.obstacles_positions)
+
     def get_grid(self) -> list[list[str]]:
         """Generate the grid representation with emojis."""
         grid = []
@@ -118,4 +126,6 @@ class Board:
             "obstacles_positions": [{"row": p.row, "col": p.col} for p in self.obstacles_positions],
             "initial_flowers_count": self.initial_flowers_count,
             "initial_obstacles_count": self.initial_obstacles_count,
+            "remaining_flowers_count": self.get_remaining_flowers_count(),
+            "remaining_obstacles_count": self.get_remaining_obstacles_count(),
         }

@@ -161,14 +161,6 @@ class Game:
             "board": board_dict,
             "robot": self.robot.to_dict(),
             "princess": self.princess.to_dict(),
-            "obstacles": {
-                "remaining": self.board.initial_obstacles_count - len(self.robot.obstacles_cleaned),
-                "total": self.board.initial_obstacles_count,
-            },
-            "flowers": {
-                "remaining": self.board.initial_flowers_count - len(self.robot.flowers_collected),
-                "total": self.board.initial_flowers_count,
-            },
             "status": self.get_status().value,
             "created_at": self.created_at.isoformat() + "Z",
             "updated_at": self.updated_at.isoformat() + "Z",

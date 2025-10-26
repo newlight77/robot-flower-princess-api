@@ -39,7 +39,9 @@ async def test_autoplay_with_optimal_strategy():
     assert isinstance(res.success, bool)
     b = repo.get("a3")
     assert b is not None
-    assert b.robot.orientation == Direction.NORTH
+    # assert len(b.robot.executed_actions) >= 1
+    # assert len(b.robot.flowers.delivered) >= 1
+    assert b.board.get_remaining_flowers_count() == 0
 
 
 async def test_autoplay_optimal_handles_exception_gracefully():

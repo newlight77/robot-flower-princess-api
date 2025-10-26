@@ -6,12 +6,16 @@ and returning the predicted actions. It allows seamless integration of the
 external ML Player service into the autoplay system.
 """
 
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.game.domain.core.value_objects.game_status import GameStatus
+from shared.logging import get_logger
+
+
+logger = get_logger("MLProxyPlayer")
 
 
 class MLProxyPlayer:
@@ -69,31 +73,39 @@ class MLProxyPlayer:
         Returns:
             List of action tuples (action_type, direction)
         """
+        logger.info(f"MLProxyPlayer.solve_async: Game {game.to_dict()}")
         # Convert game state to format expected by ML Player
         game_state = self._convert_game_to_state(game)
 
+        logger.info(f"MLProxyPlayer.solve_async: Game state {game_state}")
+
         # Get prediction from ML Player service
         try:
-            prediction = await self.ml_client.predict_action(
+            logger.info(
+                f"MLProxyPlayer.solve_async: Predicting action game_id={game_id} with strategy strategy={self.strategy}"
+            )
+
+            prediction: dict = await self.ml_client.predict_action(
                 game_id=game_id, strategy=self.strategy, game_state=game_state
             )
 
-            # Convert prediction to action tuple
-            action = prediction["action"]
-            direction_str = prediction.get("direction")
+            logger.info(f"MLProxyPlayer.solve_async: Prediction {prediction}")
 
-            # Convert string direction to Direction enum
-            direction = None
-            if direction_str:
-                direction = Direction(direction_str)
+            # Convert prediction to action tuple
+            action: str = prediction["action"]
+            direction_str: str = prediction.get("direction")
+            direction: Optional[Direction] = Direction(direction_str) if direction_str else None
 
             # Return single action (ML Player returns one action at a time)
+            logger.info(
+                f"MLProxyPlayer.solve_async: Returning action={action} and direction={direction}"
+            )
             return [(action, direction)]
 
         except Exception as e:
             # If ML Player service fails, return empty list
             # The autoplay will stop gracefully
-            print(f"ML Player service error: {e}")
+            logger.error(f"MLProxyPlayer.solve_async: ML Player service error: {e}")
             return []
 
     def _convert_game_to_state(self, game: Game) -> dict:
@@ -107,6 +119,10 @@ class MLProxyPlayer:
             Dictionary with game state
         """
         # Determine game status
+        logger.info(
+            f"MLProxyPlayer._convert_game_to_state: Determining game status={game.get_status()}"
+        )
+
         game_status = game.get_status()
         if game_status == GameStatus.VICTORY:
             status = "Victory"
@@ -114,6 +130,8 @@ class MLProxyPlayer:
             status = "Game Over"
         else:
             status = "In Progress"
+
+        logger.info(f"MLProxyPlayer._convert_game_to_state: Returning game state={status}")
 
         return {
             "game_id": game.game_id,

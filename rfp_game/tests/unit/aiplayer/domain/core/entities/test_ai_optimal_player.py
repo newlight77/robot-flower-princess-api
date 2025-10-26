@@ -18,7 +18,7 @@ def simple_board():
     board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1), Position(3, 3)}
     board.obstacles = set()
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -29,7 +29,7 @@ def board_with_obstacles():
     board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1)}
     board.obstacles = {Position(2, 2), Position(1, 3)}
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -75,7 +75,7 @@ class TestAIOptimalPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = set()
-        board.initial_flower_count = 0
+        board.board.initial_flowers_count = 0
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -112,7 +112,7 @@ class TestAIOptimalPlayer:
             Position(4, 4),
         }
         board.obstacles = {Position(2, 3), Position(3, 2)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -159,7 +159,7 @@ class TestAIOptimalPlayer:
             Position(4, 2),
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -214,7 +214,7 @@ class TestAIOptimalPlayer:
             Position(6, 6),
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -241,7 +241,7 @@ class TestAIOptimalPlayer:
             Position(2, 3),  # East
         }
         board.flowers = {Position(4, 3)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -267,7 +267,7 @@ class TestAIOptimalPlayer:
             Position(2, 3),  # East
         }
         board.flowers = {Position(0, 1)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -295,7 +295,7 @@ class TestAIOptimalPlayer:
             Position(5, 5),
             Position(8, 8),
         }
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -320,7 +320,7 @@ class TestAIOptimalPlayer:
             Position(3, 2),  # Adjacent to first
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -346,7 +346,7 @@ class TestAIOptimalPlayer:
             Position(7, 8),
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -371,7 +371,7 @@ class TestAIOptimalPlayer:
             Position(4, 3),
         }
         board.flowers = {Position(1, 1)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -397,7 +397,7 @@ class TestAIOptimalPlayer:
             Position(5, 5),
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -430,7 +430,7 @@ class TestAIOptimalPlayer:
             Position(5, 4),
         }
         board.flowers = {Position(4, 4)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -462,7 +462,7 @@ class TestAIOptimalPlayer:
             Position(8, 1),
         }
         board.obstacles = set()
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -491,7 +491,7 @@ class TestAIOptimalPlayer:
             Position(3, 5),
         }
         board.flowers = {Position(2, 2), Position(4, 4)}
-        board.initial_flower_count = len(board.flowers)
+        board.board.initial_flowers_count = len(board.flowers)
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -505,7 +505,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -519,7 +519,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         board.flowers = {Position(1, 1), Position(3, 3)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -532,7 +532,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
         board.flowers = {Position(1, 1), Position(2, 3), Position(4, 2)}
         board.obstacles = set()
-        board.initial_flower_count = 3
+        board.board.initial_flowers_count = 3
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -551,7 +551,7 @@ class TestAIOptimalPlayer:
             Position(4, 4),
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -570,7 +570,7 @@ class TestAIOptimalPlayer:
             Position(5, 5),
         }
         board.obstacles = set()
-        board.initial_flower_count = 5
+        board.board.initial_flowers_count = 5
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -591,7 +591,7 @@ class TestAIOptimalPlayer:
             Position(3, 3),
         }
         board.flowers = {Position(3, 2)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -610,7 +610,7 @@ class TestAIOptimalPlayer:
             Position(4, 5),
         }
         board.flowers = {Position(3, 3)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -629,7 +629,7 @@ class TestAIOptimalPlayer:
             Position(4, 3),
         }
         board.flowers = {Position(4, 4)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -651,7 +651,7 @@ class TestAIOptimalPlayer:
             Position(4, 4),
         }
         board.flowers = {Position(5, 5)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -664,7 +664,7 @@ class TestAIOptimalPlayer:
         # Flowers in opposite corners
         board.flowers = {Position(0, 0), Position(6, 6)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -683,7 +683,7 @@ class TestAIOptimalPlayer:
             Position(2, 3),
         }
         board.flowers = {Position(3, 2)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -703,7 +703,7 @@ class TestAIOptimalPlayer:
             Position(5, 6),  # Cluster 3
         }
         board.flowers = {Position(2, 2), Position(6, 6)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -715,7 +715,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         board.obstacles = {Position(2, 2)}
         board.flowers = {Position(2, 3)}  # Adjacent to obstacle
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -729,7 +729,7 @@ class TestAIOptimalPlayer:
         # Obstacles near princess corner
         board.obstacles = {Position(3, 3), Position(3, 4), Position(4, 3)}
         board.flowers = {Position(1, 1)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -749,7 +749,7 @@ class TestAIOptimalPlayer:
             Position(6, 6),
         }
         board.obstacles = set()
-        board.initial_flower_count = 5
+        board.board.initial_flowers_count = 5
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -770,7 +770,7 @@ class TestAIOptimalPlayer:
             Position(7, 7),
         }
         board.obstacles = set()
-        board.initial_flower_count = 7
+        board.board.initial_flowers_count = 7
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -793,7 +793,7 @@ class TestAIOptimalPlayer:
             Position(4, 4),
         }
         board.flowers = {Position(3, 3), Position(5, 5)}  # One inside box
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -816,7 +816,7 @@ class TestAIOptimalPlayer:
             Position(7, 7),
             Position(11, 11),
         }
-        board.initial_flower_count = 6
+        board.board.initial_flowers_count = 6
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -829,7 +829,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=10, cols=5, robot=robot, princess=Princess(position=Position(9, 4)))
         board.flowers = {Position(3, 2), Position(7, 3)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -842,7 +842,7 @@ class TestAIOptimalPlayer:
         board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -861,7 +861,7 @@ class TestAIOptimalPlayer:
             Position(3, 8),
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -880,7 +880,7 @@ class TestAIOptimalPlayer:
             Position(8, 3),
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -904,7 +904,7 @@ class TestAIOptimalPlayer:
             Position(6, 6),
         }
         board.obstacles = set()
-        board.initial_flower_count = 9
+        board.board.initial_flowers_count = 9
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -923,7 +923,7 @@ class TestAIOptimalPlayer:
             Position(6, 6),  # Bottom corners
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIOptimalPlayer.solve(board)
 
@@ -945,7 +945,7 @@ class TestAIOptimalPlayer:
             Position(3, 6),
         }
         board.flowers = {Position(5, 5)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIOptimalPlayer.solve(board)
 

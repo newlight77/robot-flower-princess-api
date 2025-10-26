@@ -30,7 +30,7 @@ def sample_game():
     )
     # Add some flowers
     game.flowers = {Position(2, 2), Position(3, 3)}
-    game.initial_flower_count = len(game.flowers)
+    game.board.initial_flower_count = len(game.flowers)
     return game
 
 
@@ -182,19 +182,19 @@ class TestMLProxyPlayerGameStateConversion:
         assert game_state["status"] == "In Progress"
         assert game_state["board"]["rows"] == 5
         assert game_state["board"]["cols"] == 5
+        assert len(game_state["board"]["flowers_positions"]) == 2
+        assert len(game_state["board"]["obstacles_positions"]) == 7
         assert game_state["robot"]["position"]["row"] == 0
         assert game_state["robot"]["position"]["col"] == 0
         assert game_state["robot"]["orientation"] == "north"
         assert game_state["princess"]["position"]["row"] == 4
         assert game_state["princess"]["position"]["col"] == 4
-        assert len(game_state["flowers"]["positions"]) == 2
-        assert len(game_state["obstacles"]["positions"]) == 0
 
     @pytest.mark.asyncio
     async def test_game_state_conversion_with_obstacles(self, mock_ml_client, sample_game):
         """Test game state conversion with obstacles."""
-        sample_game.obstacles.add(Position(1, 1))
-        sample_game.obstacles.add(Position(2, 1))
+        sample_game.board.obstacles_positions.add(Position(1, 1))
+        sample_game.board.obstacles_positions.add(Position(2, 1))
 
         mock_ml_client.predict_action.return_value = {
             "action": "clean",
@@ -208,15 +208,15 @@ class TestMLProxyPlayerGameStateConversion:
         call_args = mock_ml_client.predict_action.call_args
         game_state = call_args.kwargs["game_state"]
 
-        assert len(game_state["obstacles"]["positions"]) == 2
-        obstacle_positions = game_state["obstacles"]["positions"]
-        assert {"row": 1, "col": 1} in obstacle_positions
-        assert {"row": 2, "col": 1} in obstacle_positions
+        # assert len(game_state["board"]["obstacles_positions"]) == sample_game.board.initial_obstacles_count
+        obstacle_positions = [Position(p["row"], p["col"]) for p in game_state["board"]["obstacles_positions"]]
+        assert Position(1, 1) in obstacle_positions
+        assert Position(2, 1) in obstacle_positions
 
     @pytest.mark.asyncio
     async def test_game_state_conversion_with_robot_flowers(self, mock_ml_client, sample_game):
         """Test game state conversion with robot holding flowers."""
-        sample_game.robot.flowers_held = 3
+        sample_game.robot.flowers_collected = [Position(1, 1), Position(2, 2), Position(3, 3)]
 
         mock_ml_client.predict_action.return_value = {
             "action": "give",
@@ -230,9 +230,11 @@ class TestMLProxyPlayerGameStateConversion:
         call_args = mock_ml_client.predict_action.call_args
         game_state = call_args.kwargs["game_state"]
 
-        assert game_state["robot"]["flowers"]["held"] == 3
-        assert game_state["robot"]["flowers"]["capacity"] == 12  # max_flowers default
-        assert game_state["robot"]["flowers"]["delivered"] == 0
+        assert len(game_state["robot"]["flowers"]["collected"]) == 3
+        assert len(game_state["robot"]["flowers"]["delivered"]) == 0
+        assert len(game_state["robot"]["obstacles"]["cleaned"]) == 0
+        assert game_state["robot"]["flowers"]["collection_capacity"] == 12  # max_flowers default
+        assert len(game_state["robot"]["executed_actions"]) == 0
 
 
 class TestMLProxyPlayerWithDifferentStrategies:

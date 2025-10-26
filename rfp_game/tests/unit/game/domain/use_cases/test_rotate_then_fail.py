@@ -7,7 +7,6 @@ from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.game.domain.core.exceptions.game_exceptions import GameException
 
@@ -23,7 +22,7 @@ def make_small_board():
     board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
     board.flowers = set()
     board.obstacles = set()
-    board.initial_flower_count = 0
+    board.board.initial_flowers_count = 0
     return board
 
 
@@ -31,7 +30,6 @@ def test_rotate_then_move_failure_records_both_entries():
     repo = InMemoryGameRepository()
     board = make_small_board()
     repo.save("r1", board)
-    repo.save_history("r1", GameHistory())
 
     # Patch move to raise after rotate is applied
     with patch(
@@ -45,23 +43,13 @@ def test_rotate_then_move_failure_records_both_entries():
         move_uc = MoveRobotUseCase(repo)
         res = move_uc.execute(MoveRobotCommand(game_id="r1", direction=Direction.NORTH))
 
-    history = repo.get_history("r1")
-    assert history is not None
-    # expect two actions: rotate (success) and move (failed)
-    assert len(history.actions) >= 2
-    assert history.actions[-2].action_type.value == "rotate"
-    assert history.actions[-2].direction == Direction.NORTH
-    assert history.actions[-1].action_type.value == "move"
-    assert history.actions[-1].direction == Direction.NORTH
-    assert history.actions[-1].success is False
-    assert history.actions[-1].message == "blocked"
 
     assert res.success is False
-    assert res.robot.orientation.value == Direction.NORTH
-    assert res.robot.position.row == 0
-    assert res.robot.position.col == 0
-    assert res.princess.position.row == 1
-    assert res.princess.position.col == 1
-    assert res.flowers == set()
-    assert res.obstacles == set()
-    assert res.status == "in_progress"
+    assert res.game.robot.orientation.value == Direction.NORTH
+    assert res.game.robot.position.row == 0
+    assert res.game.robot.position.col == 0
+    assert res.game.princess.position.row == 1
+    assert res.game.princess.position.col == 1
+    assert res.game.flowers == set()
+    assert res.game.obstacles == set()
+    assert res.game.get_status().value == "in_progress"

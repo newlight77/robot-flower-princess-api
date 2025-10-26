@@ -3,8 +3,8 @@ from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
 
 
-def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
-    game_id = "det-pick-drop-give"
+def should_pick_drop_give_successfully(client, save_board, make_empty_board):
+    game_id = "component-pick-drop-give"
     board = make_empty_board()
     # place a flower north of robot
     flower_pos = Position(0, 1)
@@ -18,9 +18,10 @@ def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
     )
     assert resp.status_code == 200
     data = resp.json()
+    print(f"should_pick_drop_give_successfully Data: {data}")
     assert data["success"] is True
     # robot should have flowers_held > 0
-    assert len(data["robot"]["flowers"]["collected"]) > 0
+    assert len(data["game"]["robot"]["flowers"]["collected"]) > 0
 
     # drop to the south (robot facing north, drop to adjacent south cell)
     # first rotate to south
@@ -34,9 +35,10 @@ def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
     )
     assert resp.status_code == 200
     data = resp.json()
+    print(f"should_pick_drop_give_successfully Data: {data}")
     assert data["success"] is True
     # Successfully dropped the flower (business logic may vary on whether collected count changes)
-    assert "robot" in data and "flowers" in data["robot"]
+    assert "game" in data and "robot" in data["game"] and "flowers" in data["game"]["robot"]
 
     # give flowers - place robot next to princess and give
     # ensure robot has a flower to give
@@ -44,7 +46,7 @@ def test_pick_and_drop_and_give_success(client, save_board, make_empty_board):
     repo = get_game_repository()
     b = repo.get(game_id)
     assert b is not None
-    b.robot.flowers_held = 1
+    b.robot.pick_flower(Position(1, 1))  # Add a flower
     repo.save(game_id, b)
 
     # rotate robot to face princess

@@ -18,7 +18,7 @@ def simple_board():
     board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1), Position(3, 3)}
     board.obstacles = set()
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -29,7 +29,7 @@ def board_with_obstacles():
     board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1)}
     board.obstacles = {Position(2, 2), Position(1, 3)}
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -75,7 +75,7 @@ class TestAIGreedyPlayer:
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
         board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = set()
-        board.initial_flower_count = 0
+        board.board.initial_flowers_count = 0
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -140,7 +140,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -159,7 +159,7 @@ class TestAIGreedyPlayer:
             Position(4, 4),
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -173,7 +173,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=12, cols=12, robot=robot, princess=Princess(position=Position(11, 11)))
         board.flowers = {Position(5, 5), Position(8, 8)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -197,7 +197,7 @@ class TestAIGreedyPlayer:
             Position(4, 3),
             Position(4, 4),
         }
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -216,7 +216,7 @@ class TestAIGreedyPlayer:
             Position(2, 3),  # West/East
         }
         board.flowers = {Position(4, 3)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -236,7 +236,7 @@ class TestAIGreedyPlayer:
             Position(2, 3),
         }
         board.flowers = {Position(0, 1)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -255,7 +255,7 @@ class TestAIGreedyPlayer:
             Position(4, 4),  # Bottom-right corner
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -268,7 +268,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=10, cols=10, robot=robot, princess=Princess(position=Position(9, 9)))
         board.flowers = {Position(8, 8)}  # Far from robot
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -286,7 +286,7 @@ class TestAIGreedyPlayer:
             Position(6, 5),
         }
         board.obstacles = set()
-        board.initial_flower_count = 3
+        board.board.initial_flowers_count = 3
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -299,7 +299,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         board.flowers = {Position(2, 2), Position(4, 4)}
         board.obstacles = {Position(1, 1), Position(3, 3), Position(5, 5)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -320,7 +320,7 @@ class TestAIGreedyPlayer:
             Position(3, 3),
         }
         board.flowers = {Position(3, 2)}  # In the corridor
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -342,7 +342,7 @@ class TestAIGreedyPlayer:
             Position(8, 8),
         }
         board.obstacles = set()
-        board.initial_flower_count = 8
+        board.board.initial_flowers_count = 8
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -374,7 +374,7 @@ class TestAIGreedyPlayer:
             Position(3, 1),
         }
         board.flowers = {Position(3, 3)}  # Center
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -386,7 +386,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(2, 3)))
         board.flowers = {Position(0, 0), Position(4, 4)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -407,7 +407,7 @@ class TestAIGreedyPlayer:
             Position(6, 6),
         }
         board.obstacles = set()
-        board.initial_flower_count = 6
+        board.board.initial_flowers_count = 6
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -427,7 +427,7 @@ class TestAIGreedyPlayer:
             Position(3, 3),
         }
         board.flowers = {Position(3, 2)}  # Inside the U
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -445,7 +445,7 @@ class TestAIGreedyPlayer:
             Position(5, 1),
         }
         board.obstacles = set()
-        board.initial_flower_count = 5
+        board.board.initial_flowers_count = 5
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -460,7 +460,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -473,7 +473,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=10, robot=robot, princess=Princess(position=Position(4, 9)))
         board.flowers = {Position(2, 4), Position(3, 7)}
         board.obstacles = set()
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -497,7 +497,7 @@ class TestAIGreedyPlayer:
             Position(5, 3),
         }
         board.flowers = {Position(1, 1), Position(5, 5)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -509,7 +509,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=15, cols=15, robot=robot, princess=Princess(position=Position(7, 7)))
         board.flowers = {Position(14, 14)}  # Maximum distance
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -528,7 +528,7 @@ class TestAIGreedyPlayer:
             Position(3, 6),  # Right edge
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -553,7 +553,7 @@ class TestAIGreedyPlayer:
             Position(5, 4),
         }
         board.flowers = {Position(6, 6)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -565,7 +565,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         board.obstacles = {Position(2, 1), Position(2, 3)}
         board.flowers = {Position(2, 2)}  # Between obstacles
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -588,7 +588,7 @@ class TestAIGreedyPlayer:
             Position(6, 7),  # Group 4
         }
         board.flowers = {Position(4, 4), Position(7, 7)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -606,7 +606,7 @@ class TestAIGreedyPlayer:
             Position(3, 7),
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -624,7 +624,7 @@ class TestAIGreedyPlayer:
             Position(5, 4),
         }
         board.obstacles = set()
-        board.initial_flower_count = 3
+        board.board.initial_flowers_count = 3
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -643,7 +643,7 @@ class TestAIGreedyPlayer:
             Position(4, 3),
         }
         board.flowers = {Position(3, 3)}  # Center
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -664,7 +664,7 @@ class TestAIGreedyPlayer:
             Position(3, 4),
         }
         board.flowers = {Position(2, 2)}  # In narrow space
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -689,7 +689,7 @@ class TestAIGreedyPlayer:
             Position(8, 5),
         }
         board.flowers = {Position(5, 5), Position(7, 7)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -712,7 +712,7 @@ class TestAIGreedyPlayer:
             Position(5, 5),
         }
         board.flowers = {Position(2, 2), Position(4, 4), Position(6, 6)}
-        board.initial_flower_count = 3
+        board.board.initial_flowers_count = 3
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -736,7 +736,7 @@ class TestAIGreedyPlayer:
             Position(5, 4),
         }
         board.flowers = {Position(5, 3)}  # At end of corridor
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -759,7 +759,7 @@ class TestAIGreedyPlayer:
             Position(5, 3),
         }
         board.flowers = {Position(1, 1), Position(5, 5)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -791,7 +791,7 @@ class TestAIGreedyPlayer:
             Position(5, 7),
         }
         board.flowers = {Position(6, 6)}
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -808,7 +808,7 @@ class TestAIGreedyPlayer:
             Position(2, 4),
         }
         board.flowers = {Position(3, 3)}  # Behind shield
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -820,7 +820,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=20, cols=20, robot=robot, princess=Princess(position=Position(19, 19)))
         board.flowers = {Position(10, 10), Position(15, 15)}
         board.obstacles = {Position(5, 5), Position(12, 12)}
-        board.initial_flower_count = 2
+        board.board.initial_flowers_count = 2
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -833,7 +833,7 @@ class TestAIGreedyPlayer:
         board = Game(rows=10, cols=10, robot=robot, princess=Princess(position=Position(9, 9)))
         board.flowers = {Position(5, 5)}  # Center
         board.obstacles = set()
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -855,7 +855,7 @@ class TestAIGreedyPlayer:
             Position(7, 1),
         }
         board.obstacles = set()
-        board.initial_flower_count = 7
+        board.board.initial_flowers_count = 7
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -888,7 +888,7 @@ class TestAIGreedyPlayer:
             Position(5, 6),
         }
         board.flowers = {Position(6, 6)}  # Single flower
-        board.initial_flower_count = 1
+        board.board.initial_flowers_count = 1
 
         actions = AIGreedyPlayer.solve(board)
 
@@ -906,7 +906,7 @@ class TestAIGreedyPlayer:
             Position(4, 6),  # East
         }
         board.obstacles = set()
-        board.initial_flower_count = 4
+        board.board.initial_flowers_count = 4
 
         actions = AIGreedyPlayer.solve(board)
 

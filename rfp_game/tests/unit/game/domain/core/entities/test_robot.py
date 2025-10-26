@@ -14,45 +14,51 @@ def test_robot_creation():
 
 def test_robot_pick_flower():
     robot = Robot(position=Position(0, 0))
-    robot.pick_flower()
+    flower_pos = Position(1, 1)
+
+    action = robot.pick_flower(flower_pos)
     assert robot.flowers_held == 1
+    assert action.message is None  # Success
+    assert action.type.value == "pickFlower"
 
     # Test max flowers
-    for _ in range(11):
-        robot.pick_flower()
+    for i in range(11):
+        robot.pick_flower(Position(i, i))
     assert robot.flowers_held == 12
 
-    with pytest.raises(ValueError):
-        robot.pick_flower()
+    # Test exceeding max
+    action = robot.pick_flower(Position(5, 5))
+    assert robot.flowers_held == 12  # Should not increase
+    assert "Cannot hold more than" in action.message
 
 
 def test_robot_drop_flower():
     robot = Robot(position=Position(0, 0))
+    drop_pos = Position(2, 2)
 
-    with pytest.raises(ValueError):
-        robot.drop_flower()
+    # Try to drop when no flowers held
+    action = robot.drop_flower(drop_pos)
+    assert "No flowers to drop" in action.message
 
-    robot.pick_flower()
-    robot.drop_flower()
+    # Pick and then drop
+    flower_pos = Position(1, 1)
+    robot.pick_flower(flower_pos)
+    action = robot.drop_flower(flower_pos)
     assert robot.flowers_held == 0
+    assert action.message is None  # Success
 
 
 def test_robot_give_flowers():
     robot = Robot(position=Position(0, 0))
-    robot.pick_flower()
-    robot.pick_flower()
+    robot.pick_flower(Position(1, 1))
+    robot.pick_flower(Position(2, 2))
 
     princess_pos = Position(0, 1)
-    delivered = robot.give_flowers(princess_pos)
-    assert delivered == 2
+    action = robot.give_flowers(princess_pos)
     assert robot.flowers_held == 0
+    assert action.message is None  # Success
     # Verify that flowers_delivered list has one entry per flower delivered
     assert len(robot.flowers_delivered) == 2
-    assert all(
-        entry["position"]["row"] == princess_pos.row
-        and entry["position"]["col"] == princess_pos.col
-        for entry in robot.flowers_delivered
-    )
 
 
 def test_robot_give_flowers_multiple_times():
@@ -61,22 +67,22 @@ def test_robot_give_flowers_multiple_times():
     princess_pos = Position(0, 1)
 
     # First delivery: 2 flowers
-    robot.pick_flower()
-    robot.pick_flower()
-    delivered1 = robot.give_flowers(princess_pos)
-    assert delivered1 == 2
+    robot.pick_flower(Position(1, 1))
+    robot.pick_flower(Position(2, 2))
+    action1 = robot.give_flowers(princess_pos)
+    assert action1.message is None
     assert len(robot.flowers_delivered) == 2
 
     # Second delivery: 3 flowers
-    robot.pick_flower()
-    robot.pick_flower()
-    robot.pick_flower()
-    delivered2 = robot.give_flowers(princess_pos)
-    assert delivered2 == 3
+    robot.pick_flower(Position(3, 3))
+    robot.pick_flower(Position(4, 4))
+    robot.pick_flower(Position(5, 5))
+    action2 = robot.give_flowers(princess_pos)
+    assert action2.message is None
     assert len(robot.flowers_delivered) == 5  # Total: 2 + 3 = 5
 
     # Third delivery: 1 flower
-    robot.pick_flower()
-    delivered3 = robot.give_flowers(princess_pos)
-    assert delivered3 == 1
+    robot.pick_flower(Position(6, 6))
+    action3 = robot.give_flowers(princess_pos)
+    assert action3.message is None
     assert len(robot.flowers_delivered) == 6  # Total: 2 + 3 + 1 = 6

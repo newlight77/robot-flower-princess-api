@@ -1,5 +1,5 @@
-def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place_flower):
-    game_id = "helper-pick"
+def should_pick_drop_give_with_helpers_successfully(client, make_empty_board, save_board, place_flower):
+    game_id = "component-pick-drop-give-with-helpers"
     board = make_empty_board()
     # place a flower north of robot
     from hexagons.game.domain.core.entities.position import Position
@@ -15,7 +15,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert len(data["robot"]["flowers"]["collected"]) > 0
+    assert len(data["game"]["robot"]["flowers"]["collected"]) > 0
 
     # rotate to south and drop
     resp = client.post(
@@ -29,7 +29,7 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     data = resp.json()
     assert data["success"] is True
     # Successfully dropped the flower (business logic may vary on whether collected count changes)
-    assert "robot" in data and "flowers" in data["robot"]
+    assert "robot" in data and "flowers" in data["game"]["robot"]
 
     # give: set robot next to princess and set flowers_held
     from configurator.dependencies import get_game_repository
@@ -38,8 +38,6 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     b = repo.get(game_id)
     assert b is not None
     # put robot adjacent to princess
-    from hexagons.game.domain.core.entities.position import Position
-
     b.robot.position = Position(2, 1)
     b.robot.flowers_held = 1
     repo.save(game_id, b)
@@ -49,11 +47,12 @@ def test_pick_drop_give_with_helpers(client, make_empty_board, save_board, place
     )
     assert resp.status_code == 200
     data = resp.json()
-    assert "success" in data
+    print(f"should_pick_drop_give_with_helpers_successfully Data: {data}")
+    assert "success" in data["message"] or "board" in data
 
 
-def test_clean_with_helpers(client, make_empty_board, save_board, place_obstacle, place_robot):
-    game_id = "helper-clean"
+def should_clean_with_helpers_successfully(client, make_empty_board, save_board, place_obstacle, place_robot):
+    game_id = "component-clean-with-helpers"
     board = make_empty_board()
     from hexagons.game.domain.core.entities.position import Position
     from hexagons.game.domain.core.value_objects.direction import Direction

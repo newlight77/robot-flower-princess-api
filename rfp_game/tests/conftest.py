@@ -7,7 +7,6 @@ from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
-from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
 from configurator.dependencies import get_game_repository
 from hexagons.game.driven.persistence.in_memory_game_repository import (
@@ -41,19 +40,8 @@ def create_game(client):
         resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
         assert resp.status_code == 201
         data = resp.json()
-        # Create a board-like structure for backward compatibility
-        board_data = {
-            "rows": data["board"]["rows"],
-            "cols": data["board"]["cols"],
-            "grid": data["board"]["grid"],
-            "robot": data["robot"],
-            "princess_position": data["princess"]["position"],
-            "flowers_remaining": data["flowers"]["remaining"],
-            "flowers_delivered": 0,
-            "total_flowers": data["flowers"]["total"],
-            "status": data["status"],
-        }
-        return data["id"], board_data
+        game = data["game"]
+        return game["id"], game
 
     return _create
 
@@ -62,9 +50,6 @@ def create_game(client):
 def save_board(repo):
     def _save(game_id, board):
         repo.save(game_id, board)
-        history = GameHistory(game_id=game_id)
-        history.add_action(action=None)
-        repo.save_history(game_id, history)
 
     return _save
 
@@ -99,7 +84,7 @@ def seeded_game(client) -> Callable[..., str]:
     def _seed(rows: int = 5, cols: int = 5) -> str:
         resp = client.post("/api/games/", json={"rows": rows, "cols": cols})
         assert resp.status_code == 201
-        return resp.json()["id"]
+        return resp.json()["game"]["id"]
 
     return _seed
 
@@ -130,7 +115,7 @@ def game_repository():
 def sample_board():
     """Fixture for a simple test board."""
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    princess_pos = Position(2, 2)
+    princess = Princess(position=Position(2, 2))
     flowers = {Position(1, 1)}
     obstacles = {Position(0, 1)}
 
@@ -138,10 +123,10 @@ def sample_board():
         rows=3,
         cols=3,
         robot=robot,
-        princess_position=princess_pos,
-        flowers=flowers,
-        obstacles=obstacles,
+        princess=princess,
     )
+    board.flowers = flowers
+    board.obstacles = obstacles
     board.initial_flower_count = len(flowers)
     return board
 

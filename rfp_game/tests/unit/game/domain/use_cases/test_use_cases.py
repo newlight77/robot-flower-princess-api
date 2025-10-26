@@ -7,7 +7,6 @@ from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
 
 from hexagons.game.domain.use_cases.rotate_robot import (
@@ -34,7 +33,7 @@ def make_board_with_flower():
     # place a flower north of robot
     board.flowers = {Position(0, 1)}
     board.obstacles = set()
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -47,12 +46,11 @@ def test_rotate_use_case_missing_game(repo):
 def test_rotate_use_case_success(repo):
     board = make_board_with_flower()
     repo.save("g1", board)
-    repo.save_history("g1", GameHistory())
 
     use_case = RotateRobotUseCase(repo)
     res = use_case.execute(RotateRobotCommand(game_id="g1", direction=Direction.SOUTH))
     assert res.success is True
-    assert res.robot.orientation == Direction.SOUTH
+    assert res.game.robot.orientation == Direction.SOUTH
 
 
 def test_move_use_case_missing_game(repo):
@@ -64,20 +62,19 @@ def test_move_use_case_missing_game(repo):
 def test_move_use_case_success(repo):
     board = make_board_with_flower()
     repo.save("g2", board)
-    repo.save_history("g2", GameHistory())
 
     use_case = MoveRobotUseCase(repo)
     res = use_case.execute(MoveRobotCommand(game_id="g2", direction=Direction.NORTH))
     assert isinstance(res.success, bool)
-    assert hasattr(res, "board")
-    assert hasattr(res, "robot")
-    assert hasattr(res, "princess")
+    assert hasattr(res, "game")
+    assert hasattr(res.game, "board")
+    assert hasattr(res.game, "robot")
+    assert hasattr(res.game, "princess")
 
 
 def test_pick_drop_give_use_cases(repo):
     board = make_board_with_flower()
     repo.save("g3", board)
-    repo.save_history("g3", GameHistory())
 
     pick_uc = PickFlowerUseCase(repo)
     pick_res = pick_uc.execute(PickFlowerCommand(game_id="g3", direction=Direction.NORTH))

@@ -10,7 +10,7 @@ def test_rotate_changes_orientation(client, create_game):
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert data["robot"]["orientation"] == "south"
+    assert data["game"]["robot"]["orientation"] == "south"
 
 
 def test_robot_move(client, save_board, make_empty_board):
@@ -28,7 +28,7 @@ def test_robot_move(client, save_board, make_empty_board):
     assert data["success"] is True or data["success"] is False
     # If success True, robot should have moved
     if data["success"]:
-        assert data["robot"]["position"] == {"row": 0, "col": 1}
+        assert data["game"]["robot"]["position"] == {"row": 0, "col": 1}
 
 
 def test_invalid_direction_payload(client, seeded_board):
@@ -65,4 +65,4 @@ def test_move_with_helpers(client, make_empty_board, save_board):
     data = resp.json()
     # if move succeeded, robot moved to row 0, col 1
     if data["success"]:
-        assert data["robot"]["position"] == {"row": 0, "col": 1}
+        assert data["game"]["robot"]["position"] == {"row": 0, "col": 1}

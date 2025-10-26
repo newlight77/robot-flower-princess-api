@@ -19,7 +19,7 @@ def simple_board():
     board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1), Position(3, 3)}
     board.obstacles = set()
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 
@@ -39,7 +39,7 @@ def complex_board():
         Position(3, 3),
         Position(4, 4),
     }
-    board.initial_flower_count = len(board.flowers)
+    board.board.initial_flowers_count = len(board.flowers)
     return board
 
 

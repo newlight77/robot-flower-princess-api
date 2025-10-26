@@ -5,9 +5,8 @@ from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
-from hexagons.game.domain.core.value_objects.action_type import ActionType
+from hexagons.game.domain.core.value_objects.action import ActionType
 
 from hexagons.game.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from hexagons.game.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
@@ -27,7 +26,7 @@ def make_center_board(rows=3, cols=3):
     board = Game(rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(rows - 1, cols - 1)))
     board.flowers = set()
     board.obstacles = set()
-    board.initial_flower_count = 0
+    board.board.initial_flowers_count = 0
     return board
 
 
@@ -35,7 +34,6 @@ def test_move_rotates_then_moves():
     repo = InMemoryGameRepository()
     board = make_center_board()
     repo.save("m1", board)
-    repo.save_history("m1", GameHistory())
 
     use_case = MoveRobotUseCase(repo)
     res = use_case.execute(MoveRobotCommand(game_id="m1", direction=Direction.NORTH))
@@ -48,11 +46,6 @@ def test_move_rotates_then_moves():
     if res.success:
         assert b.robot.position == Position(0, 1)
 
-    history = repo.get_history("m1")
-    assert history is not None
-    last = history.actions[-1]
-    assert last.action_type == ActionType.MOVE
-    assert last.direction == Direction.NORTH
 
 
 def test_pick_rotates_then_picks():
@@ -61,9 +54,8 @@ def test_pick_rotates_then_picks():
     # place a flower north of center
     flower_pos = Position(0, 1)
     board.flowers = {flower_pos}
-    board.initial_flower_count = 1
+    board.board.initial_flowers_count = 1
     repo.save("p1", board)
-    repo.save_history("p1", GameHistory())
 
     use_case = PickFlowerUseCase(repo)
     res = use_case.execute(PickFlowerCommand(game_id="p1", direction=Direction.NORTH))
@@ -76,19 +68,13 @@ def test_pick_rotates_then_picks():
         assert b.robot.flowers_held > 0
         assert flower_pos not in b.flowers
 
-    history = repo.get_history("p1")
-    assert history is not None
-    last = history.actions[-1]
-    assert last.action_type == ActionType.PICK
-    assert last.direction == Direction.NORTH
 
 
 def test_drop_rotates_then_drops():
     repo = InMemoryGameRepository()
     board = make_center_board()
-    board.robot.flowers_held = 1
+    board.robot.pick_flower(Position(0, 1))
     repo.save("d1", board)
-    repo.save_history("d1", GameHistory())
 
     use_case = DropFlowerUseCase(repo)
     res = use_case.execute(DropFlowerCommand(game_id="d1", direction=Direction.NORTH))
@@ -101,11 +87,6 @@ def test_drop_rotates_then_drops():
         assert b.robot.flowers_held == 0
         assert Position(0, 1) in b.flowers
 
-    history = repo.get_history("d1")
-    assert history is not None
-    last = history.actions[-1]
-    assert last.action_type == ActionType.DROP
-    assert last.direction == Direction.NORTH
 
 
 def test_give_rotates_then_gives():
@@ -113,9 +94,8 @@ def test_give_rotates_then_gives():
     board = make_center_board()
     # place princess north of robot
     board.princess.position = Position(0, 1)
-    board.robot.flowers_held = 1
+    board.robot.pick_flower(Position(0, 1))
     repo.save("g1", board)
-    repo.save_history("g1", GameHistory())
 
     use_case = GiveFlowersUseCase(repo)
     res = use_case.execute(GiveFlowersCommand(game_id="g1", direction=Direction.NORTH))
@@ -127,11 +107,6 @@ def test_give_rotates_then_gives():
     if res.success:
         assert b.robot.flowers_held == 0
 
-    history = repo.get_history("g1")
-    assert history is not None
-    last = history.actions[-1]
-    assert last.action_type == ActionType.GIVE
-    assert last.direction == Direction.NORTH
 
 
 def test_clean_rotates_then_cleans():
@@ -140,7 +115,6 @@ def test_clean_rotates_then_cleans():
     obs_pos = Position(0, 1)
     board.obstacles = {obs_pos}
     repo.save("c1", board)
-    repo.save_history("c1", GameHistory())
 
     use_case = CleanObstacleUseCase(repo)
     res = use_case.execute(CleanObstacleCommand(game_id="c1", direction=Direction.NORTH))
@@ -152,8 +126,3 @@ def test_clean_rotates_then_cleans():
     if res.success:
         assert obs_pos not in b.obstacles
 
-    history = repo.get_history("c1")
-    assert history is not None
-    last = history.actions[-1]
-    assert last.action_type == ActionType.CLEAN
-    assert last.direction == Direction.NORTH

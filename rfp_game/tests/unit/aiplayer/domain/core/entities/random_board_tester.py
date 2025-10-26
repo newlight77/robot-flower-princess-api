@@ -55,7 +55,7 @@ class RandomBoardGenerator:
 
         board.flowers = flowers
         board.obstacles = obstacles
-        board.initial_flower_count = len(flowers)
+        board.board.initial_flowers_count = len(flowers)
 
         return board
 

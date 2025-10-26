@@ -7,78 +7,10 @@ The architecture supports:
 - Future: Replace heuristics with trained ML models (sklearn, pytorch, etc.)
 """
 
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
-
-
-@dataclass
-class BoardState:
-    """Simplified board state representation for ML player."""
-
-    rows: int
-    cols: int
-    robot_position: Tuple[int, int]
-    robot_orientation: str  # "NORTH", "SOUTH", "EAST", "WEST"
-    robot_flowers_held: int
-    robot_max_capacity: int
-    princess_position: Tuple[int, int]
-    flowers: List[Tuple[int, int]]
-    obstacles: List[Tuple[int, int]]
-    flowers_delivered: int
-
-    def to_feature_vector(self) -> List[float]:
-        """
-        Convert board state to feature vector for ML.
-
-        Future: This will be input to ML model.
-        Current: Used for weighted scoring.
-        """
-        features = [
-            float(self.rows),
-            float(self.cols),
-            float(self.robot_position[0]),
-            float(self.robot_position[1]),
-            float(self.robot_flowers_held),
-            float(self.robot_max_capacity),
-            float(self.princess_position[0]),
-            float(self.princess_position[1]),
-            float(len(self.flowers)),
-            float(len(self.obstacles)),
-            float(self.flowers_delivered),
-            # Derived features
-            self._distance_to_princess(),
-            self._closest_flower_distance(),
-            self._obstacle_density(),
-        ]
-        return features
-
-    def _distance_to_princess(self) -> float:
-        """Manhattan distance to princess."""
-        return float(abs(self.robot_position[0] - self.princess_position[0]) + abs(
-            self.robot_position[1] - self.princess_position[1]
-        ))
-
-    def _closest_flower_distance(self) -> float:
-        """Distance to closest flower."""
-        if not self.flowers:
-            return 0.0
-        distances = [
-            abs(self.robot_position[0] - f[0]) + abs(self.robot_position[1] - f[1])
-            for f in self.flowers
-        ]
-        return float(min(distances))
-
-    def _obstacle_density(self) -> float:
-        """Obstacle density around robot."""
-        count = 0
-        for dr in [-1, 0, 1]:
-            for dc in [-1, 0, 1]:
-                pos = (self.robot_position[0] + dr, self.robot_position[1] + dc)
-                if pos in self.obstacles:
-                    count += 1
-        return count / 9.0  # Normalize to [0, 1]
+from shared.logging import logger
+from ..value_objects.game_state import GameState
 
 
 class AIMLPlayer:
@@ -104,7 +36,7 @@ class AIMLPlayer:
         self.config = config or StrategyConfig.default()
         self.model = None  # Future: Load trained ML model here
 
-    def evaluate_board(self, state: BoardState) -> float:
+    def evaluate_board(self, state: GameState) -> float:
         """
         Evaluate board state and return a score.
 
@@ -117,6 +49,8 @@ class AIMLPlayer:
         Returns:
             Score (higher is better)
         """
+        logger.info(f"AIMLPlayer.evaluate_board: Evaluating board={state.to_dict()}")
+
         if self.model is not None:
             # Future: Use ML model
             # features = state.to_feature_vector()
@@ -127,41 +61,47 @@ class AIMLPlayer:
         score = 0.0
 
         # Distance to nearest flower
-        if state.flowers and state.robot_flowers_held < state.robot_max_capacity:
+        if state.board["flowers_positions"] and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]:
             min_flower_dist = min(
-                abs(state.robot_position[0] - f[0]) + abs(state.robot_position[1] - f[1])
-                for f in state.flowers
+                abs(state.robot["position"]["row"] - f["row"]) + abs(state.robot["position"]["col"] - f["col"])
+                for f in state.board["flowers_positions"]
             )
+            logger.info(f"AIMLPlayer.evaluate_board: Distance to nearest flower={min_flower_dist}")
             score += self.config.distance_to_flower_weight * min_flower_dist
 
         # Distance to princess (when holding flowers)
-        if state.robot_flowers_held > 0:
-            princess_dist = state._distance_to_princess()
+        if len(state.robot["flowers_delivered"]) > 0:
+            princess_dist = state._distance_to_princess(state.robot["position"], state.princess["position"])
+            logger.info(f"AIMLPlayer.evaluate_board: Distance to princess={princess_dist}")
             score += self.config.distance_to_princess_weight * princess_dist
 
         # Obstacle density penalty
         obstacle_density = state._obstacle_density()
+        logger.info(f"AIMLPlayer.evaluate_board: Obstacle density={obstacle_density}")
         score += self.config.obstacle_density_weight * obstacle_density
 
         # Flower clustering bonus
-        if len(state.flowers) > 1:
+        if len(state.board["flowers_positions"]) > 1:
             # Calculate average pairwise distance between flowers
             total_dist = 0
             count = 0
-            for i, f1 in enumerate(state.flowers):
-                for f2 in state.flowers[i + 1 :]:
-                    dist = abs(f1[0] - f2[0]) + abs(f1[1] - f2[1])
+            for i, f1 in enumerate(state.board["flowers_positions"]):
+                for f2 in state.board["flowers_positions"][i + 1 :]:
+                    dist = abs(f1["row"] - f2["row"]) + abs(f1["col"] - f2["col"])
                     total_dist += dist
                     count += 1
             if count > 0:
                 avg_dist = total_dist / count
                 # Lower average distance = more clustered = bonus
                 cluster_score = 1.0 / (1.0 + avg_dist)
+                logger.info(f"AIMLPlayer.evaluate_board: Flower clustering bonus={cluster_score}")
                 score += self.config.flower_cluster_bonus * cluster_score
+
+        logger.info(f"AIMLPlayer.evaluate_board: Heuristic evaluation score={score}")
 
         return score
 
-    def select_action(self, state: BoardState) -> Tuple[str, Optional[str]]:
+    def select_action(self, state: GameState) -> Tuple[str, Optional[str]]:
         """
         Select best action for current state.
 
@@ -177,46 +117,49 @@ class AIMLPlayer:
         # Simple decision tree for MVP
         # Future: Replace with neural network policy
 
-        # If at princess with flowers → give
-        if (
-            state.robot_position == state.princess_position
-            and state.robot_flowers_held > 0
+        logger.info(f"AIMLPlayer.select_action: Selecting action for state={state.to_dict()}")
+
+        # If next to princess with flowers → give
+        if ( state.robot["position"] in self._get_adjacent_positions(state.princess["position"])
+            and len(state.robot["flowers_delivered"]) > 0
         ):
             return ("give", None)
 
         # If at flower and not full → pick
         if (
-            state.robot_position in state.flowers
-            and state.robot_flowers_held < state.robot_max_capacity
+            state.robot["position"] in state.board["flowers_positions"]
+            and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]
         ):
             return ("pick", None)
 
         # If holding flowers → move toward princess
-        if state.robot_flowers_held > 0:
+        if len(state.robot["flowers_delivered"]) > 0:
             direction = self._get_direction_to_target(
-                state.robot_position, state.princess_position
+                state.robot["position"], state.princess["position"]
             )
             return ("move", direction)
 
         # Otherwise → move toward nearest flower
-        if state.flowers:
+        if state.board["flowers_positions"]:
             nearest_flower = min(
-                state.flowers,
-                key=lambda f: abs(state.robot_position[0] - f[0])
-                + abs(state.robot_position[1] - f[1]),
+                state.board["flowers_positions"],
+                key=lambda f: abs(state.robot["position"]["row"] - f["row"])
+                + abs(state.robot["position"]["col"] - f["col"]),
             )
-            direction = self._get_direction_to_target(state.robot_position, nearest_flower)
+            direction = self._get_direction_to_target(state.robot["position"], nearest_flower)
             return ("move", direction)
 
         # Default: do nothing (shouldn't reach here)
-        return ("move", state.robot_orientation)
+        return ("move", state.robot["orientation"])
 
     def _get_direction_to_target(
         self, current: Tuple[int, int], target: Tuple[int, int]
     ) -> str:
         """Get direction to move toward target."""
-        dr = target[0] - current[0]
-        dc = target[1] - current[1]
+        logger.info(f"AIMLPlayer._get_direction_to_target: Getting direction to target={current} -> {target}")
+
+        dr = target["row"] - current["row"]
+        dc = target["col"] - current["col"]
 
         # Prioritize vertical or horizontal based on larger difference
         if abs(dr) > abs(dc):
@@ -225,7 +168,7 @@ class AIMLPlayer:
             return "EAST" if dc > 0 else "WEST"
 
     def plan_sequence(
-        self, state: BoardState, horizon: Optional[int] = None
+        self, state: GameState, horizon: Optional[int] = None
     ) -> List[Tuple[str, Optional[str]]]:
         """
         Plan a sequence of actions.
@@ -240,6 +183,8 @@ class AIMLPlayer:
         Returns:
             List of actions
         """
+        logger.info(f"AIMLPlayer.plan_sequence: Planning sequence for state={state.to_dict()} with horizon={horizon}")
+
         horizon = horizon or self.config.lookahead_depth
         actions = []
 
@@ -267,6 +212,7 @@ class AIMLPlayer:
         - Load pytorch model: torch.load(model_path)
         - Load tensorflow model: tf.keras.models.load_model(model_path)
         """
+        logger.info(f"AIMLPlayer.load_model: Loading model from={model_path}")
         raise NotImplementedError("ML model loading will be implemented in future version")
 
     def save_model(self, model_path: str) -> None:
@@ -275,4 +221,16 @@ class AIMLPlayer:
 
         Future implementation for model persistence.
         """
+        logger.info(f"AIMLPlayer.save_model: Saving model to={model_path}")
         raise NotImplementedError("ML model saving will be implemented in future version")
+
+    def _get_adjacent_positions(self, position: Tuple[int, int]) -> List[Tuple[int, int]]:
+        """Get all valid adjacent empty positions."""
+        adjacent_positions = [
+            {"row": position["row"] + 1, "col": position["col"]},
+            {"row": position["row"] - 1, "col": position["col"]},
+            {"row": position["row"], "col": position["col"] + 1},
+            {"row": position["row"], "col": position["col"] - 1},
+        ]
+
+        return adjacent_positions

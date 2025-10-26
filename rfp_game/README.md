@@ -75,7 +75,10 @@ The API now exposes a single unified actions endpoint.
 -- `POST /api/games/{game_id}/action` - Perform an action. Body shape: `{ "action": "rotate|move|pickFlower|dropFlower|giveFlower|clean", "direction": "north|south|east|west" }` (direction is required for all actions)
 
 #### AI Player
-- `POST /api/games/{game_id}/autoplay` - Let AI solve the game
+- `POST /api/games/{game_id}/autoplay?strategy=greedy|optimal|ml` - Let AI solve the game
+  - **greedy**: Safe & reliable (75% success, BFS)
+  - **optimal**: Fast & efficient (62% success, A* + planning, -25% actions)
+  - **ml**: Hybrid ML/heuristic (adaptive, uses ML Player service)
 
 ## 🧪 Testing
 
@@ -98,22 +101,40 @@ open .coverage/coverage_html/index.html
 
 ## 🏗️ Architecture
 
-This project follows **Hexagonal Architecture** (Ports and Adapters):
+This project follows **Hexagonal Architecture** (Ports and Adapters) with a **microservices** approach:
 
+### Services Architecture
+```
+┌───────────────────┐         HTTP         ┌──────────────────────┐
+│                   │ ─────────────────────>│                      │
+│  RFP Game Service │  /api/ml-player/*    │  ML Player Service   │
+│    (port 8000)    │                       │    (port 8001)       │
+│                   │ <─────────────────────│                      │
+└───────────────────┘   Predictions        └──────────────────────┘
+         │
+         │ Hexagons:
+         ├─ game/              # Core game logic
+         ├─ aiplayer/          # AI strategies (greedy, optimal, ml_proxy)
+         └─ health/            # Health monitoring
+```
+
+### Hexagonal Structure (per service)
 ```
 src/hexagons/
-├── domain/              # Core business logic
-│   ├── entities/        # Game entities
-│   ├── value_objects/   # Immutable values
-│   ├── services/        # Domain services
-│   └── exceptions/      # Domain exceptions
-├── application/         # Use cases
-│   ├── ports/           # Interfaces
-│   └── use_cases/       # Application logic
-└── infrastructure/      # External adapters
-    ├── api/             # FastAPI
-    ├── persistence/     # In-memory repository
-    └── ai/              # AI solver
+├── <hexagon_name>/
+│   ├── domain/              # Core business logic
+│   │   ├── core/
+│   │   │   ├── entities/    # Domain entities
+│   │   │   └── value_objects/  # Immutable values
+│   │   ├── ports/           # Interfaces
+│   │   ├── services/        # Domain services
+│   │   └── use_cases/       # Application logic
+│   ├── driven/              # Infrastructure (outgoing)
+│   │   └── adapters/        # External services, persistence
+│   └── driver/              # Infrastructure (incoming)
+│       └── bff/             # API endpoints
+│           ├── routers/
+│           └── schemas/
 ```
 
 ## 📖 Example Usage

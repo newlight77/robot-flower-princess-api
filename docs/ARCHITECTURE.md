@@ -15,13 +15,19 @@
 
 ## Overview
 
-The **Robot Flower Princess** game backend is built using **Domain-Driven Design (DDD)** and **Hexagonal Architecture** (also known as Ports and Adapters). This architecture ensures:
+The **Robot Flower Princess** game backend is built using **Domain-Driven Design (DDD)** and **Hexagonal Architecture** (also known as Ports and Adapters) with a **microservices architecture**. The system consists of two main services:
+
+1. **RFP Game Service** (`rfp_game`) - Main game logic and API
+2. **ML Player Service** (`ml_player`) - Machine learning-based AI player
+
+This architecture ensures:
 
 - ✅ **Business Logic Independence**: Core domain logic is isolated from external concerns
 - ✅ **Testability**: Easy to test with minimal mocking
 - ✅ **Maintainability**: Clear separation of concerns
 - ✅ **Flexibility**: Easy to swap implementations (database, API framework, etc.)
 - ✅ **Scalability**: Clean boundaries for extending functionality
+- ✅ **Service Isolation**: AI logic separated into its own service for independent scaling
 
 ### Technology Stack
 
@@ -103,21 +109,58 @@ The domain layer uses **tactical DDD patterns**:
 ┌──────────────────────────────────────────────────────────────────┐
 │                         HTTP Client                               │
 │                  (Web, Mobile, CLI, Tests)                        │
-└──────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
+└──────────────────────┬───────────────────────────────────────────┘
+                       │
+                       ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                        FastAPI Application                        │
+│              RFP Game Service (port 8000)                         │
 │  ┌────────────────────────────────────────────────────────────┐  │
 │  │                    API Router Layer                        │  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │  │
-│  │  │ Game Router  │  │ Root Endpoint│  │Health Endpoint│   │  │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘    │  │
+│  │  ┌──────────┐ ┌────────────┐ ┌──────────┐ ┌───────────┐  │  │
+│  │  │Game Router│ │AI Router   │ │Health     │ │Other...   │  │  │
+│  │  └──────────┘ └────────────┘ └──────────┘ └───────────┘  │  │
 │  └────────────────────────────────────────────────────────────┘  │
 │                              │                                    │
 │  ┌────────────────────────────────────────────────────────────┐  │
 │  │                    Pydantic Schemas                        │  │
 │  │    (Request/Response validation & serialization)           │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                              │                                    │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │          Hexagons (Domain Modules)                         │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐                │  │
+│  │  │  Game    │  │ AIPlayer │  │  Health  │                │  │
+│  │  └────┬─────┘  └────┬─────┘  └──────────┘                │  │
+│  │       │             │                                      │  │
+│  │       │             │  ┌──────────────────────┐           │  │
+│  │       │             └──│ HttpMLPlayerClient   │───────┐   │  │
+│  │       │                │  (HTTP Adapter)      │       │   │  │
+│  │       │                └──────────────────────┘       │   │  │
+│  └───────┼───────────────────────────────────────────────┼───┘  │
+│          │                                               │      │
+│          ▼                                               │      │
+│  ┌────────────────┐                                     │      │
+│  │   Repository   │                                     │      │
+│  │   (In-Memory)  │                                     │      │
+│  └────────────────┘                                     │      │
+└────────────────────────────────────────────────────────┼──────┘
+                                                          │
+                                            HTTP Request  │
+                                                          ▼
+┌──────────────────────────────────────────────────────────────────┐
+│              ML Player Service (port 8001)                        │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │                    API Router Layer                        │  │
+│  │  ┌────────────────┐ ┌──────────────┐                      │  │
+│  │  │ML Player Router│ │Health Router │                      │  │
+│  │  └────────────────┘ └──────────────┘                      │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                              │                                    │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │                  ML Player Hexagon                         │  │
+│  │  ┌────────────────┐                                        │  │
+│  │  │  AIMLPlayer    │  (Heuristic-based, ML-ready)          │  │
+│  │  └────────────────┘                                        │  │
 │  └────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
                               │
@@ -233,89 +276,184 @@ This application has a single **bounded context**: **Game Management**
 
 ```
 Robot-Flower-Princess-Claude-API-FastAPI-v4/
-├── src/
-│   ├── hexagons/                            # Hexagonal Architecture Modules
-│   │   ├── game/                            # Game Hexagon (Core Domain)
-│   │   │   ├── domain/                      # Domain Layer (Business Logic)
-│   │   │   │   ├── core/
-│   │   │   │   │   ├── entities/            # Domain Entities
-│   │   │   │   │   │   ├── game.py          # Game aggregate root
-│   │   │   │   │   │   ├── board.py         # Board entity
-│   │   │   │   │   │   ├── robot.py         # Robot entity
-│   │   │   │   │   │   ├── princess.py      # Princess entity
-│   │   │   │   │   │   └── game_history.py  # Game history entity
-│   │   │   │   │   ├── value_objects/       # Immutable Value Objects
-│   │   │   │   │   │   ├── position.py      # Position (row, col)
-│   │   │   │   │   │   ├── direction.py     # Direction enum
-│   │   │   │   │   │   ├── action_type.py   # Action type enum
-│   │   │   │   │   │   └── game_status.py   # Game status enum
-│   │   │   │   │   └── exceptions/          # Domain Exceptions
-│   │   │   │   │       └── game_exceptions.py  # Custom exceptions
-│   │   │   │   ├── ports/                   # Domain Interfaces
-│   │   │   │   │   └── game_repository.py   # Repository interface
-│   │   │   │   ├── services/                # Domain Services
-│   │   │   │   │   └── game_service.py      # Game operations service
-│   │   │   │   └── use_cases/               # Application Use Cases
-│   │   │   │       ├── create_game.py       # Create new game
-│   │   │   │       ├── get_game_state.py        # Retrieve game state
-│   │   │   │       ├── get_game_history.py      # Retrieve game history
-│   │   │   │       ├── move_robot.py            # Move robot action
-│   │   │   │       ├── rotate_robot.py          # Rotate robot action
-│   │   │   │       ├── pick_flower.py           # Pick flower action
-│   │   │   │       ├── drop_flower.py           # Drop flower action
-│   │   │   │       ├── give_flowers.py          # Give flowers action
-│   │   │   │       └── clean_obstacle.py        # Clean obstacle action
-│   │   │   ├── driven/                      # Infrastructure (Driven Adapters)
-│   │   │   │   └── persistence/
-│   │   │   │       └── in_memory_game_repository.py  # In-memory storage
-│   │   │   └── driver/                      # Infrastructure (Driver Adapters)
-│   │   │       └── bff/                     # Backend-for-Frontend
-│   │   │           ├── routers/
-│   │   │           │   └── game_router.py   # Game API endpoints
-│   │   │           └── schemas/
-│   │   │               └── game_schema.py   # Pydantic schemas
-│   │   ├── aiplayer/                        # AIPlayer Hexagon (AI Solver)
-│   │   │   ├── domain/
-│   │   │   │   ├── core/
-│   │   │   │   │   └── entities/
-│   │   │   │   │       ├── ai_greedy_player.py   # Greedy AI strategy
-│   │   │   │   │       └── ai_optimal_player.py  # Optimal AI strategy
-│   │   │   │   └── use_cases/
-│   │   │   │       └── autoplay.py          # Autoplay use case
-│   │   │   └── driver/
-│   │   │       └── bff/
-│   │   │           └── routers/
-│   │   │               └── aiplayer_router.py  # Autoplay API endpoint
-│   │   └── health/                          # Health Hexagon (Monitoring)
-│   │       └── driver/
-│   │           └── bff/
-│   │               └── routers/
-│   │                   └── health_router.py  # Health check endpoint
-│   ├── configurator/                        # Configuration (Shared)
-│   │   ├── settings.py                      # App settings
-│   │   └── dependencies.py                  # Dependency injection
-│   ├── shared/                              # Shared Utilities
-│   │   └── logging.py                       # Logging setup
-│   └── main.py                              # FastAPI app entry point
-├── tests/                                  # Test Suite
-│   ├── unit/                               # Unit tests
-│   ├── integration/                        # Integration tests
-│   ├── feature-component/                  # Feature-component tests
-│   └── conftest.py                         # Pytest fixtures
+├── rfp_game/                                # Main Game Service (port 8000)
+│   ├── src/
+│   │   ├── hexagons/                        # Hexagonal Architecture Modules
+│   │   │   ├── game/                        # Game Hexagon (Core Domain)
+│   │   │   │   ├── domain/                  # Domain Layer (Business Logic)
+│   │   │   │   │   ├── core/
+│   │   │   │   │   │   ├── entities/        # Domain Entities
+│   │   │   │   │   │   │   ├── game.py      # Game aggregate root
+│   │   │   │   │   │   │   ├── board.py     # Board entity
+│   │   │   │   │   │   │   ├── robot.py     # Robot entity
+│   │   │   │   │   │   │   ├── princess.py  # Princess entity
+│   │   │   │   │   │   │   └── game_history.py  # Game history entity
+│   │   │   │   │   │   ├── value_objects/   # Immutable Value Objects
+│   │   │   │   │   │   │   ├── position.py  # Position (row, col)
+│   │   │   │   │   │   │   ├── direction.py # Direction enum
+│   │   │   │   │   │   │   ├── action_type.py  # Action type enum
+│   │   │   │   │   │   │   └── game_status.py  # Game status enum
+│   │   │   │   │   │   └── exceptions/      # Domain Exceptions
+│   │   │   │   │   │       └── game_exceptions.py  # Custom exceptions
+│   │   │   │   │   ├── ports/               # Domain Interfaces
+│   │   │   │   │   │   └── game_repository.py  # Repository interface
+│   │   │   │   │   ├── services/            # Domain Services
+│   │   │   │   │   │   └── game_service.py  # Game operations service
+│   │   │   │   │   └── use_cases/           # Application Use Cases
+│   │   │   │   │       ├── create_game.py   # Create new game
+│   │   │   │   │       ├── get_game_state.py    # Retrieve game state
+│   │   │   │   │       ├── get_game_history.py  # Retrieve game history
+│   │   │   │   │       ├── move_robot.py        # Move robot action
+│   │   │   │   │       ├── rotate_robot.py      # Rotate robot action
+│   │   │   │   │       ├── pick_flower.py       # Pick flower action
+│   │   │   │   │       ├── drop_flower.py       # Drop flower action
+│   │   │   │   │       ├── give_flowers.py      # Give flowers action
+│   │   │   │   │       └── clean_obstacle.py    # Clean obstacle action
+│   │   │   │   ├── driven/                  # Infrastructure (Driven Adapters)
+│   │   │   │   │   └── persistence/
+│   │   │   │   │       └── in_memory_game_repository.py  # In-memory storage
+│   │   │   │   └── driver/                  # Infrastructure (Driver Adapters)
+│   │   │   │       └── bff/                 # Backend-for-Frontend
+│   │   │   │           ├── routers/
+│   │   │   │           │   └── game_router.py  # Game API endpoints
+│   │   │   │           └── schemas/
+│   │   │   │               └── game_schema.py  # Pydantic schemas
+│   │   │   ├── aiplayer/                    # AIPlayer Hexagon (AI Solver)
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── core/
+│   │   │   │   │   │   └── entities/
+│   │   │   │   │   │       ├── ai_greedy_player.py    # Greedy AI strategy
+│   │   │   │   │   │       ├── ai_optimal_player.py   # Optimal AI strategy (A*)
+│   │   │   │   │   │       └── ml_proxy_player.py     # ML Player proxy
+│   │   │   │   │   ├── ports/
+│   │   │   │   │   │   └── ml_player_client.py        # ML Player client interface
+│   │   │   │   │   └── use_cases/
+│   │   │   │   │       └── autoplay.py      # Autoplay use case
+│   │   │   │   ├── driven/                  # Driven Adapters
+│   │   │   │   │   └── adapters/
+│   │   │   │   │       └── http_ml_player_client.py  # HTTP client for ML Player
+│   │   │   │   └── driver/
+│   │   │   │       └── bff/
+│   │   │   │           └── routers/
+│   │   │   │               └── aiplayer_router.py  # Autoplay API endpoint
+│   │   │   └── health/                      # Health Hexagon (Monitoring)
+│   │   │       └── driver/
+│   │   │           └── bff/
+│   │   │               └── routers/
+│   │   │                   └── health_router.py  # Health check endpoint
+│   │   ├── configurator/                    # Configuration (Shared)
+│   │   │   ├── settings.py                  # App settings
+│   │   │   └── dependencies.py              # Dependency injection
+│   │   ├── shared/                          # Shared Utilities
+│   │   │   └── logging.py                   # Logging setup
+│   │   └── main.py                          # FastAPI app entry point
+│   ├── tests/                               # Test Suite
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   └── Makefile
+│
+├── ml_player/                               # ML Player Service (port 8001)
+│   ├── src/
+│   │   ├── hexagons/
+│   │   │   └── mlplayer/                    # ML Player Hexagon
+│   │   │       ├── domain/
+│   │   │       │   ├── core/
+│   │   │       │   │   ├── entities/
+│   │   │       │   │   │   └── ai_ml_player.py   # Heuristic-based AI (ML-ready)
+│   │   │       │   │   └── value_objects/
+│   │   │       │   │       └── strategy_config.py  # Strategy configurations
+│   │   │       │   ├── ports/
+│   │   │       │   │   └── game_client.py        # Game client interface
+│   │   │       │   └── use_cases/
+│   │   │       │       └── predict_action.py     # Predict action use case
+│   │   │       ├── driven/
+│   │   │       │   └── adapters/
+│   │   │       │       └── http_game_client.py   # HTTP client for game service
+│   │   │       └── driver/
+│   │   │           └── bff/
+│   │   │               ├── routers/
+│   │   │               │   └── ml_player_router.py  # ML Player API endpoints
+│   │   │               └── schemas/
+│   │   │                   └── ml_player_schema.py  # Pydantic schemas
+│   │   ├── configurator/                    # Configuration
+│   │   │   ├── settings.py
+│   │   │   └── dependencies.py
+│   │   ├── shared/                          # Shared Utilities
+│   │   │   └── logging.py
+│   │   └── main.py                          # FastAPI app entry point
+│   ├── tests/                               # Test Suite
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   └── Makefile
+│
+├── docs/                                    # Documentation
+│   ├── ARCHITECTURE.md                      # This file
+│   ├── API.md                               # API documentation
+│   ├── DEPLOYMENT.md                        # Deployment guide
+│   ├── CI_CD.md                             # CI/CD workflow
+│   └── TESTING_STRATEGY.md                  # Testing strategy
+└── .github/
+    └── workflows/
+        └── ci.yml                           # GitHub Actions CI/CD
 ├── docs/                                   # Documentation
 │   ├── ARCHITECTURE.md                     # This file
 │   ├── API.md                              # API documentation
 │   ├── DEPLOYMENT.md                       # Deployment guide
 │   ├── CI_CD.md                            # CI/CD workflow
 │   └── TESTING_STRATEGY.md                 # Testing strategy
-├── .github/
-│   └── workflows/
-│       └── ci.yml                          # GitHub Actions CI/CD
-├── Dockerfile                              # Docker image definition
-├── pyproject.toml                          # Poetry dependencies
-├── Makefile                                # Build & test commands
-└── README.md                               # Project overview
+└── .github/
+    └── workflows/
+        └── ci.yml                           # GitHub Actions CI/CD
 ```
+
+### Microservices Architecture
+
+The system is split into **two independent services** that communicate via HTTP:
+
+#### 1. RFP Game Service (`rfp_game/`)
+- **Port**: 8000
+- **Purpose**: Core game logic, API endpoints, game state management
+- **Hexagons**:
+  - `game`: Game entities, rules, and state management
+  - `aiplayer`: AI strategies (Greedy, Optimal, ML Proxy)
+  - `health`: Health monitoring
+- **Dependencies**: ML Player service (via HTTP)
+
+#### 2. ML Player Service (`ml_player/`)
+- **Port**: 8001
+- **Purpose**: Machine learning-based AI predictions
+- **Hexagons**:
+  - `mlplayer`: Heuristic-based AI (MVP) with ML upgrade path
+  - `health`: Health monitoring
+- **Dependencies**: None (can run independently)
+
+### Inter-Service Communication
+
+**MLProxyPlayer** (in `rfp_game`) delegates to **ML Player Service**:
+
+```
+1. Autoplay with ML strategy requested
+   ↓
+2. AutoplayUseCase creates MLProxyPlayer
+   ↓
+3. MLProxyPlayer uses HttpMLPlayerClient
+   ↓
+4. HTTP POST to ml_player/api/ml-player/predict/{game_id}
+   ↓
+5. ML Player returns predicted action
+   ↓
+6. MLProxyPlayer converts to game action
+   ↓
+7. GameService executes action on game
+```
+
+**Benefits of Service Separation**:
+- ✅ **Independent Scaling**: ML service can scale separately
+- ✅ **Decoupling**: Game logic independent of AI implementation
+- ✅ **Technology Flexibility**: ML service can use different tech stack
+- ✅ **Deployment Flexibility**: Services can be deployed on different infrastructure
+- ✅ **Testing**: Services can be tested independently
+- ✅ **Resilience**: If ML service is down, greedy/optimal strategies still work
 
 ---
 

@@ -77,6 +77,26 @@ class Board:
         """Remove an obstacle from the board."""
         self.obstacles_positions.discard(position)
 
+    def is_empty(self, position: Position) -> bool:
+        """Check if a position is empty."""
+        return self.is_valid_position(position) \
+            and position not in self.flowers_positions \
+            and position not in self.obstacles_positions \
+            and position != self.robot_position \
+            and position != self.princess_position
+
+    def empty_adjacent_positions(self, position: Position) -> bool:
+        """Check if a position is adjacent to the robot."""
+        return [p for p in position.adjacent_positions() if self.is_empty(p)]
+
+    def closest_empty_position(self, position: Position) -> Position:
+        """Get the closest empty position to a given position."""
+        return min(self.empty_adjacent_positions(position), key=lambda p: position.manhattan_distance(p))
+
+    def closest_empty_position_to_princess(self, position: Position) -> Position:
+        """Get the closest empty position to the princess."""
+        return min(self.empty_adjacent_positions(self.princess_position), key=lambda p: position.manhattan_distance(p))
+
     def get_remaining_flowers_count(self) -> int:
         """Get the number of remaining flowers on the board."""
         return self.initial_flowers_count - len(self.flowers_positions)

@@ -14,10 +14,6 @@ class PredictActionRequest(BaseModel):
         pattern="^(default|aggressive|conservative)$",
     ),
     game_id: str = Field(description="Game identifier")
-    status: str = Field(
-        default="In Progress",
-        description="Game Over, Victory, In Progress",
-        pattern="^(Game Over|Victory|In Progress)$")
     board: dict
     robot: dict
     princess: dict

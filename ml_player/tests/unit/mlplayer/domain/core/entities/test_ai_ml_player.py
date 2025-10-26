@@ -2,8 +2,57 @@
 
 import pytest
 
-from hexagons.mlplayer.domain.core.entities import AIMLPlayer, BoardState
-from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
+from hexagons.mlplayer.domain.core.entities import AIMLPlayer
+from hexagons.mlplayer.domain.core.value_objects import StrategyConfig, GameState
+
+
+def _create_game_state(
+    robot_position=(0, 0),
+    princess_position=(4, 4),
+    flowers_positions=None,
+    obstacles_positions=None,
+    robot_flowers_collected=None,
+    robot_flowers_delivered=None,
+):
+    """Helper to create a GameState for testing."""
+    if flowers_positions is None:
+        flowers_positions = []
+    if obstacles_positions is None:
+        obstacles_positions = []
+    if robot_flowers_collected is None:
+        robot_flowers_collected = []
+    if robot_flowers_delivered is None:
+        robot_flowers_delivered = []
+
+    # Create a simple grid for testing
+    grid = [["⬜" for _ in range(5)] for _ in range(5)]
+
+    return GameState(
+        game_id="test-game",
+        board={
+            "rows": 5,
+            "cols": 5,
+            "grid": grid,
+            "flowers_positions": [{"row": f[0], "col": f[1]} for f in flowers_positions],
+            "obstacles_positions": [{"row": o[0], "col": o[1]} for o in obstacles_positions],
+            "initial_flowers_count": len(flowers_positions),
+            "initial_obstacles_count": len(obstacles_positions),
+        },
+        robot={
+            "position": {"row": robot_position[0], "col": robot_position[1]},
+            "orientation": "EAST",
+            "flowers_collected": [{"row": f[0], "col": f[1]} for f in robot_flowers_collected],
+            "flowers_delivered": [{"row": f[0], "col": f[1]} for f in robot_flowers_delivered],
+            "flowers_collection_capacity": 5,
+            "obstacles_cleaned": [],
+            "executed_actions": [],
+        },
+        princess={
+            "position": {"row": princess_position[0], "col": princess_position[1]},
+            "flowers_received": [{"row": f[0], "col": f[1]} for f in robot_flowers_delivered],
+            "mood": "neutral",
+        },
+    )
 
 
 def test_ai_ml_player_initialization():
@@ -24,18 +73,26 @@ def test_ai_ml_player_with_custom_config():
     assert player.config.risk_aversion == 0.3
 
 
-def test_evaluate_board_returns_score(sample_board_state):
+def test_evaluate_board_returns_score():
     """Test that evaluate_board returns a numeric score."""
+    game_state = _create_game_state(
+        flowers_positions=[(1, 1), (2, 2)],
+        obstacles_positions=[(1, 2)]
+    )
     player = AIMLPlayer()
-    score = player.evaluate_board(sample_board_state)
+    score = player.evaluate_board(game_state)
 
     assert isinstance(score, float)
 
 
-def test_select_action_returns_valid_action(sample_board_state):
+def test_select_action_returns_valid_action():
     """Test that select_action returns a valid action tuple."""
+    game_state = _create_game_state(
+        flowers_positions=[(1, 1), (2, 2)],
+        obstacles_positions=[(1, 2)]
+    )
     player = AIMLPlayer()
-    action, direction = player.select_action(sample_board_state)
+    action, direction = player.select_action(game_state)
 
     assert isinstance(action, str)
     assert action in ["move", "pick", "drop", "give", "clean", "rotate"]
@@ -48,21 +105,13 @@ def test_select_action_returns_valid_action(sample_board_state):
 
 def test_select_action_pick_when_at_flower():
     """Test that player picks flower when standing on one."""
-    board_state = BoardState(
-        rows=5,
-        cols=5,
-        robot_position=(1, 1),  # Same as flower
-        robot_orientation="EAST",
-        robot_flowers_held=0,
-        robot_max_capacity=5,
-        princess_position=(4, 4),
-        flowers=[(1, 1)],  # Robot is on this flower
-        obstacles=[],
-        flowers_delivered=0,
+    game_state = _create_game_state(
+        robot_position=(1, 1),
+        flowers_positions=[(1, 1)],  # Robot is on this flower
     )
 
     player = AIMLPlayer()
-    action, direction = player.select_action(board_state)
+    action, direction = player.select_action(game_state)
 
     assert action == "pick"
     assert direction is None
@@ -70,30 +119,27 @@ def test_select_action_pick_when_at_flower():
 
 def test_select_action_give_when_at_princess():
     """Test that player gives flowers when at princess with flowers held."""
-    board_state = BoardState(
-        rows=5,
-        cols=5,
-        robot_position=(4, 4),  # Same as princess
-        robot_orientation="EAST",
-        robot_flowers_held=2,  # Holding flowers
-        robot_max_capacity=5,
+    game_state = _create_game_state(
+        robot_position=(4, 3),  # Adjacent to princess
         princess_position=(4, 4),
-        flowers=[],
-        obstacles=[],
-        flowers_delivered=0,
+        robot_flowers_delivered=[(1, 1), (2, 2)],  # Holding flowers
     )
 
     player = AIMLPlayer()
-    action, direction = player.select_action(board_state)
+    action, direction = player.select_action(game_state)
 
     assert action == "give"
     assert direction is None
 
 
-def test_plan_sequence_returns_action_list(sample_board_state):
+def test_plan_sequence_returns_action_list():
     """Test that plan_sequence returns a list of actions."""
+    game_state = _create_game_state(
+        flowers_positions=[(1, 1), (2, 2)],
+        obstacles_positions=[(1, 2)]
+    )
     player = AIMLPlayer()
-    actions = player.plan_sequence(sample_board_state)
+    actions = player.plan_sequence(game_state)
 
     assert isinstance(actions, list)
     assert len(actions) > 0
@@ -128,20 +174,28 @@ def test_save_model_not_implemented():
         player.save_model("model.pkl")
 
 
-def test_board_state_to_feature_vector(sample_board_state):
-    """Test that BoardState can convert to feature vector."""
-    features = sample_board_state.to_feature_vector()
+def test_game_state_to_feature_vector():
+    """Test that GameState can convert to feature vector."""
+    game_state = _create_game_state(
+        flowers_positions=[(1, 1), (2, 2)],
+        obstacles_positions=[(1, 2)]
+    )
+    features = game_state.to_feature_vector()
 
     assert isinstance(features, list)
     assert len(features) > 0
     assert all(isinstance(f, float) for f in features)
 
 
-def test_board_state_distance_calculations(sample_board_state):
-    """Test BoardState distance calculation methods."""
-    princess_dist = sample_board_state._distance_to_princess()
-    flower_dist = sample_board_state._closest_flower_distance()
-    obstacle_density = sample_board_state._obstacle_density()
+def test_game_state_distance_calculations():
+    """Test GameState distance calculation methods."""
+    game_state = _create_game_state(
+        flowers_positions=[(1, 1), (2, 2)],
+        obstacles_positions=[(1, 2)]
+    )
+    princess_dist = game_state._distance_to_princess()
+    flower_dist = game_state._closest_flower_distance()
+    obstacle_density = game_state._obstacle_density()
 
     assert isinstance(princess_dist, float)
     assert isinstance(flower_dist, float)

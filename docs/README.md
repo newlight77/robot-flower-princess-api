@@ -218,13 +218,14 @@ git push origin feature/my-feature
 |--------|-------|
 | **Documentation Files** | 7 |
 | **Total Doc Size** | ~211KB |
-| **Total Tests** | 50 (32 unit, 11 integration, 7 feature-component) |
+| **Services** | 2 (RFP Game, ML Player) |
+| **Total Tests** | 165 (146 unit, 6 integration, 13 feature-component) |
 | **Test Execution Time** | < 1 second |
 | **Test Coverage** | 90%+ |
-| **API Endpoints** | 8 |
+| **API Endpoints** | 8 (game) + 3 (ML player) |
 | **Test Suites** | 3 (unit, integration, feature-component) |
 | **CI Pipeline Time** | ~5 minutes |
-| **Docker Image Size** | ~150MB |
+| **Docker Image Size** | ~150MB (per service) |
 
 ---
 

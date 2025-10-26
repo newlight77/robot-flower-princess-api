@@ -503,6 +503,17 @@ Let the AI automatically solve the game using pathfinding and strategic planning
 |-----------|------|----------|-------------|
 | `game_id` | string | Yes | Unique game identifier |
 
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Valid Values | Description |
+|-----------|------|----------|---------|--------------|-------------|
+| `strategy` | string | No | `greedy` | `greedy`, `optimal`, `ml` | AI strategy to use |
+
+**Strategy Options**:
+- **`greedy`** (default): Safe & reliable. 75% success rate. Uses BFS pathfinding. Best for learning and guaranteed completion.
+- **`optimal`**: Fast & efficient. 62% success rate, but 25% fewer actions. Uses A* pathfinding and multi-step planning. Best for speed.
+- **`ml`**: ML-powered hybrid. Uses ML Player service for predictions. Heuristic-based MVP with ML upgrade path. Best for adaptive behavior.
+
 **Request Body**
 Empty (no body required)
 
@@ -570,19 +581,34 @@ Empty (no body required)
 | 404 | Game not found |
 | 400 | Game already completed |
 
-**cURL Example**
+**cURL Examples**
 ```bash
+# Use default greedy strategy
 curl -X POST "http://localhost:8000/api/games/abc123/autoplay"
+
+# Use optimal strategy (faster, fewer actions)
+curl -X POST "http://localhost:8000/api/games/abc123/autoplay?strategy=optimal"
+
+# Use ML strategy (adaptive, learns from patterns)
+curl -X POST "http://localhost:8000/api/games/abc123/autoplay?strategy=ml"
 ```
 
-**AI Strategy**:
+**AI Strategy Comparison**:
+
+| Strategy | Success Rate | Actions | Algorithm | Best For |
+|----------|-------------|---------|-----------|----------|
+| `greedy` | 75% | Baseline | BFS pathfinding | Guaranteed completion |
+| `optimal` | 62% | -25% | A* + Planning | Speed & efficiency |
+| `ml` | TBD | Variable | Heuristic (ML-ready) | Adaptive behavior |
+
+**Common AI Strategy**:
 1. **Collect flowers**: Navigate to nearest flower, pick it up
 2. **Deliver flowers**: When full or no more flowers, navigate to princess and deliver
 3. **Clean obstacles**: If path blocked, clean obstacles strategically
 4. **Drop-clean-repick**: If stuck with flowers, drop them, clean obstacles, pick up again
 5. **Navigate adjacent**: Move adjacent to princess/flower (not onto them)
 
-**Performance**: The AI typically solves games in 50-200 actions depending on board size and complexity.
+**Performance**: The AI typically solves games in 50-200 actions depending on board size, complexity, and strategy chosen.
 
 ---
 

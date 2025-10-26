@@ -1,5 +1,5 @@
 """Domain entities for ML player."""
 
-from .ai_ml_player import AIMLPlayer, BoardState
+from .ai_ml_player import AIMLPlayer
 
-__all__ = ["AIMLPlayer", "BoardState"]
+__all__ = ["AIMLPlayer"]

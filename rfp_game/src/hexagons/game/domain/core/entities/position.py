@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass(frozen=True)
@@ -16,6 +17,14 @@ class Position:
         """Calculate Manhattan distance to another position."""
         return abs(self.row - other.row) + abs(self.col - other.col)
 
+    def adjacent_positions(self) -> List["Position"]:
+        return [
+            self.move(1, 0),
+            self.move(-1, 0),
+            self.move(0, 1),
+            self.move(0, -1),
+        ]
+
     def to_dict(self) -> dict:
         """Convert position to dictionary representation."""
         return {
@@ -23,5 +32,6 @@ class Position:
             "col": self.col,
         }
 
+    @classmethod
     def from_dict(cls, dict: dict) -> "Position":
         return cls(row=dict["row"], col=dict["col"])

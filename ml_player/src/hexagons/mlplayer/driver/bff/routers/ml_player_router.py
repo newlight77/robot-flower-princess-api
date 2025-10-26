@@ -46,19 +46,18 @@ async def predict_action(
         command = PredictActionCommand(
             strategy=request.strategy,
             game_id=game_id,
-            status=request.status,
             board=request.board,
             robot=request.robot,
             princess=request.princess,
             obstacles=request.obstacles,
             flowers=request.flowers,
         )
+
+        logger.info(f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}")
+
         result = await use_case.execute(command)
 
-        logger.info(
-            f"Predicted action={result.action}, direction={result.direction}, "
-            f"confidence={result.confidence:.2f}"
-        )
+        logger.info(f"Predicted action={result.action}, direction={result.direction}, confidence={result.confidence:.2f}")
 
         return PredictActionResponse(
             game_id=game_id,

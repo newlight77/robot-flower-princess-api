@@ -3,26 +3,9 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from hexagons.mlplayer.domain.core.entities import BoardState
+from hexagons.mlplayer.domain.core.value_objects.game_state import GameState
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
-
-
-@pytest.fixture
-def sample_board_state() -> BoardState:
-    """Create a sample board state for testing."""
-    return BoardState(
-        rows=5,
-        cols=5,
-        robot_position=(0, 0),
-        robot_orientation="EAST",
-        robot_flowers_held=0,
-        robot_max_capacity=5,
-        princess_position=(4, 4),
-        flowers=[(1, 1), (2, 2), (3, 3)],
-        obstacles=[(1, 2), (2, 1)],
-        flowers_delivered=0,
-    )
 
 
 @pytest.fixture

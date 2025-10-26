@@ -39,40 +39,16 @@ class GiveFlowersUseCase:
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")
 
-        history = self.repository.get_history(command.game_id)
-        if history is None:
-            history = GameHistory(game_id=command.game_id)
-
         try:
             GameService.rotate_robot(game, command.direction)
             GameService.give_flowers(game)
             self.repository.save(command.game_id, game)
-
-            action = Action(
-                action_type=ActionType.GIVE,
-                direction=command.direction,
-                success=True,
-                message=f"Flowers delivered! ({game.flowers_delivered}/{game.initial_flower_count})",
-            )
-            history.add_action(action)
-            self.repository.save_history(command.game_id, history)
 
             return GiveFlowersResult(
                 success=True,
                 game=game,
             )
         except GameException as e:
-            action = Action(
-                action_type=ActionType.GIVE,
-                direction=command.direction,
-                success=False,
-                message=f"Game Over: {str(e)}",
-            )
-            history.add_action(action)
-            self.repository.save_history(command.game_id, history)
-            game.status = GameStatus.GAME_OVER
-            self.repository.save(command.game_id, game)
-
             return GiveFlowersResult(
                 success=False,
                 game=game,

@@ -16,16 +16,12 @@ class CreateGameResponse(BaseModel):
 class GamesResponse(BaseModel):
     games: List[dict]
     total: int
+    message: str = ""
 
 
 class GetGameResponse(BaseModel):
     game: dict
     message: str = ""
-
-
-
-class GameHistoryResponse(BaseModel):
-    history: dict
 
 
 

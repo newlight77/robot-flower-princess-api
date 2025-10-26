@@ -21,16 +21,8 @@ class CreateGameCommand:
 
 @dataclass
 class CreateGameResult:
-    game_id: str
-    board: Board
-    robot: Robot
-    princess: Princess
-    flowers: Set[Position]
-    obstacles: Set[Position]
-    status: str
+    game: Game
     message: str
-    created_at: datetime
-    updated_at: datetime
 
 
 class CreateGameUseCase:
@@ -47,24 +39,14 @@ class CreateGameUseCase:
             command.cols,
             command.name,
         )
-        game: Game = Game.create(rows=command.rows, cols=command.cols, name=command.name)
+        game: Game = Game.create(rows=command.rows, cols=command.cols)
+        if command.name:
+            game.name = command.name
 
-
-        # Save game and initialize history
-        self.repository.save(game_id, game)
-        history = GameHistory(game_id=game_id)
-        history.add_action(action=None)
-        self.repository.save_history(game_id, history)
+        # Save game
+        self.repository.save(game.game_id, game)
 
         return CreateGameResult(
-            game_id=game_id,
-            board=game.board,
-            robot=game.robot,
-            princess=game.princess,
-            flowers=game.flowers,
-            obstacles=game.obstacles,
-            status=game.get_status().value,
+            game=game,
             message="Game created successfully",
-            created_at=game.created_at,
-            updated_at=game.updated_at,
         )

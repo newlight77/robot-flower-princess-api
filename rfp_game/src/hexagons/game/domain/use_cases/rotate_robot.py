@@ -39,38 +39,15 @@ class RotateRobotUseCase:
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")
 
-        history = self.repository.get_history(command.game_id)
-        if history is None:
-            history = GameHistory(game_id=command.game_id)
-
         try:
             GameService.rotate_robot(game, command.direction)
             self.repository.save(command.game_id, game)
-
-            action = Action(
-                action_type=ActionType.ROTATE,
-                direction=command.direction,
-                success=True,
-                message=f"Rotated to face {command.direction.value}",
-            )
-            history.add_action(action)
-            self.repository.save_history(command.game_id, history)
 
             return RotateRobotResult(
                 success=True,
                 game=game,
             )
         except GameException as e:
-            action = Action(
-                action_type=ActionType.ROTATE,
-                direction=command.direction,
-                success=False,
-                message=str(e),
-            )
-            history.add_action(action)
-            self.repository.save_history(command.game_id, history)
-            game.status = GameStatus.GAME_OVER
-            self.repository.save(command.game_id, game)
             return RotateRobotResult(
                 success=False,
                 game=game,

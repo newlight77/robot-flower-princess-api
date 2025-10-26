@@ -75,6 +75,11 @@ class Game:
         """Set obstacles positions on board."""
         self.board.obstacles_positions = value
 
+    @property
+    def initial_flower_count(self) -> int:
+        """Get initial flower count from board."""
+        return self.board.initial_flowers_count
+
     @classmethod
     def create(cls, rows: int, cols: int, name: str = "") -> "Game":
         """Factory method to create a new game with fixed positions."""

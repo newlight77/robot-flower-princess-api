@@ -1,7 +1,6 @@
 from ..core.entities.game import Game
 from ..core.value_objects.direction import Direction
 from ..core.value_objects.game_status import GameStatus
-from ..core.value_objects.action_type import ActionType
 from ..core.exceptions.game_exceptions import (
     InvalidMoveException,
     GameOverException,
@@ -9,6 +8,7 @@ from ..core.exceptions.game_exceptions import (
     InvalidDropException,
     InvalidGiveException,
     InvalidCleanException,
+    InvalidRotateException,
 )
 from shared.logging import get_logger
 
@@ -25,8 +25,10 @@ class GameService:
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
 
-        board.robot.rotate(direction)
-        board.robot.add_executed_action(ActionType.ROTATE, direction)
+        action = board.robot.rotate(direction)
+        if action.message:
+            raise InvalidRotateException(action.message)
+
         board.update_timestamp()
 
     @staticmethod
@@ -48,9 +50,11 @@ class GameService:
             raise InvalidMoveException(f"Target cell is blocked by {cell_type.value}")
 
         # Execute move
-        board.robot.move_to(new_position)
+        action = board.robot.move_to(new_position)
+        if action.message:
+            raise InvalidMoveException(action.message)
+
         board.board.move_robot(new_position)  # Update board position
-        board.robot.add_executed_action(ActionType.MOVE, board.robot.orientation)
         board.update_timestamp()
 
     @staticmethod
@@ -75,9 +79,11 @@ class GameService:
             raise InvalidPickException("No flower at target position")
 
         # Pick the flower
-        board.robot.pick_flower(target_position)
+        action = board.robot.pick_flower(target_position)
+        if action.message:
+            raise InvalidPickException(action.message)
+
         board.board.pick_flower(target_position)  # Remove from board
-        board.robot.add_executed_action(ActionType.PICK, board.robot.orientation)
         board.update_timestamp()
 
     @staticmethod
@@ -100,9 +106,11 @@ class GameService:
             raise InvalidDropException("Target cell is not empty")
 
         # Drop the flower
-        board.robot.drop_flower(target_position)
+        action = board.robot.drop_flower(target_position)
+        if action.message:
+            raise InvalidDropException(action.message)
+
         board.board.drop_flower(target_position)  # Add to board
-        board.robot.add_executed_action(ActionType.DROP, board.robot.orientation)
         board.update_timestamp()
 
     @staticmethod
@@ -111,7 +119,7 @@ class GameService:
         if board.get_status() != GameStatus.IN_PROGRESS:
             raise GameOverException("Game is already over")
 
-        if board.robot.flowers_held == 0:
+        if len(board.robot.flowers_collected) == 0:
             raise InvalidGiveException("Robot has no flowers to give")
 
         # Get position in front of robot
@@ -125,10 +133,11 @@ class GameService:
             raise InvalidGiveException("Princess is not at target position")
 
         # Give flowers
-        delivered = board.robot.give_flowers(target_position)
-        board.flowers_delivered += delivered
-        board.princess.receive_flowers(delivered)
-        board.robot.add_executed_action(ActionType.GIVE, board.robot.orientation)
+        action = board.robot.give_flowers(target_position)
+        if action.message:
+            raise InvalidGiveException(action.message)
+
+        board.princess.receive_flowers(board.robot.flowers_delivered)
         board.update_timestamp()
 
     @staticmethod
@@ -151,7 +160,9 @@ class GameService:
             raise InvalidCleanException("No obstacle at target position")
 
         # Remove obstacle
+        action = board.robot.clean_obstacle(target_position)
+        if action.message:
+            raise InvalidCleanException(action.message)
+
         board.board.clean_obstacle(target_position)  # Remove from board
-        board.robot.clean_obstacle(target_position)
-        board.robot.add_executed_action(ActionType.CLEAN, board.robot.orientation)
         board.update_timestamp()

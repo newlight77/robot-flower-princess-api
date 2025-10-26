@@ -59,18 +59,9 @@ async def autoplay(
             AutoplayCommand(game_id=game_id, strategy=strategy)
         )
 
-        # Convert Board, Robot, Princess objects to dicts for the API response
-        board_dict = result.board.to_dict()
-
         return ActionResponse(
             success=result.success,
-            id=game_id,
-            status=result.status,
-            board=board_dict,
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=obstacles_to_dict(result.obstacles, result.robot),
-            flowers=flowers_to_dict(result.flowers),
+            game=result.game.to_dict(),
             message=f"{result.message} (Actions taken: {result.actions_taken})",
         )
     except ValueError as e:

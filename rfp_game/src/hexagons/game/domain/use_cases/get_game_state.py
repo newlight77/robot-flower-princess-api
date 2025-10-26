@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import Set
-
 from ..core.entities.game import Game
 from ..ports.game_repository import GameRepository
 from shared.logging import get_logger

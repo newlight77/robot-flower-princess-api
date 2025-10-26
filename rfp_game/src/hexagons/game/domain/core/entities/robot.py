@@ -1,20 +1,19 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List
 from .position import Position
 from ..value_objects.direction import Direction
-from ..value_objects.action_type import ActionType
+from ..value_objects.action import Action, ActionType
 
 
 @dataclass
 class Robot:
     position: Position
     orientation: Direction = Direction.EAST
-    flowers_held: int = 0
     max_flowers: int = 12
-    flowers_collected: List[Dict[str, Any]] = field(default_factory=list)
-    flowers_delivered: List[Dict[str, Any]] = field(default_factory=list)
-    obstacles_cleaned: List[Dict[str, Any]] = field(default_factory=list)
-    executed_actions: List[Dict[str, Any]] = field(default_factory=list)
+    flowers_collected: List[Position] = field(default_factory=list)
+    flowers_delivered: List[Position] = field(default_factory=list)
+    obstacles_cleaned: List[Position] = field(default_factory=list)
+    executed_actions: List[Action] = field(default_factory=list)
 
     def move_to(self, new_position: Position) -> None:
         self.position = new_position
@@ -22,46 +21,72 @@ class Robot:
     def rotate(self, direction: Direction) -> None:
         self.orientation = direction
 
-    def pick_flower(self, flower_position: Position = None) -> None:
-        if self.flowers_held >= self.max_flowers:
-            raise ValueError(f"Cannot hold more than {self.max_flowers} flowers")
-        self.flowers_held += 1
-        if flower_position:
-            self.flowers_collected.append(
-                {"position": {"row": flower_position.row, "col": flower_position.col}}
-            )
+    def pick_flower(self, flower_position: Position = None) -> Action:
+        action = Action(action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position)
+        self.add_executed_action(action)
 
-    def drop_flower(self, drop_position: Position = None) -> None:
-        if self.flowers_held == 0:
-            raise ValueError("No flowers to drop")
-        self.flowers_held -= 1
-        # Note: dropped flowers are not tracked in delivered list, only given flowers are
+        if len(self.flowers_collected) >= self.max_flowers:
+            action.message = f"Cannot hold more than {self.max_flowers} flowers"
+            return action
+        if not flower_position:
+            action.message = "No flower to pick"
+            return action
 
-    def give_flowers(self, princess_position: Position = None) -> int:
-        count = self.flowers_held
-        if count > 0 and princess_position:
-            # Add one entry per flower delivered
-            for _ in range(count):
-                self.flowers_delivered.append(
-                    {"position": {"row": princess_position.row, "col": princess_position.col}}
-                )
-        self.flowers_held = 0
-        return count
+        self.flowers_collected.append(flower_position)
+        return action
 
-    def clean_obstacle(self, obstacle_position: Position) -> None:
-        self.obstacles_cleaned.append(
-            {"position": {"row": obstacle_position.row, "col": obstacle_position.col}}
-        )
+    def drop_flower(self, drop_position: Position = None) -> Action:
+        action = Action(action_type=ActionType.DROP, direction=self.orientation, drop_position=drop_position)
+        self.add_executed_action(action)
 
-    def add_executed_action(self, action_type: ActionType, direction: Direction) -> None:
-        """Add an action to the executed actions history."""
-        self.executed_actions.append({"type": action_type.value, "direction": direction.value})
+        if len(self.flowers_collected) == 0:
+            action.message = "No flowers to drop"
+            return action
+        if not drop_position:
+            action.message = "No position to drop flowers"
+            return action
+
+        self.flowers_collected.remove(drop_position)
+        return action
+
+    def give_flowers(self, princess_position: Position = None) -> Action:
+        action = Action(action_type=ActionType.GIVE, direction=self.orientation, princess_position=princess_position)
+        self.add_executed_action(action)
+
+        """Give all collected flowers to princess. Returns count of flowers delivered."""
+        if len(self.flowers_collected) == 0:
+            action.message = "No flowers to give"
+            return action
+        if not princess_position:
+            action.message = "No princess to give flowers to"
+            return action
+
+        self.flowers_delivered.extend(self.flowers_collected)
+        self.flowers_collected.clear()
+
+        return action
+
+    def clean_obstacle(self, obstacle_position: Position) -> Action:
+        action = Action(action_type=ActionType.CLEAN, direction=self.orientation, obstacle_position=obstacle_position)
+        self.add_executed_action(action)
+
+        if len(self.flowers_collected) > 0:
+            action.message = "Cannot clean obstacle while holding flowers"
+            return action
+
+        self.obstacles_cleaned.append(obstacle_position)
+        return action
 
     def can_clean(self) -> bool:
-        return self.flowers_held == 0
+        return len(self.flowers_collected) == 0
 
     def can_pick(self) -> bool:
-        return self.flowers_held < self.max_flowers
+        return len(self.flowers_collected) < self.max_flowers
+
+    @property
+    def flowers_held(self) -> int:
+        """Return the number of flowers currently held."""
+        return len(self.flowers_collected)
 
     def to_dict(self) -> dict:
         """Convert robot to dictionary representation for API."""
@@ -76,5 +101,5 @@ class Robot:
             "obstacles": {
                 "cleaned": self.obstacles_cleaned,
             },
-            "executed_actions": self.executed_actions,
+            "executed_actions": [action.to_dict() for action in self.executed_actions],
         }

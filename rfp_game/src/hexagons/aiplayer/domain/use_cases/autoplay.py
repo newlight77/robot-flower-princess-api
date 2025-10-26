@@ -6,8 +6,7 @@ from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlay
 from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
 from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
 from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
-from hexagons.game.domain.core.value_objects.action_type import ActionType
-from hexagons.game.domain.core.entities.game_history import Action, GameHistory
+from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.board import Board
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
@@ -29,12 +28,7 @@ class AutoplayCommand:
 class AutoplayResult:
     success: bool
     actions_taken: int
-    board: Board
-    robot: Robot
-    princess: Princess
-    flowers: Set[Position]
-    obstacles: Set[Position]
-    status: str
+    game: "Game"  # Import Game from hexagons.game.domain.core.entities.game
     message: str
 
 
@@ -53,10 +47,6 @@ class AutoplayUseCase:
         board = self.repository.get(command.game_id)
         if board is None:
             raise ValueError(f"Game {command.game_id} not found")
-
-        history = self.repository.get_history(command.game_id)
-        if history is None:
-            history = GameHistory(game_id=command.game_id)
 
         # Create a copy for the solver
         board_copy = deepcopy(board)
@@ -92,66 +82,23 @@ class AutoplayUseCase:
 
                 if action_type == "rotate":
                     dir_str = direction.value if direction is not None else "unknown"
-                    action = Action(
-                        action_type=ActionType.ROTATE,
-                        direction=direction,
-                        success=True,
-                        message=f"AI: Rotated to {dir_str}",
-                    )
-                    history.add_action(action)
 
                 elif action_type == "move":
                     GameService.move_robot(board)
-                    action = Action(
-                        action_type=ActionType.MOVE,
-                        direction=direction or board.robot.orientation,
-                        success=True,
-                        message="AI: Moved",
-                    )
-                    history.add_action(action)
 
                 elif action_type == "pick":
                     GameService.pick_flower(board)
-                    action = Action(
-                        action_type=ActionType.PICK,
-                        direction=direction or board.robot.orientation,
-                        success=True,
-                        message="AI: Picked flower",
-                    )
-                    history.add_action(action)
 
                 elif action_type == "drop":
                     GameService.drop_flower(board)
-                    action = Action(
-                        action_type=ActionType.DROP,
-                        direction=direction or board.robot.orientation,
-                        success=True,
-                        message="AI: Dropped flower",
-                    )
-                    history.add_action(action)
 
                 elif action_type == "give":
                     GameService.give_flowers(board)
-                    action = Action(
-                        action_type=ActionType.GIVE,
-                        direction=direction or board.robot.orientation,
-                        success=True,
-                        message="AI: Gave flowers",
-                    )
-                    history.add_action(action)
 
                 elif action_type == "clean":
                     GameService.clean_obstacle(board)
-                    action = Action(
-                        action_type=ActionType.CLEAN,
-                        direction=direction or board.robot.orientation,
-                        success=True,
-                        message="AI: Cleaned obstacle",
-                    )
-                    history.add_action(action)
 
             self.repository.save(command.game_id, board)
-            self.repository.save_history(command.game_id, history)
 
             status = board.get_status().value
             success = status == "victory"
@@ -164,12 +111,7 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=success,
                 actions_taken=len(actions),
-                board=board.board,
-                robot=board.robot,
-                princess=board.princess,
-                flowers=board.flowers,
-                obstacles=board.obstacles,
-                status=board.get_status().value,
+                game=board,
                 message=message,
             )
 
@@ -177,11 +119,6 @@ class AutoplayUseCase:
             return AutoplayResult(
                 success=False,
                 actions_taken=0,
-                board=board.board,
-                robot=board.robot,
-                princess=board.princess,
-                flowers=board.flowers,
-                obstacles=board.obstacles,
-                status=board.get_status().value,
+                game=board,
                 message=f"AI failed: {str(e)}",
             )

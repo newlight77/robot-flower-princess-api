@@ -117,52 +117,19 @@ class MLProxyPlayer:
         else:
             status = "In Progress"
 
-        # Convert flowers to list of positions
-        flower_positions = [
-            {"row": pos.row, "col": pos.col}
-            for pos in game.flowers
-        ]
-
-        # Convert obstacles to list of positions
-        obstacle_positions = [
-            {"row": pos.row, "col": pos.col}
-            for pos in game.obstacles
-        ]
-
         return {
             "status": status,
-            "board": {
-                "rows": game.rows,
-                "cols": game.cols
-            },
-            "robot": {
-                "position": {
-                    "row": game.robot.position.row,
-                    "col": game.robot.position.col
-                },
-                "orientation": game.robot.orientation.value,
-                "flowers": {
-                    "held": game.robot.flowers_held,
-                    "capacity": game.robot.max_flowers,
-                    "delivered": len(game.robot.flowers_delivered)
-                }
-            },
-            "princess": {
-                "position": {
-                    "row": game.princess.position.row,
-                    "col": game.princess.position.col
-                },
-                "flowers": {
-                    "delivered": len(game.robot.flowers_delivered),
-                    "required": game.initial_flower_count
-                }
-            },
+            "board": game.board.to_dict(),
+            "robot": game.robot.to_dict(),
+            "princess": game.princess.to_dict(),
             "obstacles": {
-                "positions": obstacle_positions
+                "remaining": game.board.initial_obstacles_count - len(game.robot.obstacles_cleaned),
+                "total": game.board.initial_obstacles_count,
             },
             "flowers": {
-                "positions": flower_positions
-            }
+                "remaining": game.board.initial_flowers_count - len(game.robot.flowers_collected),
+                "total": game.board.initial_flowers_count,
+            },
         }
 
     @property

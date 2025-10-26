@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from ..ports.game_repository import GameRepository
 from ..services.game_service import GameService
 from ..core.value_objects.direction import Direction
-from ..core.value_objects.action_type import ActionType
-from ..core.entities.game_history import Action, GameHistory
 from ..core.exceptions.game_exceptions import GameException
 from ..core.entities.game import Game
 from ..core.value_objects.game_status import GameStatus

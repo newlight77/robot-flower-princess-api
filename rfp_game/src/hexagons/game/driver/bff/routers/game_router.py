@@ -69,10 +69,10 @@ def create_game(
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(
-            robot_pos=result.robot.position,
-            princess_pos=result.princess.position,
-            flowers=result.flowers,
-            obstacles=result.obstacles,
+            robot_position=result.robot.position,
+            princess_position=result.princess.position,
+            flowers_positions=result.flowers,
+            obstacles_positions=result.obstacles,
         )
 
         return CreateGameResponse(
@@ -146,10 +146,10 @@ def get_game_state(
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(
-            robot_pos=result.robot.position,
-            princess_pos=result.princess.position,
-            flowers=result.flowers,
-            obstacles=result.obstacles,
+            robot_position=result.robot.position,
+            princess_position=result.princess.position,
+            flowers_positions=result.flowers,
+            obstacles_positions=result.obstacles,
         )
 
         # Get the full game object to access created_at and updated_at
@@ -269,10 +269,10 @@ def perform_action(
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(
-            robot_pos=result.robot.position,
-            princess_pos=result.princess.position,
-            flowers=result.flowers,
-            obstacles=result.obstacles,
+            robot_position=result.robot.position,
+            princess_position=result.princess.position,
+            flowers_positions=result.flowers,
+            obstacles_positions=result.obstacles,
         )
 
         return ActionResponse(

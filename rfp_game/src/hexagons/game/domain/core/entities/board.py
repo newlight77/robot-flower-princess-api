@@ -20,10 +20,10 @@ class Board:
 
     def get_grid(
         self,
-        robot_pos: Position,
-        princess_pos: Position,
-        flowers: set[Position],
-        obstacles: set[Position],
+        robot_position: Position,
+        princess_position: Position,
+        flowers_positions: set[Position],
+        obstacles_positions: set[Position],
     ) -> list[list[str]]:
         """Generate the grid representation with emojis."""
         grid = []
@@ -32,13 +32,13 @@ class Board:
             for c in range(self.cols):
                 pos = Position(r, c)
 
-                if pos == robot_pos:
+                if pos == robot_position:
                     cell = "🤖"
-                elif pos == princess_pos:
+                elif pos == princess_position:
                     cell = "👑"
-                elif pos in flowers:
+                elif pos in flowers_positions:
                     cell = "🌸"
-                elif pos in obstacles:
+                elif pos in obstacles_positions:
                     cell = "🗑️"
                 else:
                     cell = "⬜"
@@ -49,17 +49,17 @@ class Board:
 
     def to_dict(
         self,
-        robot_pos: Position = None,
-        princess_pos: Position = None,
-        flowers: set[Position] = None,
-        obstacles: set[Position] = None,
+        robot_position: Position = None,
+        princess_position: Position = None,
+        flowers_positions: set[Position] = None,
+        obstacles_positions: set[Position] = None,
     ) -> dict:
         """Convert board to dictionary representation."""
         grid = self.get_grid(
-            robot_pos or Position(0, 0),
-            princess_pos or Position(self.rows - 1, self.cols - 1),
-            flowers or set(),
-            obstacles or set(),
+            robot_position or Position(0, 0),
+            princess_position or Position(self.rows - 1, self.cols - 1),
+            flowers_positions or set(),
+            obstacles_positions or set(),
         )
 
         return {

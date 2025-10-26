@@ -151,10 +151,10 @@ class Game:
         logger.debug("to_dict rows=%s cols=%s", self.board.rows, self.board.cols)
 
         board_dict = self.board.to_dict(
-            robot_pos=self.robot.position,
-            princess_pos=self.princess.position,
-            flowers=self.flowers,
-            obstacles=self.obstacles,
+            robot_position=self.robot.position,
+            princess_position=self.princess.position,
+            flowers_positions=self.flowers,
+            obstacles_positions=self.obstacles,
         )
 
         return {

@@ -61,10 +61,10 @@ async def autoplay(
 
         # Convert Board, Robot, Princess objects to dicts for the API response
         board_dict = result.board.to_dict(
-            robot_pos=result.robot.position,
-            princess_pos=result.princess.position,
-            flowers=result.flowers,
-            obstacles=result.obstacles,
+            robot_position=result.robot.position,
+            princess_position=result.princess.position,
+            flowers_positions=result.flowers,
+            obstacles_positions=result.obstacles,
         )
 
         return ActionResponse(

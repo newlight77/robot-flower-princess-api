@@ -21,7 +21,7 @@ def should_pick_drop_give_successfully(client, save_board, make_empty_board):
     print(f"should_pick_drop_give_successfully Data: {data}")
     assert data["success"] is True
     # robot should have flowers_held > 0
-    assert len(data["game"]["robot"]["flowers"]["collected"]) > 0
+    assert len(data["game"]["robot"]["flowers_collected"]) > 0
 
     # drop to the south (robot facing north, drop to adjacent south cell)
     # first rotate to south
@@ -38,7 +38,9 @@ def should_pick_drop_give_successfully(client, save_board, make_empty_board):
     print(f"should_pick_drop_give_successfully Data: {data}")
     assert data["success"] is True
     # Successfully dropped the flower (business logic may vary on whether collected count changes)
-    assert "game" in data and "robot" in data["game"] and "flowers" in data["game"]["robot"]
+    assert (
+        "game" in data and "robot" in data["game"] and "flowers_collected" in data["game"]["robot"]
+    )
 
     # give flowers - place robot next to princess and give
     # ensure robot has a flower to give
@@ -99,7 +101,7 @@ def test_drop_flower_at_different_position(client, save_board, make_empty_board)
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Pick failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 1
+    assert len(data["game"]["robot"]["flowers_collected"]) == 1
 
     # Step 2: Rotate east and move to (6, 2)
     resp = client.post(
@@ -107,9 +109,7 @@ def test_drop_flower_at_different_position(client, save_board, make_empty_board)
     )
     assert resp.status_code == 200
 
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "east"}
-    )
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "east"})
     assert resp.status_code == 200
 
     # Step 3: Drop flower east at position (6, 3) - different from pick position (7, 1)
@@ -122,12 +122,16 @@ def test_drop_flower_at_different_position(client, save_board, make_empty_board)
 
     # Verify success
     assert data["success"] is True, f"Drop failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 0, "Robot should have no flowers after dropping"
+    assert (
+        len(data["game"]["robot"]["flowers_collected"]) == 0
+    ), "Robot should have no flowers after dropping"
 
     # Verify the flower is now at the new position on the board
     board_state = data["game"]["board"]
     dropped_row, dropped_col = 6, 3
-    assert board_state["grid"][dropped_row][dropped_col] == "🌸", f"Expected flower at ({dropped_row}, {dropped_col})"
+    assert (
+        board_state["grid"][dropped_row][dropped_col] == "🌸"
+    ), f"Expected flower at ({dropped_row}, {dropped_col})"
 
 
 def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_board):
@@ -163,7 +167,7 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Pick north failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 1
+    assert len(data["game"]["robot"]["flowers_collected"]) == 1
 
     # Pick flower 2 from east
     resp = client.post(
@@ -172,7 +176,7 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Pick east failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 2
+    assert len(data["game"]["robot"]["flowers_collected"]) == 2
 
     # Pick flower 3 from south
     resp = client.post(
@@ -181,7 +185,7 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Pick south failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 3
+    assert len(data["game"]["robot"]["flowers_collected"]) == 3
 
     # Now drop flowers - they should be removed in LIFO order
     # Drop 1: Should remove flower from south (last picked) - drop it west
@@ -191,7 +195,7 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Drop 1 failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 2
+    assert len(data["game"]["robot"]["flowers_collected"]) == 2
 
     # Drop 2: Should remove flower from east (second to last picked) - drop it north
     resp = client.post(
@@ -200,7 +204,7 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Drop 2 failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 1
+    assert len(data["game"]["robot"]["flowers_collected"]) == 1
 
     # Drop 3: Should remove flower from north (first picked) - drop it east
     resp = client.post(
@@ -209,4 +213,4 @@ def test_pick_and_drop_multiple_flowers_lifo(client, save_board, make_empty_boar
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True, f"Drop 3 failed: {data}"
-    assert len(data["game"]["robot"]["flowers"]["collected"]) == 0, "All flowers should be dropped"
+    assert len(data["game"]["robot"]["flowers_collected"]) == 0, "All flowers should be dropped"

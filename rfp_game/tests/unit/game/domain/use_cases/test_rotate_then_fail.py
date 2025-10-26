@@ -4,8 +4,6 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 from hexagons.game.domain.core.entities.position import Position
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.game.domain.core.exceptions.game_exceptions import GameException
@@ -18,8 +16,10 @@ from hexagons.game.domain.use_cases.rotate_robot import (
 
 
 def make_small_board():
-    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
+    board = Game(rows=2, cols=2)
+    board.robot.position = Position(0, 0)
+    board.robot.orientation = Direction.EAST
+    board.princess.position = Position(1, 1)
     board.flowers = set()
     board.obstacles = set()
     board.board.initial_flowers_count = 0

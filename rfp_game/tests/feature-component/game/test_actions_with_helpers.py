@@ -17,7 +17,7 @@ def should_pick_drop_give_with_helpers_successfully(
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert len(data["game"]["robot"]["flowers"]["collected"]) > 0
+    assert len(data["game"]["robot"]["flowers_collected"]) > 0
 
     # rotate to south and drop
     resp = client.post(
@@ -31,17 +31,17 @@ def should_pick_drop_give_with_helpers_successfully(
     data = resp.json()
     assert data["success"] is True
     # Successfully dropped the flower (business logic may vary on whether collected count changes)
-    assert "robot" in data and "flowers" in data["game"]["robot"]
+    assert "robot" in data["game"] and "flowers_collected" in data["game"]["robot"]
 
-    # give: set robot next to princess and set flowers_held
+    # give: set robot next to princess and add a flower to give
     from configurator.dependencies import get_game_repository
 
     repo = get_game_repository()
     b = repo.get(game_id)
     assert b is not None
-    # put robot adjacent to princess
+    # put robot adjacent to princess and add a flower to collected
     b.robot.position = Position(2, 1)
-    b.robot.flowers_held = 1
+    b.robot.flowers_collected.append(Position(1, 1))  # Add a flower to give
     repo.save(game_id, b)
 
     resp = client.post(
@@ -79,4 +79,4 @@ def should_clean_with_helpers_successfully(
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert data["board"]["grid"][0][1] == "⬜"
+    assert data["game"]["board"]["grid"][0][1] == "⬜"

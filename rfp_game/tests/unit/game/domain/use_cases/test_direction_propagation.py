@@ -2,8 +2,6 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 from hexagons.game.domain.core.entities.position import Position
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
 
@@ -21,10 +19,10 @@ from hexagons.game.domain.use_cases.clean_obstacle import (
 
 
 def make_center_board(rows=3, cols=3):
-    robot = Robot(position=Position(1, 1), orientation=Direction.EAST)
-    board = Game(
-        rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(rows - 1, cols - 1))
-    )
+    board = Game(rows=rows, cols=cols)
+    board.robot.position = Position(1, 1)
+    board.robot.orientation = Direction.EAST
+    board.princess.position = Position(rows - 1, cols - 1)
     board.flowers = set()
     board.obstacles = set()
     board.board.initial_flowers_count = 0

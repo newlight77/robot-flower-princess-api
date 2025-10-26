@@ -139,14 +139,6 @@ class MLProxyPlayer:
             "board": game.board.to_dict(),
             "robot": game.robot.to_dict(),
             "princess": game.princess.to_dict(),
-            "obstacles": {
-                "remaining": game.board.initial_obstacles_count - len(game.robot.obstacles_cleaned),
-                "total": game.board.initial_obstacles_count,
-            },
-            "flowers": {
-                "remaining": game.board.initial_flowers_count - len(game.robot.flowers_collected),
-                "total": game.board.initial_flowers_count,
-            },
         }
 
     @property

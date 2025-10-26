@@ -6,29 +6,27 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
 from hexagons.game.domain.core.entities.position import Position
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.aiplayer.domain.use_cases.autoplay import AutoplayUseCase, AutoplayCommand
 
 
-def make_small_board():
-    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
-    board.flowers = {Position(0, 1)}
-    board.board.initial_flowers_count = 1
-    board.obstacles = set()
-    return board
+def make_game_with_small_board():
+    game = Game(rows=3, cols=3)
+
+    game.board.flowers_positions = {Position(0, 1)}
+    game.board.initial_flowers_count = 1
+    game.board.initial_obstacles_count = 0
+    game.board.obstacles_positions = set()
+    return game
 
 
 async def test_autoplay_greedy_and_optimal_both_callable():
     """Test that both AI strategies can be invoked via the use case."""
     repo = InMemoryGameRepository()
-    board1 = make_small_board()
-    board2 = make_small_board()
-    repo.save("greedy_game", board1)
-    repo.save("optimal_game", board2)
+    game1 = make_game_with_small_board()
+    game2 = make_game_with_small_board()
+    repo.save("greedy_game", game1)
+    repo.save("optimal_game", game2)
 
     # Mock both strategies
     with patch(
@@ -51,7 +49,7 @@ async def test_autoplay_greedy_and_optimal_both_callable():
 async def test_autoplay_strategy_selection_isolation():
     """Test that strategy parameter correctly selects the AI player without calling the other."""
     repo = InMemoryGameRepository()
-    board = make_small_board()
+    board = make_game_with_small_board()
     repo.save("validation", board)
 
     # Patch both strategies but only greedy should be called

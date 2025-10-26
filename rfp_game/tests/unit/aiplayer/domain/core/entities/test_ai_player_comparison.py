@@ -4,8 +4,6 @@ import pytest
 from copy import deepcopy
 
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
@@ -15,9 +13,15 @@ from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPl
 @pytest.fixture
 def simple_board():
     """Create a simple solvable game board."""
-    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
+    board = Game(rows=5, cols=5)
+
+    board.robot.position = Position(0, 0)
+
+    board.robot.orientation = Direction.EAST
+
+    board.princess.position = Position(4, 4)
     board.flowers = {Position(1, 1), Position(3, 3)}
+    board.board.initial_flowers_count = len(board.flowers)
     board.obstacles = set()
     board.board.initial_flowers_count = len(board.flowers)
     return board
@@ -26,8 +30,13 @@ def simple_board():
 @pytest.fixture
 def complex_board():
     """Create a complex board with multiple flowers and obstacles."""
-    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
+    board = Game(rows=7, cols=7)
+
+    board.robot.position = Position(0, 0)
+
+    board.robot.orientation = Direction.EAST
+
+    board.princess.position = Position(6, 6)
     board.flowers = {
         Position(1, 1),
         Position(2, 3),

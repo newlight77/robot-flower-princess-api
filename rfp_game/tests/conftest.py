@@ -5,8 +5,6 @@ from fastapi.testclient import TestClient
 from main import app
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.position import Position
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.value_objects.direction import Direction
 from configurator.dependencies import get_game_repository
 from hexagons.game.driven.persistence.in_memory_game_repository import (
@@ -58,14 +56,14 @@ def save_board(repo):
 def make_empty_board():
     from hexagons.game.domain.core.entities.game import Game
     from hexagons.game.domain.core.entities.position import Position
-    from hexagons.game.domain.core.entities.robot import Robot
-    from hexagons.game.domain.core.entities.princess import Princess
     from hexagons.game.domain.core.value_objects.direction import Direction
 
     def _make(rows=3, cols=3):
-        robot_pos = Position(1, 1)
-        robot = Robot(position=robot_pos, orientation=Direction.NORTH)
-        board = Game(rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(2, 2)))
+        board = Game(rows=rows, cols=cols)
+        # Override default positions and clear random flowers/obstacles for testing
+        board.robot.position = Position(1, 1)
+        board.robot.orientation = Direction.NORTH
+        board.princess.position = Position(2, 2)
         board.flowers = set()
         board.obstacles = set()
         return board
@@ -114,20 +112,17 @@ def game_repository():
 @pytest.fixture
 def sample_board():
     """Fixture for a simple test board."""
-    robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    princess = Princess(position=Position(2, 2))
     flowers = {Position(1, 1)}
     obstacles = {Position(0, 1)}
 
-    board = Game(
-        rows=3,
-        cols=3,
-        robot=robot,
-        princess=princess,
-    )
+    board = Game(rows=3, cols=3)
+    # Override default positions
+    board.robot.position = Position(0, 0)
+    board.robot.orientation = Direction.EAST
+    board.princess.position = Position(2, 2)
+    # Set specific flowers and obstacles for testing
     board.flowers = flowers
     board.obstacles = obstacles
-    board.initial_flower_count = len(flowers)
     return board
 
 

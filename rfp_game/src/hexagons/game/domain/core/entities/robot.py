@@ -116,13 +116,9 @@ class Robot:
         return {
             "position": {"row": self.position.row, "col": self.position.col},
             "orientation": self.orientation.value,
-            "flowers": {
-                "collected": [{"row": p.row, "col": p.col} for p in self.flowers_collected],
-                "delivered": [{"row": p.row, "col": p.col} for p in self.flowers_delivered],
-                "collection_capacity": self.max_flowers,
-            },
-            "obstacles": {
-                "cleaned": [{"row": p.row, "col": p.col} for p in self.obstacles_cleaned],
-            },
+            "flowers_collected": [{"row": p.row, "col": p.col} for p in self.flowers_collected],
+            "flowers_delivered": [{"row": p.row, "col": p.col} for p in self.flowers_delivered],
+            "flowers_collection_capacity": self.max_flowers,
+            "obstacles_cleaned": [{"row": p.row, "col": p.col} for p in self.obstacles_cleaned],
             "executed_actions": [action.to_dict() for action in self.executed_actions],
         }

@@ -5,8 +5,6 @@ from unittest.mock import AsyncMock
 
 from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
 
@@ -20,17 +18,14 @@ def mock_ml_client():
 @pytest.fixture
 def sample_game():
     """Create a sample game for testing."""
-    robot = Robot(position=Position(0, 0), orientation=Direction.NORTH)
-    game = Game(
-        game_id="test-game-123",
-        rows=5,
-        cols=5,
-        robot=robot,
-        princess=Princess(position=Position(4, 4)),
-    )
+    game = Game(game_id="test-game-123", rows=5, cols=5)
+    # Override default positions
+    game.robot.position = Position(0, 0)
+    game.robot.orientation = Direction.NORTH
+    game.princess.position = Position(4, 4)
     # Add some flowers
     game.flowers = {Position(2, 2), Position(3, 3)}
-    game.board.initial_flower_count = len(game.flowers)
+    game.board.initial_flowers_count = len(game.flowers)
     return game
 
 
@@ -220,10 +215,10 @@ class TestMLProxyPlayerGameStateConversion:
         call_args = mock_ml_client.predict_action.call_args
         game_state = call_args.kwargs["game_state"]
 
-        assert len(game_state["robot"]["flowers"]["collected"]) == 3
-        assert len(game_state["robot"]["flowers"]["delivered"]) == 0
-        assert len(game_state["robot"]["obstacles"]["cleaned"]) == 0
-        assert game_state["robot"]["flowers"]["collection_capacity"] == 12  # max_flowers default
+        assert len(game_state["robot"]["flowers_collected"]) == 3
+        assert len(game_state["robot"]["flowers_delivered"]) == 0
+        assert len(game_state["robot"]["obstacles_cleaned"]) == 0
+        assert game_state["robot"]["flowers_collection_capacity"] == 12  # max_flowers default
         assert len(game_state["robot"]["executed_actions"]) == 0
 
 

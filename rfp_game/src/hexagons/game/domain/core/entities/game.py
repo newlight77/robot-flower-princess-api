@@ -14,34 +14,38 @@ logger = get_logger("Game")
 
 
 class Game:
+    game_id: str
+    name: str
+    status: GameStatus
+    created_at: datetime
+    updated_at: datetime
+    board: Board
+    robot: Robot
+    princess: Princess
+
     def __init__(
         self,
         rows: int,
         cols: int,
-        robot: Robot,
-        princess: Princess = None,
-        game_id: str = str(uuid.uuid4()),
+        game_id: str = None,
         name: str = "",
+        created_at: datetime = None,
+        updated_at: datetime = None,
     ):
         """Initialize Game."""
-        self.game_id = game_id
+        self.game_id = game_id if game_id else str(uuid.uuid4())
         self.name = name
-        self.robot = robot
+        self.status = GameStatus.IN_PROGRESS
+        self.created_at = created_at if created_at else datetime.now()
+        self.updated_at = updated_at if updated_at else datetime.now()
+        self.flowers_delivered = 0
 
-        # Handle princess initialization
-        if princess is not None:
-            self.princess = princess
-        else:
-            # Default princess position at bottom-right
-            self.princess = Princess(position=Position(rows - 1, cols - 1))
+        # Create robot and princess first (default positions)
+        self.robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
+        self.princess = Princess(position=Position(rows - 1, cols - 1))
 
         # Create board with robot and princess positions (board generates flowers/obstacles)
         self.board = Board(rows, cols, self.robot.position, self.princess.position)
-
-        # Set other fields
-        self.flowers_delivered = 0
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
 
         logger.debug("Game.__init__ rows=%s cols=%s", self.board.rows, self.board.cols)
 
@@ -90,18 +94,11 @@ class Game:
         if name is None or name == "":
             name = f"Game-{rows}x{cols}"
 
-        # Robot always at top-left
-        robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-
-        # Princess always at bottom-right
-        princess = Princess(position=Position(rows - 1, cols - 1))
-
+        # __init__ will create robot at (0, 0) and princess at (rows-1, cols-1) automatically
         # Board will generate random flowers and obstacles
         return cls(
             rows=rows,
             cols=cols,
-            robot=robot,
-            princess=princess,
             name=name,
         )
 

@@ -20,20 +20,17 @@ class Game:
         cols: int,
         robot: Robot,
         princess: Princess = None,
-        princess_position: Position = None,
         game_id: str = "",
         **kwargs,
     ):
-        """Initialize Game with backward compatibility for princess_position."""
+        """Initialize Game."""
         self.game_id = game_id or kwargs.get("game_id", "")
         self.board = Board(rows, cols)
         self.robot = robot
 
-        # Handle backward compatibility
+        # Handle princess initialization
         if princess is not None:
             self.princess = princess
-        elif princess_position is not None:
-            self.princess = Princess(position=princess_position)
         else:
             # Default princess position at bottom-right
             self.princess = Princess(position=Position(self.board.rows - 1, self.board.cols - 1))
@@ -75,11 +72,10 @@ class Game:
             raise ValueError("Game size must be between 3x3 and 50x50")
 
         # Robot always at top-left
-        robot_pos = Position(0, 0)
+        robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
 
         # Princess always at bottom-right
-        princess_pos = Position(rows - 1, cols - 1)
-        princess = Princess(position=princess_pos)
+        princess = Princess(position=Position(rows - 1, cols - 1))
 
         total_cells = rows * cols
         max_flowers = max(1, int(total_cells * 0.1))
@@ -87,7 +83,7 @@ class Game:
 
         # Generate all positions except robot and princess
         all_positions = [Position(r, c) for r in range(rows) for c in range(cols)]
-        all_positions = [p for p in all_positions if p != robot_pos and p != princess_pos]
+        all_positions = [p for p in all_positions if p != robot.position and p != princess.position]
         random.shuffle(all_positions)
 
         # Place flowers (up to 10% of board)
@@ -96,8 +92,6 @@ class Game:
 
         # Place obstacles (around 30% of board)
         obstacles = {all_positions.pop() for _ in range(min(num_obstacles, len(all_positions)))}
-
-        robot = Robot(position=robot_pos, orientation=Direction.EAST)
 
         return cls(
             rows=rows,
@@ -151,16 +145,6 @@ class Game:
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp."""
         self.updated_at = datetime.now()
-
-    @property
-    def princess_position(self) -> Position:
-        """Backward compatibility property for princess position."""
-        return self.princess.position
-
-    @princess_position.setter
-    def princess_position(self, value: Position) -> None:
-        """Set princess position for backward compatibility."""
-        self.princess.position = value
 
     def to_dict(self) -> dict:
         """Convert game to dictionary representation for API compatibility."""

@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
 
@@ -25,7 +26,7 @@ def sample_game():
         rows=5,
         cols=5,
         robot=robot,
-        princess_position=Position(4, 4),
+        princess=Princess(position=Position(4, 4)),
     )
     # Add some flowers
     game.flowers = {Position(2, 2), Position(3, 3)}

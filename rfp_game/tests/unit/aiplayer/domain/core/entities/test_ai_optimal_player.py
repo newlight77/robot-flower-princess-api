@@ -5,6 +5,7 @@ from copy import deepcopy
 
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
@@ -14,7 +15,7 @@ from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPl
 def simple_board():
     """Create a simple solvable game board."""
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+    board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1), Position(3, 3)}
     board.obstacles = set()
     board.initial_flower_count = len(board.flowers)
@@ -25,7 +26,7 @@ def simple_board():
 def board_with_obstacles():
     """Create a board with obstacles that requires cleaning."""
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+    board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
     board.flowers = {Position(1, 1)}
     board.obstacles = {Position(2, 2), Position(1, 3)}
     board.initial_flower_count = len(board.flowers)
@@ -72,7 +73,7 @@ class TestAIOptimalPlayer:
     def test_solve_empty_board_no_actions(self):
         """AIOptimalPlayer should return empty actions for board with no flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+        board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = set()
         board.initial_flower_count = 0
 
@@ -103,7 +104,7 @@ class TestAIOptimalPlayer:
         Tests multi-step planning with permutations for optimal flower sequencing.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         board.flowers = {
             Position(1, 1),
             Position(2, 2),
@@ -149,7 +150,7 @@ class TestAIOptimalPlayer:
         Tests the optimal flower sequencing algorithm.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
 
         # Use 3 flowers to trigger permutation planning
         board.flowers = {
@@ -201,7 +202,7 @@ class TestAIOptimalPlayer:
         Tests the algorithm switching strategy for larger flower sets.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
+        board = Game(rows=8, cols=8, robot=robot, princess=Princess(position=Position(7, 7)))
 
         # Use 6 flowers to trigger greedy with look-ahead (not permutations)
         board.flowers = {
@@ -230,7 +231,7 @@ class TestAIOptimalPlayer:
         Tests initial obstacle cleaning before any movement.
         """
         robot = Robot(position=Position(2, 2), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
 
         # Surround robot with obstacles
         board.obstacles = {
@@ -256,7 +257,7 @@ class TestAIOptimalPlayer:
         Tests obstacle removal near goal position.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(2, 2))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(2, 2)))
 
         # Surround princess with obstacles
         board.obstacles = {
@@ -282,7 +283,7 @@ class TestAIOptimalPlayer:
         Tests scalability of A* pathfinding on larger grids.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=15, cols=15, robot=robot, princess_position=Position(14, 14))
+        board = Game(rows=15, cols=15, robot=robot, princess=Princess(position=Position(14, 14)))
 
         # Place flowers at various distances
         board.flowers = {
@@ -310,7 +311,7 @@ class TestAIOptimalPlayer:
         Tests multi-step planning with nearby flowers.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
 
         # Cluster flowers together
         board.flowers = {
@@ -337,7 +338,7 @@ class TestAIOptimalPlayer:
         Tests long-distance pathfinding initialization.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=10, cols=10, robot=robot, princess_position=Position(9, 9))
+        board = Game(rows=10, cols=10, robot=robot, princess=Princess(position=Position(9, 9)))
 
         # Place flowers far from robot
         board.flowers = {
@@ -361,7 +362,7 @@ class TestAIOptimalPlayer:
         Tests failure scenario where princess is completely inaccessible.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
 
         # Create wall of obstacles blocking princess
         board.obstacles = {
@@ -385,7 +386,7 @@ class TestAIOptimalPlayer:
         Tests multiple pickup-deliver cycles.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
+        board = Game(rows=8, cols=8, robot=robot, princess=Princess(position=Position(7, 7)))
 
         # Spread flowers requiring multiple trips
         board.flowers = {
@@ -414,7 +415,7 @@ class TestAIOptimalPlayer:
         Tests complex pathfinding scenarios.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
 
         # Create maze-like obstacles
         board.obstacles = {
@@ -445,7 +446,7 @@ class TestAIOptimalPlayer:
         Tests algorithm performance with high flower count.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=10, cols=10, robot=robot, princess_position=Position(9, 9))
+        board = Game(rows=10, cols=10, robot=robot, princess=Princess(position=Position(9, 9)))
 
         # Place many flowers (10 flowers)
         board.flowers = {
@@ -478,7 +479,7 @@ class TestAIOptimalPlayer:
         Tests strategic obstacle evaluation with complex patterns.
         """
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
 
         # Create checkerboard-like obstacle pattern
         board.obstacles = {
@@ -501,7 +502,7 @@ class TestAIOptimalPlayer:
     def test_single_flower_optimal_path(self):
         """AIOptimalPlayer should find optimal path for single flower."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+        board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
         board.initial_flower_count = 1
@@ -515,7 +516,7 @@ class TestAIOptimalPlayer:
     def test_two_flower_permutation_planning(self):
         """AIOptimalPlayer should test both permutations for 2 flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         board.flowers = {Position(1, 1), Position(3, 3)}
         board.obstacles = set()
         board.initial_flower_count = 2
@@ -528,7 +529,7 @@ class TestAIOptimalPlayer:
     def test_three_flower_permutation_planning(self):
         """AIOptimalPlayer should optimize sequence for 3 flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
         board.flowers = {Position(1, 1), Position(2, 3), Position(4, 2)}
         board.obstacles = set()
         board.initial_flower_count = 3
@@ -542,7 +543,7 @@ class TestAIOptimalPlayer:
     def test_four_flower_permutation_planning(self):
         """AIOptimalPlayer should optimize sequence for 4 flowers (max permutations)."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
         board.flowers = {
             Position(1, 1),
             Position(1, 4),
@@ -560,7 +561,7 @@ class TestAIOptimalPlayer:
     def test_five_flower_greedy_lookahead(self):
         """AIOptimalPlayer should use greedy with look-ahead for 5 flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         board.flowers = {
             Position(1, 1),
             Position(2, 2),
@@ -579,7 +580,7 @@ class TestAIOptimalPlayer:
     def test_corridor_with_obstacles_astar_navigation(self):
         """AIOptimalPlayer's A* should find optimal path through corridor."""
         robot = Robot(position=Position(0, 2), orientation=Direction.EAST)
-        board = Game(rows=5, cols=8, robot=robot, princess_position=Position(4, 2))
+        board = Game(rows=5, cols=8, robot=robot, princess=Princess(position=Position(4, 2)))
         # Corridor with obstacles
         board.obstacles = {
             Position(1, 1),
@@ -600,7 +601,7 @@ class TestAIOptimalPlayer:
     def test_diagonal_obstacle_wall(self):
         """AIOptimalPlayer should navigate around diagonal obstacle walls."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         # Diagonal wall
         board.obstacles = {
             Position(1, 2),
@@ -618,7 +619,7 @@ class TestAIOptimalPlayer:
     def test_l_shaped_obstacle_barrier(self):
         """AIOptimalPlayer should navigate L-shaped obstacle patterns."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=6, cols=6, robot=robot, princess_position=Position(5, 5))
+        board = Game(rows=6, cols=6, robot=robot, princess=Princess(position=Position(5, 5)))
         # L-shaped barrier
         board.obstacles = {
             Position(2, 1),
@@ -637,7 +638,7 @@ class TestAIOptimalPlayer:
     def test_zigzag_path_required(self):
         """AIOptimalPlayer should handle zigzag path requirements."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         # Staggered obstacles requiring zigzag
         board.obstacles = {
             Position(1, 1),
@@ -659,7 +660,7 @@ class TestAIOptimalPlayer:
     def test_flowers_requiring_backtracking(self):
         """AIOptimalPlayer should handle scenarios requiring backtracking."""
         robot = Robot(position=Position(3, 3), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(3, 3))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(3, 3)))
         # Flowers in opposite corners
         board.flowers = {Position(0, 0), Position(6, 6)}
         board.obstacles = set()
@@ -673,7 +674,7 @@ class TestAIOptimalPlayer:
     def test_obstacle_creates_detour(self):
         """AIOptimalPlayer should efficiently handle forced detours."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         # Wall forcing detour
         board.obstacles = {
             Position(2, 0),
@@ -691,7 +692,7 @@ class TestAIOptimalPlayer:
     def test_multiple_obstacle_clusters(self):
         """AIOptimalPlayer should navigate multiple obstacle clusters."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=8, cols=8, robot=robot, princess_position=Position(7, 7))
+        board = Game(rows=8, cols=8, robot=robot, princess=Princess(position=Position(7, 7)))
         # Multiple clusters
         board.obstacles = {
             Position(1, 1),
@@ -711,7 +712,7 @@ class TestAIOptimalPlayer:
     def test_flower_adjacent_to_obstacle(self):
         """AIOptimalPlayer should collect flowers next to obstacles."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         board.obstacles = {Position(2, 2)}
         board.flowers = {Position(2, 3)}  # Adjacent to obstacle
         board.initial_flower_count = 1
@@ -724,7 +725,7 @@ class TestAIOptimalPlayer:
     def test_princess_in_corner_with_obstacles(self):
         """AIOptimalPlayer should reach princess in corner through obstacles."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=5, cols=5, robot=robot, princess_position=Position(4, 4))
+        board = Game(rows=5, cols=5, robot=robot, princess=Princess(position=Position(4, 4)))
         # Obstacles near princess corner
         board.obstacles = {Position(3, 3), Position(3, 4), Position(4, 3)}
         board.flowers = {Position(1, 1)}
@@ -738,7 +739,7 @@ class TestAIOptimalPlayer:
     def test_scattered_flowers_across_board(self):
         """AIOptimalPlayer should efficiently collect scattered flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
+        board = Game(rows=9, cols=9, robot=robot, princess=Princess(position=Position(8, 8)))
         # Scattered pattern
         board.flowers = {
             Position(1, 7),
@@ -758,7 +759,7 @@ class TestAIOptimalPlayer:
     def test_seven_flowers_lookahead_strategy(self):
         """AIOptimalPlayer should handle 7 flowers with greedy look-ahead."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
+        board = Game(rows=9, cols=9, robot=robot, princess=Princess(position=Position(8, 8)))
         board.flowers = {
             Position(1, 1),
             Position(2, 2),
@@ -779,7 +780,7 @@ class TestAIOptimalPlayer:
     def test_box_shaped_obstacle_enclosure(self):
         """AIOptimalPlayer should navigate box-shaped obstacles."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         # Box/square of obstacles
         board.obstacles = {
             Position(2, 2),
@@ -801,7 +802,7 @@ class TestAIOptimalPlayer:
     def test_very_large_board_with_many_flowers(self):
         """AIOptimalPlayer should handle very large boards with many flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=15, cols=15, robot=robot, princess_position=Position(14, 14))
+        board = Game(rows=15, cols=15, robot=robot, princess=Princess(position=Position(14, 14)))
         board.flowers = {
             Position(2, 2),
             Position(4, 4),
@@ -825,7 +826,7 @@ class TestAIOptimalPlayer:
     def test_rectangular_board_tall(self):
         """AIOptimalPlayer should handle rectangular boards (taller than wide)."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=10, cols=5, robot=robot, princess_position=Position(9, 4))
+        board = Game(rows=10, cols=5, robot=robot, princess=Princess(position=Position(9, 4)))
         board.flowers = {Position(3, 2), Position(7, 3)}
         board.obstacles = set()
         board.initial_flower_count = 2
@@ -838,7 +839,7 @@ class TestAIOptimalPlayer:
     def test_minimum_board_size(self):
         """AIOptimalPlayer should work on minimum 3x3 board."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+        board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = {Position(1, 1)}
         board.obstacles = set()
         board.initial_flower_count = 1
@@ -851,7 +852,7 @@ class TestAIOptimalPlayer:
     def test_flower_line_horizontal(self):
         """AIOptimalPlayer should efficiently collect horizontal flower line."""
         robot = Robot(position=Position(3, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=10, robot=robot, princess_position=Position(3, 9))
+        board = Game(rows=7, cols=10, robot=robot, princess=Princess(position=Position(3, 9)))
         # Horizontal line
         board.flowers = {
             Position(3, 2),
@@ -870,7 +871,7 @@ class TestAIOptimalPlayer:
     def test_flower_line_vertical(self):
         """AIOptimalPlayer should efficiently collect vertical flower line."""
         robot = Robot(position=Position(0, 3), orientation=Direction.SOUTH)
-        board = Game(rows=10, cols=7, robot=robot, princess_position=Position(9, 3))
+        board = Game(rows=10, cols=7, robot=robot, princess=Princess(position=Position(9, 3)))
         # Vertical line
         board.flowers = {
             Position(2, 3),
@@ -889,7 +890,7 @@ class TestAIOptimalPlayer:
     def test_grid_pattern_flowers(self):
         """AIOptimalPlayer should optimize collection of grid-patterned flowers."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=9, cols=9, robot=robot, princess_position=Position(8, 8))
+        board = Game(rows=9, cols=9, robot=robot, princess=Princess(position=Position(8, 8)))
         # Grid pattern (every other cell)
         board.flowers = {
             Position(2, 2),
@@ -913,7 +914,7 @@ class TestAIOptimalPlayer:
     def test_perimeter_flowers(self):
         """AIOptimalPlayer should collect flowers around board perimeter."""
         robot = Robot(position=Position(3, 3), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(3, 3))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(3, 3)))
         # Perimeter
         board.flowers = {
             Position(0, 0),
@@ -932,7 +933,7 @@ class TestAIOptimalPlayer:
     def test_obstacle_wall_with_gap(self):
         """AIOptimalPlayer should find and use gaps in obstacle walls."""
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-        board = Game(rows=7, cols=7, robot=robot, princess_position=Position(6, 6))
+        board = Game(rows=7, cols=7, robot=robot, princess=Princess(position=Position(6, 6)))
         # Wall with one gap
         board.obstacles = {
             Position(3, 0),

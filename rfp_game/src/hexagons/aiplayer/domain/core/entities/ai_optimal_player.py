@@ -70,7 +70,7 @@ class AIOptimalPlayer:
             if should_deliver:
                 # Navigate adjacent to princess (not TO princess)
                 adjacent_positions = AIOptimalPlayer._get_adjacent_positions(
-                    board.princess_position, board
+                    board.princess.position, board
                 )
                 if not adjacent_positions:
                     # No empty adjacent positions near princess - need to clean obstacles
@@ -93,7 +93,7 @@ class AIOptimalPlayer:
 
                         # Now try to clean an obstacle near princess
                         if AIOptimalPlayer._clean_obstacle_near_flower(
-                            board, board.princess_position, actions
+                            board, board.princess.position, actions
                         ):
                             continue
 
@@ -146,7 +146,7 @@ class AIOptimalPlayer:
 
                 # Face princess and give flowers
                 direction = AIOptimalPlayer._get_direction(
-                    board.robot.position, board.princess_position
+                    board.robot.position, board.princess.position
                 )
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
@@ -161,7 +161,7 @@ class AIOptimalPlayer:
 
                 # First, handle case where princess is surrounded by obstacles
                 princess_adjacent = AIOptimalPlayer._get_adjacent_positions(
-                    board.princess_position, board
+                    board.princess.position, board
                 )
 
                 if not princess_adjacent:
@@ -169,7 +169,7 @@ class AIOptimalPlayer:
                     if board.robot.flowers_held == 0:  # Can only clean without flowers
                         # Try to clean an obstacle adjacent to princess
                         cleaned = AIOptimalPlayer._clean_obstacle_near_flower(
-                            board, board.princess_position, actions
+                            board, board.princess.position, actions
                         )
                         if cleaned:
                             continue  # Successfully cleaned, check again
@@ -183,7 +183,7 @@ class AIOptimalPlayer:
                             Direction.WEST,
                         ]:
                             row_delta, col_delta = direction.get_delta()
-                            adj_pos = board.princess_position.move(row_delta, col_delta)
+                            adj_pos = board.princess.position.move(row_delta, col_delta)
                             if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
                                 # Try to reach this obstacle
                                 # Find adjacent empty position to this obstacle
@@ -305,7 +305,7 @@ class AIOptimalPlayer:
                     board,
                     board.flowers,
                     board.robot.position,
-                    board.princess_position,
+                    board.princess.position,
                     max_batch_size=3,
                 )
 
@@ -449,7 +449,7 @@ class AIOptimalPlayer:
                 if board.robot.flowers_held >= min(3, board.robot.max_flowers):
                     # We have enough flowers to deliver, check if path exists NOW
                     princess_adjacent_now = AIOptimalPlayer._get_adjacent_positions(
-                        board.princess_position, board
+                        board.princess.position, board
                     )
                     if princess_adjacent_now:
                         closest_now = min(
@@ -822,7 +822,7 @@ class AIOptimalPlayer:
             board,
             board.robot.position,
             board.flowers,
-            board.princess_position,
+            board.princess.position,
             max_options=5,  # Evaluate top 5 reachable obstacles
         )
 

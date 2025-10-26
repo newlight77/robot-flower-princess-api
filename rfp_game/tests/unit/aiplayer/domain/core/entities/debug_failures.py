@@ -16,7 +16,7 @@ def debug_failing_board(seed, config):
 
     # Save initial state
     initial_robot_pos = board.robot.position
-    initial_princess_pos = board.princess_position
+    initial_princess_pos = board.princess.position
     initial_flowers = len(board.flowers)
     initial_obstacles = len(board.obstacles)
 

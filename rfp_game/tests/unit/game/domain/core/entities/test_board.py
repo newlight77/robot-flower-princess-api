@@ -9,7 +9,7 @@ def test_board_creation():
     assert board.rows == 10
     assert board.cols == 10
     assert board.robot.position == Position(0, 0)
-    assert board.princess_position == Position(9, 9)
+    assert board.princess.position == Position(9, 9)
 
 
 def test_board_invalid_size():

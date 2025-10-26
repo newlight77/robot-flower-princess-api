@@ -6,6 +6,7 @@ from main import app
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
 from configurator.dependencies import get_game_repository
@@ -73,12 +74,13 @@ def make_empty_board():
     from hexagons.game.domain.core.entities.game import Game
     from hexagons.game.domain.core.entities.position import Position
     from hexagons.game.domain.core.entities.robot import Robot
+    from hexagons.game.domain.core.entities.princess import Princess
     from hexagons.game.domain.core.value_objects.direction import Direction
 
     def _make(rows=3, cols=3):
         robot_pos = Position(1, 1)
         robot = Robot(position=robot_pos, orientation=Direction.NORTH)
-        board = Game(rows=rows, cols=cols, robot=robot, princess_position=Position(2, 2))
+        board = Game(rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(2, 2)))
         board.flowers = set()
         board.obstacles = set()
         return board

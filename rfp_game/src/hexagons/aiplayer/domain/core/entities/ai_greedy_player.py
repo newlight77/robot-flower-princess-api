@@ -65,7 +65,7 @@ class AIGreedyPlayer:
             if should_deliver:
                 # Navigate adjacent to princess (not TO princess)
                 adjacent_positions = AIGreedyPlayer._get_adjacent_positions(
-                    board.princess_position, board
+                    board.princess.position, board
                 )
                 if not adjacent_positions:
                     # No empty adjacent positions near princess - need to clean obstacles
@@ -88,7 +88,7 @@ class AIGreedyPlayer:
 
                         # Now try to clean an obstacle near princess
                         if AIGreedyPlayer._clean_obstacle_near_flower(
-                            board, board.princess_position, actions
+                            board, board.princess.position, actions
                         ):
                             continue
 
@@ -141,7 +141,7 @@ class AIGreedyPlayer:
 
                 # Face princess and give flowers
                 direction = AIGreedyPlayer._get_direction(
-                    board.robot.position, board.princess_position
+                    board.robot.position, board.princess.position
                 )
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
@@ -156,7 +156,7 @@ class AIGreedyPlayer:
 
                 # First, handle case where princess is surrounded by obstacles
                 princess_adjacent = AIGreedyPlayer._get_adjacent_positions(
-                    board.princess_position, board
+                    board.princess.position, board
                 )
 
                 if not princess_adjacent:
@@ -164,7 +164,7 @@ class AIGreedyPlayer:
                     if board.robot.flowers_held == 0:  # Can only clean without flowers
                         # Try to clean an obstacle adjacent to princess
                         cleaned = AIGreedyPlayer._clean_obstacle_near_flower(
-                            board, board.princess_position, actions
+                            board, board.princess.position, actions
                         )
                         if cleaned:
                             continue  # Successfully cleaned, check again
@@ -178,7 +178,7 @@ class AIGreedyPlayer:
                             Direction.WEST,
                         ]:
                             row_delta, col_delta = direction.get_delta()
-                            adj_pos = board.princess_position.move(row_delta, col_delta)
+                            adj_pos = board.princess.position.move(row_delta, col_delta)
                             if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
                                 # Try to reach this obstacle
                                 # Find adjacent empty position to this obstacle
@@ -416,7 +416,7 @@ class AIGreedyPlayer:
                 if board.robot.flowers_held >= min(3, board.robot.max_flowers):
                     # We have enough flowers to deliver, check if path exists NOW
                     princess_adjacent_now = AIGreedyPlayer._get_adjacent_positions(
-                        board.princess_position, board
+                        board.princess.position, board
                     )
                     if princess_adjacent_now:
                         closest_now = min(

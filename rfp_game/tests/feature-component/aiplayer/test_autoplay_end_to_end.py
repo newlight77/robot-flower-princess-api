@@ -5,6 +5,7 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
 )
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
@@ -16,7 +17,7 @@ def test_autoplay_end_to_end():
     repo = InMemoryGameRepository()
     # create a small solvable board
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
+    board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
     board.flowers = {Position(0, 1)}
     board.obstacles = set()
     board.initial_flower_count = len(board.flowers)
@@ -55,7 +56,7 @@ def test_autoplay_with_obstacles():
     # _ O _
     # _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(0, 1)}
     board.obstacles = {Position(1, 1)}  # One obstacle in the middle
     board.initial_flower_count = len(board.flowers)
@@ -98,7 +99,7 @@ def test_autoplay_multiple_flowers_with_obstacles():
     # _ O _ F
     # _ _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
     board.flowers = {
         Position(0, 1),  # Next to robot
         Position(2, 3),  # Near princess
@@ -147,7 +148,7 @@ def test_autoplay_normal_delivery_clear_path():
     # _ _ _
     # _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(0, 1)}
     board.obstacles = set()  # No obstacles
     board.initial_flower_count = len(board.flowers)
@@ -187,7 +188,7 @@ def test_autoplay_blocked_path_drop_and_clean():
     # _ O O O
     # _ _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
     board.flowers = {Position(0, 1)}
     # Wall of obstacles blocking path
     board.obstacles = {
@@ -238,7 +239,7 @@ def test_autoplay_no_adjacent_space_to_princess():
     # _ _ O O
     # _ _ O P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
     board.flowers = {Position(0, 1)}
     # Obstacles surround princess
     board.obstacles = {
@@ -285,7 +286,7 @@ def test_autoplay_navigate_adjacent_to_princess():
     # _ _ _
     # _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(0, 1)}
     board.obstacles = set()
     board.initial_flower_count = len(board.flowers)
@@ -309,7 +310,7 @@ def test_autoplay_navigate_adjacent_to_princess():
 
         final_board = repo.get(game_id)
         # Robot should be adjacent to princess, not on princess
-        assert final_board.robot.position != board.princess_position
+        assert final_board.robot.position != board.princess.position
         # Should have made progress
         assert final_board.flowers_delivered > 0 or len(final_board.flowers) == 0
 
@@ -342,7 +343,7 @@ def test_autoplay_robot_starts_blocked():
     repo = InMemoryGameRepository()
 
     robot = Robot(position=Position(1, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(1, 2)}
     board.obstacles = {Position(1, 1)}  # Blocking direct path to flower
     board.initial_flower_count = len(board.flowers)
@@ -383,7 +384,7 @@ def test_autoplay_optimal_end_to_end():
     repo = InMemoryGameRepository()
     # create a small solvable board
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
+    board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
     board.flowers = {Position(0, 1)}
     board.obstacles = set()
     board.initial_flower_count = len(board.flowers)
@@ -419,7 +420,7 @@ def test_autoplay_optimal_with_obstacles():
     # _ O _
     # _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(0, 1)}
     board.obstacles = {Position(1, 1)}  # One obstacle in the middle
     board.initial_flower_count = len(board.flowers)
@@ -459,7 +460,7 @@ def test_autoplay_optimal_multiple_flowers():
     # _ O _ F
     # _ _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
     board.flowers = {
         Position(0, 1),  # Next to robot
         Position(2, 3),  # Near princess
@@ -501,7 +502,7 @@ def test_autoplay_optimal_clear_path_efficiency():
     # _ _ _
     # _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=3, cols=3, robot=robot, princess_position=Position(2, 2))
+    board = Game(rows=3, cols=3, robot=robot, princess=Princess(position=Position(2, 2)))
     board.flowers = {Position(0, 1)}
     board.obstacles = set()  # No obstacles
     board.initial_flower_count = len(board.flowers)
@@ -548,7 +549,7 @@ def test_autoplay_optimal_complex_obstacle_pattern():
     # _ O _ _
     # _ _ _ P
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=4, cols=4, robot=robot, princess_position=Position(3, 3))
+    board = Game(rows=4, cols=4, robot=robot, princess=Princess(position=Position(3, 3)))
     board.flowers = {Position(0, 1)}
     board.obstacles = {
         Position(1, 1),

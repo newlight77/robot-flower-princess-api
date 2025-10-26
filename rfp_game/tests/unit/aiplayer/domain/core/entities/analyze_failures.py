@@ -41,7 +41,7 @@ def save_failing_boards():
 
         # Check if path exists from robot to princess
         robot_pos = board.robot.position
-        princess_pos = board.princess_position
+        princess_pos = board.princess.position
 
         # Check adjacent positions to princess
         adjacent_to_princess = AIGreedyPlayer._get_adjacent_positions(princess_pos, board)

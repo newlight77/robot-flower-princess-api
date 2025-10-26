@@ -3,6 +3,7 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
 )
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
@@ -23,7 +24,7 @@ from hexagons.game.domain.use_cases.clean_obstacle import (
 
 def make_center_board(rows=3, cols=3):
     robot = Robot(position=Position(1, 1), orientation=Direction.EAST)
-    board = Game(rows=rows, cols=cols, robot=robot, princess_position=Position(rows - 1, cols - 1))
+    board = Game(rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(rows - 1, cols - 1)))
     board.flowers = set()
     board.obstacles = set()
     board.initial_flower_count = 0
@@ -111,7 +112,7 @@ def test_give_rotates_then_gives():
     repo = InMemoryGameRepository()
     board = make_center_board()
     # place princess north of robot
-    board.princess_position = Position(0, 1)
+    board.princess.position = Position(0, 1)
     board.robot.flowers_held = 1
     repo.save("g1", board)
     repo.save_history("g1", GameHistory())

@@ -7,6 +7,7 @@ from hexagons.game.driven.persistence.in_memory_game_repository import (
 )
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.entities.robot import Robot
+from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.entities.game_history import GameHistory
 from hexagons.game.domain.core.value_objects.direction import Direction
@@ -15,7 +16,7 @@ from hexagons.aiplayer.domain.use_cases.autoplay import AutoplayUseCase, Autopla
 
 def make_small_board():
     robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
-    board = Game(rows=2, cols=2, robot=robot, princess_position=Position(1, 1))
+    board = Game(rows=2, cols=2, robot=robot, princess=Princess(position=Position(1, 1)))
     board.flowers = {Position(0, 1)}
     board.initial_flower_count = 1
     board.obstacles = set()

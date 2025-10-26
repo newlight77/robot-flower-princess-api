@@ -28,12 +28,14 @@ class GetGamesUseCase:
         """Get the last N games, optionally filtered by status."""
         self.logger.info("execute: GetGamesQuery limit=%s status=%r", query.limit, query.status)
         status = query.status if query.status is not None else "in_progress"
+
         self.logger.info(
             "execute: GetGamesQuery limit=%s status=%r final status=%s",
             query.limit,
             query.status,
             status,
         )
+
         games = self.repository.get_games(query.limit, status)
 
         return GetGamesResult(

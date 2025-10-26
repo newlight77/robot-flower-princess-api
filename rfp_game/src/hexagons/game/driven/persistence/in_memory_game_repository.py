@@ -31,14 +31,14 @@ class InMemoryGameRepository(GameRepository):
         logger.debug("exists game_id=%s exists=%s", game_id, exists)
         return exists
 
-    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Game]]:
+    def get_games(self, limit: int = 10, status: str = "") -> List[Game]:
         """Get the last N games, optionally filtered by status."""
         logger.info("get_games limit=%s status=%s", limit, status)
-        filtered_games = []
-        for game_id, game in self._games.items():
+        filtered_games: List[Game] = []
+        for game in self._games.values():
             game_status = game.get_status()
             if status is None or game_status.value == status:
-                filtered_games.append((game_id, game))
+                filtered_games.append(game)
 
-        # Return the last N filtered games
-        return filtered_games[-limit:] if len(filtered_games) > limit else filtered_games
+        # Return the first N filtered games
+        return filtered_games[:limit] if len(filtered_games) > limit else filtered_games

@@ -86,6 +86,7 @@ def get_games(
     try:
         use_case = GetGamesUseCase(repository)
         result: GetGamesResult = use_case.execute(GetGamesQuery(limit=limit, status=status))
+        logger.info("get_games: result=%s", result)
 
         return GamesResponse(
             games=[game.to_dict() for game in result.games],

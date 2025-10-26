@@ -28,6 +28,6 @@ class GameRepository(ABC):
         pass
 
     @abstractmethod
-    def get_games(self, limit: int = 10, status: str = "") -> List[tuple[str, Game]]:
+    def get_games(self, limit: int = 10, status: str = "") -> List[Game]:
         """Get the last N games, optionally filtered by status."""
         pass

@@ -116,6 +116,7 @@ class MLProxyPlayer:
             status = "In Progress"
 
         return {
+            "game_id": game.game_id,
             "status": status,
             "board": game.board.to_dict(),
             "robot": game.robot.to_dict(),

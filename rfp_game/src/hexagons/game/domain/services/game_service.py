@@ -8,7 +8,7 @@ from ..core.exceptions.game_exceptions import (
     InvalidDropException,
     InvalidGiveException,
     InvalidCleanException,
-    InvalidRotateException,
+    InvalidRotationException,
 )
 from shared.logging import get_logger
 
@@ -27,7 +27,7 @@ class GameService:
 
         action = board.robot.rotate(direction)
         if action.message:
-            raise InvalidRotateException(action.message)
+            raise InvalidRotationException(action.message)
 
         board.update_timestamp()
 
@@ -132,12 +132,16 @@ class GameService:
         if target_position != board.princess.position:
             raise InvalidGiveException("Princess is not at target position")
 
+        # Count flowers before giving
+        flowers_count = len(board.robot.flowers_collected)
+
         # Give flowers
         action = board.robot.give_flowers(target_position)
         if action.message:
             raise InvalidGiveException(action.message)
 
         board.princess.receive_flowers(board.robot.flowers_delivered)
+        board.flowers_delivered += flowers_count  # Update game-level counter
         board.update_timestamp()
 
     @staticmethod

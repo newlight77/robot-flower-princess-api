@@ -14,7 +14,7 @@ class Board:
 
     rows: int
     cols: int
-    positions: list[list[Position]]
+    grid: list[list[Position]]
     robot_position: Position
     princess_position: Position
     flowers_positions: set[Position]
@@ -30,7 +30,7 @@ class Board:
         self.princess_position = princess_position
 
         # Create all positions in the board
-        self.positions = [
+        self.grid = [
             [Position(r, c) for c in range(cols)]
             for r in range(rows)
         ]
@@ -42,7 +42,7 @@ class Board:
 
         # Get all available positions (excluding robot and princess)
         # Flatten the 2D positions list
-        all_positions = [pos for row in self.positions for pos in row]
+        all_positions = [pos for row in self.grid for pos in row]
         available_positions = [p for p in all_positions if p != robot_position and p != princess_position]
         random.shuffle(available_positions)
 
@@ -80,7 +80,7 @@ class Board:
     def get_grid(self) -> list[list[str]]:
         """Generate the grid representation with emojis."""
         grid = []
-        for row_positions in self.positions:
+        for row_positions in self.grid:
             row = []
             for pos in row_positions:
                 if pos == self.robot_position:
@@ -106,4 +106,20 @@ class Board:
             "rows": self.rows,
             "cols": self.cols,
             "grid": grid,
+            "robot_position": {
+                "row": self.robot_position.row,
+                "col": self.robot_position.col,
+            },
+            "princess_position": {
+                "row": self.princess_position.row,
+                "col": self.princess_position.col,
+            },
+            "flowers_positions": [
+                {"row": p.row, "col": p.col} for p in self.flowers_positions
+            ],
+            "obstacles_positions": [
+                {"row": p.row, "col": p.col} for p in self.obstacles_positions
+            ],
+            "initial_flowers_count": self.initial_flowers_count,
+            "initial_obstacles_count": self.initial_obstacles_count,
         }

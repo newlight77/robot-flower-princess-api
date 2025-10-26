@@ -159,24 +159,8 @@ class Game:
             "id": self.game_id,
             "name": self.name,
             "board": board_dict,
-            "robot": {
-                "position": {"row": self.robot.position.row, "col": self.robot.position.col},
-                "orientation": self.robot.orientation.value,
-                "flowers": {
-                    "collected": self.robot.flowers_collected,
-                    "delivered": self.robot.flowers_delivered,
-                    "collection_capacity": self.robot.max_flowers,
-                },
-                "obstacles": {
-                    "cleaned": self.robot.obstacles_cleaned,
-                },
-                "executed_actions": self.robot.executed_actions,
-            },
-            "princess": {
-                "position": {"row": self.princess.position.row, "col": self.princess.position.col},
-                "flowers_received": self.princess.flowers_received,
-                "mood": self.princess.mood,
-            },
+            "robot": self.robot.to_dict(),
+            "princess": self.princess.to_dict(),
             "obstacles": {
                 "remaining": self.board.initial_obstacles_count - len(self.robot.obstacles_cleaned),
                 "total": self.board.initial_obstacles_count,

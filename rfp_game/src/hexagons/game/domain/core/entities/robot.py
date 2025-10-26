@@ -15,11 +15,17 @@ class Robot:
     obstacles_cleaned: List[Position] = field(default_factory=list)
     executed_actions: List[Action] = field(default_factory=list)
 
-    def move_to(self, new_position: Position) -> None:
+    def move_to(self, new_position: Position) -> Action:
+        action = Action(action_type=ActionType.MOVE, direction=self.orientation)
+        self.add_executed_action(action)
         self.position = new_position
+        return action
 
-    def rotate(self, direction: Direction) -> None:
+    def rotate(self, direction: Direction) -> Action:
+        action = Action(action_type=ActionType.ROTATE, direction=direction)
+        self.add_executed_action(action)
         self.orientation = direction
+        return action
 
     def pick_flower(self, flower_position: Position = None) -> Action:
         action = Action(action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position)
@@ -77,6 +83,10 @@ class Robot:
         self.obstacles_cleaned.append(obstacle_position)
         return action
 
+    def add_executed_action(self, action: Action) -> None:
+        """Add an action to the executed actions history."""
+        self.executed_actions.append(action)
+
     def can_clean(self) -> bool:
         return len(self.flowers_collected) == 0
 
@@ -94,12 +104,12 @@ class Robot:
             "position": {"row": self.position.row, "col": self.position.col},
             "orientation": self.orientation.value,
             "flowers": {
-                "collected": self.flowers_collected,
-                "delivered": self.flowers_delivered,
+                "collected": [{"row": p.row, "col": p.col} for p in self.flowers_collected],
+                "delivered": [{"row": p.row, "col": p.col} for p in self.flowers_delivered],
                 "collection_capacity": self.max_flowers,
             },
             "obstacles": {
-                "cleaned": self.obstacles_cleaned,
+                "cleaned": [{"row": p.row, "col": p.col} for p in self.obstacles_cleaned],
             },
             "executed_actions": [action.to_dict() for action in self.executed_actions],
         }

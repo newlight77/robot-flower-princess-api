@@ -1,5 +1,5 @@
-import random
 from datetime import datetime
+import uuid
 
 from .position import Position
 from .robot import Robot
@@ -20,12 +20,12 @@ class Game:
         cols: int,
         robot: Robot,
         princess: Princess = None,
-        game_id: str = "",
-        **kwargs,
+        game_id: str = str(uuid.uuid4()),
+        name: str = "",
     ):
         """Initialize Game."""
-        self.game_id = game_id or kwargs.get("game_id", "")
-        self.board = Board(rows, cols)
+        self.game_id = game_id
+        self.name = name
         self.robot = robot
 
         # Handle princess initialization
@@ -33,27 +33,17 @@ class Game:
             self.princess = princess
         else:
             # Default princess position at bottom-right
-            self.princess = Princess(position=Position(self.board.rows - 1, self.board.cols - 1))
+            self.princess = Princess(position=Position(rows - 1, cols - 1))
+
+        # Create board with robot and princess positions (board generates flowers/obstacles)
+        self.board = Board(rows, cols, self.robot.position, self.princess.position)
 
         # Set other fields
-        self.flowers = kwargs.get("flowers", set())
-        self.obstacles = kwargs.get("obstacles", set())
-        self.initial_flower_count = kwargs.get("initial_flower_count", 0)
-        self.flowers_delivered = kwargs.get("flowers_delivered", 0)
-        self.name = kwargs.get("name", "")
-        self.created_at = kwargs.get("created_at", datetime.now())
-        self.updated_at = kwargs.get("updated_at", datetime.now())
+        self.flowers_delivered = 0
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
 
-        # Set initial flower count if not provided
-        if self.initial_flower_count == 0:
-            self.initial_flower_count = len(self.flowers)
-
-        logger.debug(
-            "Game.__init__ rows=%s cols=%s initial_flowers=%s",
-            self.board.rows,
-            self.board.cols,
-            self.initial_flower_count,
-        )
+        logger.debug("Game.__init__ rows=%s cols=%s", self.board.rows, self.board.cols)
 
     @property
     def rows(self) -> int:
@@ -65,11 +55,35 @@ class Game:
         """Get board cols for backward compatibility."""
         return self.board.cols
 
+    @property
+    def flowers(self) -> set[Position]:
+        """Get flowers positions from board."""
+        return self.board.flowers_positions
+
+    @flowers.setter
+    def flowers(self, value: set[Position]) -> None:
+        """Set flowers positions on board."""
+        self.board.flowers_positions = value
+
+    @property
+    def obstacles(self) -> set[Position]:
+        """Get obstacles positions from board."""
+        return self.board.obstacles_positions
+
+    @obstacles.setter
+    def obstacles(self, value: set[Position]) -> None:
+        """Set obstacles positions on board."""
+        self.board.obstacles_positions = value
+
     @classmethod
-    def create(cls, rows: int, cols: int) -> "Game":
+    def create(cls, rows: int, cols: int, name: str = "") -> "Game":
         """Factory method to create a new game with fixed positions."""
         if rows < 3 or rows > 50 or cols < 3 or cols > 50:
             raise ValueError("Game size must be between 3x3 and 50x50")
+
+        # Set the game name if provided
+        if name is None or name == "":
+            name = f"Game-{rows}x{cols}"
 
         # Robot always at top-left
         robot = Robot(position=Position(0, 0), orientation=Direction.EAST)
@@ -77,29 +91,13 @@ class Game:
         # Princess always at bottom-right
         princess = Princess(position=Position(rows - 1, cols - 1))
 
-        total_cells = rows * cols
-        max_flowers = max(1, int(total_cells * 0.1))
-        num_obstacles = int(total_cells * 0.3)
-
-        # Generate all positions except robot and princess
-        all_positions = [Position(r, c) for r in range(rows) for c in range(cols)]
-        all_positions = [p for p in all_positions if p != robot.position and p != princess.position]
-        random.shuffle(all_positions)
-
-        # Place flowers (up to 10% of board)
-        num_flowers = random.randint(1, min(max_flowers, len(all_positions)))
-        flowers = {all_positions.pop() for _ in range(num_flowers)}
-
-        # Place obstacles (around 30% of board)
-        obstacles = {all_positions.pop() for _ in range(min(num_obstacles, len(all_positions)))}
-
+        # Board will generate random flowers and obstacles
         return cls(
             rows=rows,
             cols=cols,
             robot=robot,
             princess=princess,
-            flowers=flowers,
-            obstacles=obstacles,
+            name=name,
         )
 
     def get_cell_type(self, position: Position) -> CellType:
@@ -150,14 +148,11 @@ class Game:
         """Convert game to dictionary representation for API compatibility."""
         logger.debug("to_dict rows=%s cols=%s", self.board.rows, self.board.cols)
 
-        board_dict = self.board.to_dict(
-            robot_position=self.robot.position,
-            princess_position=self.princess.position,
-            flowers_positions=self.flowers,
-            obstacles_positions=self.obstacles,
-        )
+        board_dict = self.board.to_dict()
 
         return {
+            "id": self.game_id,
+            "name": self.name,
             "board": board_dict,
             "robot": {
                 "position": {"row": self.robot.position.row, "col": self.robot.position.col},
@@ -178,12 +173,12 @@ class Game:
                 "mood": self.princess.mood,
             },
             "obstacles": {
-                "remaining": len(self.obstacles),
-                "total": len(self.obstacles) + len(self.robot.obstacles_cleaned),
+                "remaining": self.board.initial_obstacles_count - len(self.robot.obstacles_cleaned),
+                "total": self.board.initial_obstacles_count,
             },
             "flowers": {
-                "remaining": len(self.flowers),
-                "total": self.initial_flower_count,
+                "remaining": self.board.initial_flowers_count - len(self.robot.flowers_collected),
+                "total": self.board.initial_flowers_count,
             },
             "status": self.get_status().value,
             "created_at": self.created_at.isoformat() + "Z",

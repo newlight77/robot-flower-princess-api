@@ -1,15 +1,12 @@
 from dataclasses import dataclass
-from typing import Set
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ..core.value_objects.action_type import ActionType
 from ..core.entities.game_history import Action, GameHistory
 from ..core.exceptions.game_exceptions import GameException
 from ..core.value_objects.direction import Direction
-from ..core.entities.board import Board
-from ..core.entities.robot import Robot
-from ..core.entities.princess import Princess
-from ..core.entities.position import Position
+from ..core.entities.game import Game
+from ..core.value_objects.game_status import GameStatus
 from shared.logging import get_logger
 
 
@@ -22,13 +19,7 @@ class DropFlowerCommand:
 @dataclass
 class DropFlowerResult:
     success: bool
-    board: Board
-    robot: Robot
-    princess: Princess
-    flowers: Set[Position]
-    obstacles: Set[Position]
-    status: str
-    message: str
+    game: Game
 
 
 class DropFlowerUseCase:
@@ -42,8 +33,8 @@ class DropFlowerUseCase:
         self.logger.info(
             "execute: DropFlowerCommand game_id=%s direction=%s", command.game_id, command.direction
         )
-        board = self.repository.get(command.game_id)
-        if board is None:
+        game = self.repository.get(command.game_id)
+        if game is None:
             raise ValueError(f"Game {command.game_id} not found")
 
         history = self.repository.get_history(command.game_id)
@@ -51,46 +42,35 @@ class DropFlowerUseCase:
             history = GameHistory(game_id=command.game_id)
 
         try:
-            GameService.rotate_robot(board, command.direction)
-            GameService.drop_flower(board)
-            self.repository.save(command.game_id, board)
+            GameService.rotate_robot(game, command.direction)
+            GameService.drop_flower(game)
+            self.repository.save(command.game_id, game)
 
             action = Action(
                 action_type=ActionType.DROP,
                 direction=command.direction,
                 success=True,
-                message=f"Dropped flower (holding {board.robot.flowers_held})",
+                message=f"Dropped flower (holding {game.robot.flowers_held})",
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
 
             return DropFlowerResult(
                 success=True,
-                board=board.board,
-                robot=board.robot,
-                princess=board.princess,
-                flowers=board.flowers,
-                obstacles=board.obstacles,
-                status=board.get_status().value,
-                message=f"Flower dropped successfully (holding {board.robot.flowers_held})",
+                game=game,
             )
         except GameException as e:
             action = Action(
                 action_type=ActionType.DROP,
                 direction=command.direction,
                 success=False,
-                message=str(e),
+                message=f"Game Over: {str(e)}",
             )
             history.add_action(action)
             self.repository.save_history(command.game_id, history)
-
+            game.status = GameStatus.GAME_OVER
+            self.repository.save(command.game_id, game)
             return DropFlowerResult(
                 success=False,
-                board=board.board,
-                robot=board.robot,
-                princess=board.princess,
-                flowers=board.flowers,
-                obstacles=board.obstacles,
-                status=board.get_status().value,
-                message=f"Game Over: {str(e)}",
+                game=game,
             )

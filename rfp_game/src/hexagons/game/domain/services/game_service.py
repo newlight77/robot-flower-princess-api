@@ -49,6 +49,7 @@ class GameService:
 
         # Execute move
         board.robot.move_to(new_position)
+        board.board.move_robot(new_position)  # Update board position
         board.robot.add_executed_action(ActionType.MOVE, board.robot.orientation)
         board.update_timestamp()
 
@@ -75,7 +76,7 @@ class GameService:
 
         # Pick the flower
         board.robot.pick_flower(target_position)
-        board.flowers.remove(target_position)
+        board.board.pick_flower(target_position)  # Remove from board
         board.robot.add_executed_action(ActionType.PICK, board.robot.orientation)
         board.update_timestamp()
 
@@ -100,7 +101,7 @@ class GameService:
 
         # Drop the flower
         board.robot.drop_flower(target_position)
-        board.flowers.add(target_position)
+        board.board.drop_flower(target_position)  # Add to board
         board.robot.add_executed_action(ActionType.DROP, board.robot.orientation)
         board.update_timestamp()
 
@@ -150,7 +151,7 @@ class GameService:
             raise InvalidCleanException("No obstacle at target position")
 
         # Remove obstacle
-        board.obstacles.remove(target_position)
+        board.board.clean_obstacle(target_position)  # Remove from board
         board.robot.clean_obstacle(target_position)
         board.robot.add_executed_action(ActionType.CLEAN, board.robot.orientation)
         board.update_timestamp()

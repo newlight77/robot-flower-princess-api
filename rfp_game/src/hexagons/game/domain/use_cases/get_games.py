@@ -3,6 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 from ..ports.game_repository import GameRepository
 from ..core.entities.board import Board
+from ..core.entities.game import Game
 from shared.logging import get_logger
 
 
@@ -13,17 +14,10 @@ class GetGamesQuery:
 
 
 @dataclass
-class GameSummary:
-    game_id: str
-    status: str
-    board: Board
-    created_at: datetime
-    updated_at: datetime
-
-
-@dataclass
 class GetGamesResult:
-    games: List[GameSummary]
+    games: List[Game]
+    total: int
+    message: str
 
 
 class GetGamesUseCase:
@@ -44,16 +38,7 @@ class GetGamesUseCase:
         )
         games = self.repository.get_games(query.limit, status)
 
-        game_summaries = []
-        for game_id, game in games:
-            game_summaries.append(
-                GameSummary(
-                    game_id=game_id,
-                    status=game.get_status().value,
-                    board=game.board,
-                    created_at=game.created_at,
-                    updated_at=game.updated_at,
-                )
-            )
-
-        return GetGamesResult(games=game_summaries)
+        return GetGamesResult(
+            games=games,
+            total=len(games),
+            message=f"Games retrieved successfully: {len(games)} games")

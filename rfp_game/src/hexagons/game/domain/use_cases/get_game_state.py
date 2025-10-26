@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from typing import Set
+
+from ..core.entities.game import Game
 from ..ports.game_repository import GameRepository
-from ..core.entities.board import Board
-from ..core.entities.robot import Robot
-from ..core.entities.princess import Princess
-from ..core.entities.position import Position
 from shared.logging import get_logger
 
 
@@ -15,12 +13,7 @@ class GetGameStateQuery:
 
 @dataclass
 class GetGameStateResult:
-    board: Board
-    robot: Robot
-    princess: Princess
-    flowers: Set[Position]
-    obstacles: Set[Position]
-    status: str
+    game: Game
 
 
 class GetGameStateUseCase:
@@ -32,15 +25,10 @@ class GetGameStateUseCase:
     def execute(self, query: GetGameStateQuery) -> GetGameStateResult:
         """Get the current state of a game."""
         self.logger.info("execute: GetGameStateQuery game_id=%s", query.game_id)
-        board = self.repository.get(query.game_id)
-        if board is None:
+        game = self.repository.get(query.game_id)
+        if game is None:
             raise ValueError(f"Game {query.game_id} not found")
 
         return GetGameStateResult(
-            board=board.board,
-            robot=board.robot,
-            princess=board.princess,
-            flowers=board.flowers,
-            obstacles=board.obstacles,
-            status=board.get_status().value,
+            game=game,
         )

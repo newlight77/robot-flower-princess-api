@@ -7,17 +7,14 @@ from ..schemas.game_schema import (
     CreateGameResponse,
     ActionRequest,
     ActionType,
-    GameSchema,
     GetGameResponse,
     ActionResponse,
-    GameHistoryResponse,
     GamesResponse,
 )
 from configurator.dependencies import get_game_repository
 from ....domain.ports.game_repository import GameRepository
 from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
-from ....domain.use_cases.get_game_history import GetGameHistoryUseCase, GetGameHistoryQuery
 from ....domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
 from ....domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from ....domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
@@ -26,9 +23,10 @@ from ....domain.use_cases.give_flowers import GiveFlowersUseCase, GiveFlowersCom
 from ....domain.use_cases.clean_obstacle import CleanObstacleUseCase, CleanObstacleCommand
 from ....domain.use_cases.get_games import GetGamesResult, GetGamesUseCase, GetGamesQuery
 from ....domain.core.value_objects.direction import Direction
+from ....domain.core.entities.position import Position
+from ....domain.core.entities.robot import Robot
 from ....domain.use_cases.create_game import CreateGameResult
 from ....domain.use_cases.get_game_state import GetGameStateResult
-from ....domain.use_cases.get_game_history import GetGameHistoryResult
 
 
 router = APIRouter(prefix="/api/games", tags=["games"])
@@ -36,7 +34,7 @@ router = APIRouter(prefix="/api/games", tags=["games"])
 logger = get_logger("game_router")
 
 
-def obstacles_to_dict(obstacles: set, robot) -> dict:
+def obstacles_to_dict(obstacles: set[Position], robot: Robot) -> dict:
     """Convert obstacles set to API dict format."""
     return {
         "remaining": len(obstacles),
@@ -67,25 +65,9 @@ def create_game(
             CreateGameCommand(rows=request.rows, cols=request.cols, name=request.name)
         )
 
-        # Convert Board, Robot, Princess objects to dicts for the API response
-        board_dict = result.board.to_dict(
-            robot_position=result.robot.position,
-            princess_position=result.princess.position,
-            flowers_positions=result.flowers,
-            obstacles_positions=result.obstacles,
-        )
-
         return CreateGameResponse(
-            id=result.game_id,
-            status=result.status,
+            game=result.game.to_dict(),
             message=result.message,
-            created_at=result.created_at.isoformat() + "Z",
-            updated_at=result.updated_at.isoformat() + "Z",
-            board=board_dict,
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=obstacles_to_dict(result.obstacles, result.robot),
-            flowers=flowers_to_dict(result.flowers),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -105,28 +87,13 @@ def get_games(
         use_case = GetGamesUseCase(repository)
         result: GetGamesResult = use_case.execute(GetGamesQuery(limit=limit, status=status))
 
-        games = []
-        for game in result.games:
-            # Get the full game from the repository to access all fields
-            game = repository.get(game.game_id)
-            if game:
-                games.append(
-                    GameSchema(
-                        id=game.game_id,
-                        status=game.get_status().value,
-                        created_at=game.created_at.isoformat() + "Z",
-                        updated_at=game.updated_at.isoformat() + "Z",
-                        board=game.to_dict(),
-                        robot=game.robot.to_dict(),
-                        princess=game.princess.to_dict(),
-                        obstacles=obstacles_to_dict(game.obstacles, game.robot),
-                        flowers=flowers_to_dict(game.flowers, game.initial_flower_count),
-                    )
-                )
-
-        return GamesResponse(games=games, total=len(games))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return GamesResponse(
+            games=[game.to_dict() for game in result.games],
+            total=result.total,
+            message=result.message,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/{game_id}", response_model=GetGameResponse)
@@ -141,52 +108,12 @@ def get_game_state(
     try:
         use_case = GetGameStateUseCase(repository)
         result: GetGameStateResult = use_case.execute(GetGameStateQuery(game_id=game_id))
-        if result is None:
-            raise HTTPException(status_code=404, detail=f"Game {game_id} not found")
-
-        # Convert Board, Robot, Princess objects to dicts for the API response
-        board_dict = result.board.to_dict(
-            robot_position=result.robot.position,
-            princess_position=result.princess.position,
-            flowers_positions=result.flowers,
-            obstacles_positions=result.obstacles,
-        )
-
-        # Get the full game object to access created_at and updated_at
-        game = repository.get(game_id)
 
         return GetGameResponse(
-            id=game_id,
-            status=result.status,
-            message="Game state retrieved successfully",
-            created_at=game.created_at.isoformat() + "Z",
-            updated_at=game.updated_at.isoformat() + "Z",
-            board=board_dict,
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=obstacles_to_dict(result.obstacles, result.robot),
-            flowers=flowers_to_dict(result.flowers),
+            game=result.game.to_dict(),
+            message=f"Game {game_id} state retrieved successfully",
         )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
 
-
-@router.get("/{game_id}/history", response_model=GameHistoryResponse)
-def get_game_history(
-    game_id: str,
-    repository: GameRepository = Depends(get_game_repository),
-) -> GameHistoryResponse:
-    """Get the history of a game."""
-
-    logger.info("get_game_history: game_id=%s", game_id)
-
-    try:
-        use_case = GetGameHistoryUseCase(repository)
-        result: GetGameHistoryResult = use_case.execute(GetGameHistoryQuery(game_id=game_id))
-        return GameHistoryResponse(
-            id=game_id,
-            history=result.history.to_dict(),
-        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -267,24 +194,10 @@ def perform_action(
         else:
             raise ValueError(f"Unknown action: {action}")
 
-        # Convert Board, Robot, Princess objects to dicts for the API response
-        board_dict = result.board.to_dict(
-            robot_position=result.robot.position,
-            princess_position=result.princess.position,
-            flowers_positions=result.flowers,
-            obstacles_positions=result.obstacles,
-        )
-
         return ActionResponse(
             success=result.success,
-            id=game_id,
-            status=result.status,
-            board=board_dict,
-            robot=result.robot.to_dict(),
-            princess=result.princess.to_dict(),
-            obstacles=obstacles_to_dict(result.obstacles, result.robot),
-            flowers=flowers_to_dict(result.flowers),
-            message=result.message,
+            game=result.game.to_dict(),
+            message= "action performed successfully" if result.success else "failed to perform action",
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

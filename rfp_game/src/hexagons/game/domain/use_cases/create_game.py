@@ -47,16 +47,8 @@ class CreateGameUseCase:
             command.cols,
             command.name,
         )
-        game: Game = Game.create(rows=command.rows, cols=command.cols)
+        game: Game = Game.create(rows=command.rows, cols=command.cols, name=command.name)
 
-        # Set the game name if provided
-        if command.name:
-            game.name = command.name
-        else:
-            game.name = f"Game-{command.rows}x{command.cols}"
-
-        game_id = str(uuid.uuid4())
-        game.game_id = game_id
 
         # Save game and initialize history
         self.repository.save(game_id, game)

@@ -4,6 +4,7 @@ from typing import Literal
 from .position import Position
 from typing import List
 
+
 @dataclass
 class Princess:
     position: Position

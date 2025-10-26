@@ -4,7 +4,6 @@ from ..services.game_service import GameService
 from ..core.value_objects.direction import Direction
 from ..core.exceptions.game_exceptions import GameException
 from ..core.entities.game import Game
-from ..core.value_objects.game_status import GameStatus
 from shared.logging import get_logger
 
 
@@ -45,7 +44,7 @@ class RotateRobotUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return RotateRobotResult(
                 success=False,
                 game=game,

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Set
 from ..ports.game_repository import GameRepository
 from ...domain.services.game_service import GameService
 from ..core.exceptions.game_exceptions import GameException
@@ -45,7 +44,7 @@ class PickFlowerUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return PickFlowerResult(
                 success=False,
                 game=game,

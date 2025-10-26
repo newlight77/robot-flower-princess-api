@@ -45,7 +45,7 @@ class GiveFlowersUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return GiveFlowersResult(
                 success=False,
                 game=game,

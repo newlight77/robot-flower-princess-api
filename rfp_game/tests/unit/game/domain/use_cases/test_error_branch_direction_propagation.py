@@ -9,7 +9,6 @@ from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
 from hexagons.game.domain.core.exceptions.game_exceptions import GameException
-from hexagons.game.domain.core.value_objects.action import ActionType
 
 from hexagons.game.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from hexagons.game.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
@@ -46,7 +45,6 @@ def test_move_error_records_failed_action_direction():
         use_case.execute(MoveRobotCommand(game_id="merr", direction=Direction.NORTH))
 
 
-
 def test_pick_error_records_failed_action_direction():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -58,7 +56,6 @@ def test_pick_error_records_failed_action_direction():
     ):
         use_case = PickFlowerUseCase(repo)
         use_case.execute(PickFlowerCommand(game_id="perr", direction=Direction.NORTH))
-
 
 
 def test_drop_error_records_failed_action_direction():
@@ -75,7 +72,6 @@ def test_drop_error_records_failed_action_direction():
         use_case.execute(DropFlowerCommand(game_id="derr", direction=Direction.NORTH))
 
 
-
 def test_give_error_records_failed_action_direction():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -90,7 +86,6 @@ def test_give_error_records_failed_action_direction():
         use_case.execute(GiveFlowersCommand(game_id="gerr", direction=Direction.NORTH))
 
 
-
 def test_clean_error_records_failed_action_direction():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -102,4 +97,3 @@ def test_clean_error_records_failed_action_direction():
     ):
         use_case = CleanObstacleUseCase(repo)
         use_case.execute(CleanObstacleCommand(game_id="cerr", direction=Direction.NORTH))
-

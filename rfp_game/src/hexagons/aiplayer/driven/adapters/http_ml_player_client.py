@@ -26,12 +26,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
-    async def predict_action(
-        self,
-        game_id: str,
-        strategy: str,
-        game_state: Dict
-    ) -> Dict:
+    async def predict_action(self, game_id: str, strategy: str, game_state: Dict) -> Dict:
         """
         Request an action prediction from the ML Player.
 
@@ -71,8 +66,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
-                f"{self.base_url}/api/ml-player/predict/{game_id}",
-                json=payload
+                f"{self.base_url}/api/ml-player/predict/{game_id}", json=payload
             )
             response.raise_for_status()
             return response.json()
@@ -110,9 +104,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
             httpx.HTTPError: If request fails or strategy not found
         """
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.get(
-                f"{self.base_url}/api/ml-player/strategies/{strategy_name}"
-            )
+            response = await client.get(f"{self.base_url}/api/ml-player/strategies/{strategy_name}")
             response.raise_for_status()
             return response.json()
 

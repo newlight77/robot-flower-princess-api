@@ -1,7 +1,9 @@
 from hexagons.game.domain.core.entities.position import Position
 
 
-def should_clean_removes_obstacle_successfully(client, make_empty_board, save_board, place_obstacle):
+def should_clean_removes_obstacle_successfully(
+    client, make_empty_board, save_board, place_obstacle
+):
     game_id = "component-clean-removes-obstacle"
     board = make_empty_board()
     # place an obstacle north of robot

@@ -37,6 +37,9 @@ def should_autoplay_successfully_with_clear_path():
         data = resp.json()
         print(f"should_autoplay_successfully_with_clear_path Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
+
     finally:
         # restore original override
         if original_override is None:
@@ -79,6 +82,8 @@ def should_autoplay_successfully_with_obstacles():
         data = resp.json()
         print(f"should_autoplay_successfully_with_obstacles Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         # restore original override
@@ -124,6 +129,8 @@ def should_autoplay_successfully_with_multiple_flowers_and_obstacles():
         data = resp.json()
         print(f"should_autoplay_successfully_with_multiple_flowers_and_obstacles Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
         # Verify some progress was made
 
@@ -162,11 +169,13 @@ def should_autoplay_successfully_with_normal_delivery_clear_path():
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
 
-        final_board = repo.get(game_id)
         # Should successfully deliver flower
         data = resp.json()
         print(f"should_autoplay_successfully_with_normal_delivery_clear_path Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["flowers"]["delivered"]) >= 1
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -210,6 +219,11 @@ def should_autoplay_successfully_with_blocked_path_drop_and_clean():
     try:
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
+        data = resp.json()
+        print(f"should_autoplay_successfully_with_blocked_path_drop_and_clean Data: {data}")
+        assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
         final_board = repo.get(game_id)
         # Should have cleaned at least one obstacle or dropped flowers
@@ -257,6 +271,12 @@ def should_autoplay_successfully_with_no_adjacent_space_to_princess():
     try:
         resp = client.post(f"/api/games/{game_id}/autoplay")
         assert resp.status_code == 200
+
+        data = resp.json()
+        print(f"should_autoplay_successfully_with_no_adjacent_space_to_princess Data: {data}")
+        assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
         final_board = repo.get(game_id)
         # Should have cleaned obstacle near princess or made progress
@@ -310,6 +330,8 @@ def should_autoplay_successfully_with_navigate_adjacent_to_princess():
         data = resp.json()
         print(f"should_autoplay_successfully_with_navigate_adjacent_to_princess Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -360,6 +382,8 @@ def should_autoplay_successfully_with_blocked_path():
         data = resp.json()
         print(f"should_autoplay_successfully_with_blocked_path Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -436,6 +460,8 @@ def should_autoplay_successfully_with_optimal_strategy_and_obstacles():
         data = resp.json()
         print(f"should_autoplay_successfully_with_optimal_strategy_and_obstacles Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -477,8 +503,12 @@ def should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers():
 
         # Verify the endpoint works with optimal strategy
         data = resp.json()
-        print(f"should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers Data: {data}")
+        print(
+            f"should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers Data: {data}"
+        )
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -514,13 +544,13 @@ def should_autoplay_successfully_with_optimal_strategy_and_clear_path():
         resp = client.post(f"/api/games/{game_id}/autoplay?strategy=optimal")
         assert resp.status_code == 200
 
-        final_board = repo.get(game_id)
-
         # Optimal should use fewer actions (more efficient)
         # This is a simple board, so action count should be reasonable
         data = resp.json()
         print(f"should_autoplay_successfully_with_optimal_strategy_and_clear_path Data: {data}")
         assert "success" in data["message"] or "board" in data
+        assert len(data["game"]["robot"]["executed_actions"]) >= 10
+        assert data["game"]["status"] == "victory"
 
     finally:
         if original_override is None:
@@ -564,7 +594,9 @@ def should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_patt
 
         # Verify the endpoint works with optimal strategy
         data = resp.json()
-        print(f"should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_pattern Data: {data}")
+        print(
+            f"should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_pattern Data: {data}"
+        )
         assert "success" in data["message"] or "board" in data
 
     finally:

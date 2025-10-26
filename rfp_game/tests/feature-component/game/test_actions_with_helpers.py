@@ -1,4 +1,6 @@
-def should_pick_drop_give_with_helpers_successfully(client, make_empty_board, save_board, place_flower):
+def should_pick_drop_give_with_helpers_successfully(
+    client, make_empty_board, save_board, place_flower
+):
     game_id = "component-pick-drop-give-with-helpers"
     board = make_empty_board()
     # place a flower north of robot
@@ -51,7 +53,9 @@ def should_pick_drop_give_with_helpers_successfully(client, make_empty_board, sa
     assert "success" in data["message"] or "board" in data
 
 
-def should_clean_with_helpers_successfully(client, make_empty_board, save_board, place_obstacle, place_robot):
+def should_clean_with_helpers_successfully(
+    client, make_empty_board, save_board, place_obstacle, place_robot
+):
     game_id = "component-clean-with-helpers"
     board = make_empty_board()
     from hexagons.game.domain.core.entities.position import Position

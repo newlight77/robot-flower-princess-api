@@ -45,7 +45,7 @@ class CleanObstacleUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return CleanObstacleResult(
                 success=False,
                 game=game,

@@ -43,7 +43,7 @@ class DropFlowerUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return DropFlowerResult(
                 success=False,
                 game=game,

@@ -28,7 +28,9 @@ class Robot:
         return action
 
     def pick_flower(self, flower_position: Position = None) -> Action:
-        action = Action(action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position)
+        action = Action(
+            action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position
+        )
         self.add_executed_action(action)
 
         if len(self.flowers_collected) >= self.max_flowers:
@@ -42,7 +44,9 @@ class Robot:
         return action
 
     def drop_flower(self, drop_position: Position = None) -> Action:
-        action = Action(action_type=ActionType.DROP, direction=self.orientation, drop_position=drop_position)
+        action = Action(
+            action_type=ActionType.DROP, direction=self.orientation, drop_position=drop_position
+        )
         self.add_executed_action(action)
 
         if len(self.flowers_collected) == 0:
@@ -56,7 +60,11 @@ class Robot:
         return action
 
     def give_flowers(self, princess_position: Position = None) -> Action:
-        action = Action(action_type=ActionType.GIVE, direction=self.orientation, princess_position=princess_position)
+        action = Action(
+            action_type=ActionType.GIVE,
+            direction=self.orientation,
+            princess_position=princess_position,
+        )
         self.add_executed_action(action)
 
         """Give all collected flowers to princess. Returns count of flowers delivered."""
@@ -73,7 +81,11 @@ class Robot:
         return action
 
     def clean_obstacle(self, obstacle_position: Position) -> Action:
-        action = Action(action_type=ActionType.CLEAN, direction=self.orientation, obstacle_position=obstacle_position)
+        action = Action(
+            action_type=ActionType.CLEAN,
+            direction=self.orientation,
+            obstacle_position=obstacle_position,
+        )
         self.add_executed_action(action)
 
         if len(self.flowers_collected) > 0:

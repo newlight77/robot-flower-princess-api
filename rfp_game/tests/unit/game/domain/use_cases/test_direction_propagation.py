@@ -6,7 +6,6 @@ from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.princess import Princess
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
-from hexagons.game.domain.core.value_objects.action import ActionType
 
 from hexagons.game.domain.use_cases.move_robot import MoveRobotUseCase, MoveRobotCommand
 from hexagons.game.domain.use_cases.pick_flower import PickFlowerUseCase, PickFlowerCommand
@@ -23,7 +22,9 @@ from hexagons.game.domain.use_cases.clean_obstacle import (
 
 def make_center_board(rows=3, cols=3):
     robot = Robot(position=Position(1, 1), orientation=Direction.EAST)
-    board = Game(rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(rows - 1, cols - 1)))
+    board = Game(
+        rows=rows, cols=cols, robot=robot, princess=Princess(position=Position(rows - 1, cols - 1))
+    )
     board.flowers = set()
     board.obstacles = set()
     board.board.initial_flowers_count = 0
@@ -47,7 +48,6 @@ def test_move_rotates_then_moves():
         assert b.robot.position == Position(0, 1)
 
 
-
 def test_pick_rotates_then_picks():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -69,7 +69,6 @@ def test_pick_rotates_then_picks():
         assert flower_pos not in b.flowers
 
 
-
 def test_drop_rotates_then_drops():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -86,7 +85,6 @@ def test_drop_rotates_then_drops():
     if res.success:
         assert b.robot.flowers_held == 0
         assert Position(0, 1) in b.flowers
-
 
 
 def test_give_rotates_then_gives():
@@ -108,7 +106,6 @@ def test_give_rotates_then_gives():
         assert b.robot.flowers_held == 0
 
 
-
 def test_clean_rotates_then_cleans():
     repo = InMemoryGameRepository()
     board = make_center_board()
@@ -125,4 +122,3 @@ def test_clean_rotates_then_cleans():
     assert b.robot.orientation == Direction.NORTH
     if res.success:
         assert obs_pos not in b.obstacles
-

@@ -11,6 +11,7 @@ class ActionType(str, Enum):
     GIVE = "giveFlower"
     CLEAN = "clean"
 
+
 class Action:
     def __init__(
         self,

@@ -8,6 +8,7 @@ class CreateGameRequest(BaseModel):
     cols: int = Field(ge=3, le=50, description="Number of columns (3-50)")
     name: str = Field(default="", description="Optional game name")
 
+
 class CreateGameResponse(BaseModel):
     game: dict
     message: str = ""
@@ -22,7 +23,6 @@ class GamesResponse(BaseModel):
 class GetGameResponse(BaseModel):
     game: dict
     message: str = ""
-
 
 
 class ActionType(str, Enum):

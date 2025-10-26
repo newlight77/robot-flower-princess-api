@@ -43,7 +43,6 @@ def test_rotate_then_move_failure_records_both_entries():
         move_uc = MoveRobotUseCase(repo)
         res = move_uc.execute(MoveRobotCommand(game_id="r1", direction=Direction.NORTH))
 
-
     assert res.success is False
     assert res.game.robot.orientation.value == Direction.NORTH
     assert res.game.robot.position.row == 0

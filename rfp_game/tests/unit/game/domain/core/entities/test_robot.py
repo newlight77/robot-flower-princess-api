@@ -1,4 +1,3 @@
-import pytest
 from hexagons.game.domain.core.entities.robot import Robot
 from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.core.value_objects.direction import Direction

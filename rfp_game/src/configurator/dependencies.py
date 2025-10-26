@@ -16,6 +16,5 @@ def get_game_repository() -> GameRepository:
 def get_ml_player_client() -> MLPlayerClientPort:
     """Dependency injection for ML Player client."""
     return HttpMLPlayerClient(
-        base_url=settings.ml_player_service_url,
-        timeout=settings.ml_player_service_timeout
+        base_url=settings.ml_player_service_url, timeout=settings.ml_player_service_timeout
     )

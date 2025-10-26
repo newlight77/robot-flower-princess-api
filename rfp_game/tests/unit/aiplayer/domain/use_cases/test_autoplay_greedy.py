@@ -78,6 +78,7 @@ async def test_autoplay_with_greedy_strategy_explicit():
     assert b is not None
     assert b.robot.orientation == Direction.SOUTH
 
+
 async def test_autoplay_defaults_to_greedy_strategy():
     """Test autoplay defaults to AIGreedyPlayer when no strategy specified."""
     repo = InMemoryGameRepository()

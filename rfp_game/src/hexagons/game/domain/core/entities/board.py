@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING
 from .position import Position
 
 if TYPE_CHECKING:
-    from .robot import Robot
-    from .princess import Princess
+    pass
 
 
 @dataclass
@@ -30,10 +29,7 @@ class Board:
         self.princess_position = princess_position
 
         # Create all positions in the board
-        self.grid = [
-            [Position(r, c) for c in range(cols)]
-            for r in range(rows)
-        ]
+        self.grid = [[Position(r, c) for c in range(cols)] for r in range(rows)]
 
         # Generate random flowers and obstacles
         total_cells = rows * cols
@@ -43,7 +39,9 @@ class Board:
         # Get all available positions (excluding robot and princess)
         # Flatten the 2D positions list
         all_positions = [pos for row in self.grid for pos in row]
-        available_positions = [p for p in all_positions if p != robot_position and p != princess_position]
+        available_positions = [
+            p for p in all_positions if p != robot_position and p != princess_position
+        ]
         random.shuffle(available_positions)
 
         # Place flowers (up to 10% of board)
@@ -51,7 +49,9 @@ class Board:
         self.flowers_positions = {available_positions.pop() for _ in range(num_flowers)}
 
         # Place obstacles (around 30% of board)
-        self.obstacles_positions = {available_positions.pop() for _ in range(min(num_obstacles, len(available_positions)))}
+        self.obstacles_positions = {
+            available_positions.pop() for _ in range(min(num_obstacles, len(available_positions)))
+        }
 
         # Store initial counts
         self.initial_flowers_count = len(self.flowers_positions)
@@ -114,12 +114,8 @@ class Board:
                 "row": self.princess_position.row,
                 "col": self.princess_position.col,
             },
-            "flowers_positions": [
-                {"row": p.row, "col": p.col} for p in self.flowers_positions
-            ],
-            "obstacles_positions": [
-                {"row": p.row, "col": p.col} for p in self.obstacles_positions
-            ],
+            "flowers_positions": [{"row": p.row, "col": p.col} for p in self.flowers_positions],
+            "obstacles_positions": [{"row": p.row, "col": p.col} for p in self.obstacles_positions],
             "initial_flowers_count": self.initial_flowers_count,
             "initial_obstacles_count": self.initial_obstacles_count,
         }

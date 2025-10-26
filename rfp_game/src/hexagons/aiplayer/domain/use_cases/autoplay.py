@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Set, Literal, Optional
+from typing import Literal, Optional
 from copy import deepcopy
 from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
@@ -7,10 +7,6 @@ from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPl
 from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
 from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
 from hexagons.game.domain.core.entities.game import Game
-from hexagons.game.domain.core.entities.board import Board
-from hexagons.game.domain.core.entities.robot import Robot
-from hexagons.game.domain.core.entities.princess import Princess
-from hexagons.game.domain.core.entities.position import Position
 from hexagons.game.domain.services.game_service import GameService
 from shared.logging import get_logger
 
@@ -35,7 +31,9 @@ class AutoplayResult:
 class AutoplayUseCase:
     def __init__(self, repository: GameRepository, ml_client: Optional[MLPlayerClientPort] = None):
         self.logger = get_logger(self)
-        self.logger.debug("Initializing AutoplayUseCase repository=%r ml_client=%r", repository, ml_client)
+        self.logger.debug(
+            "Initializing AutoplayUseCase repository=%r ml_client=%r", repository, ml_client
+        )
         self.repository = repository
         self.ml_client = ml_client
 
@@ -81,7 +79,7 @@ class AutoplayUseCase:
                     GameService.rotate_robot(board, direction)
 
                 if action_type == "rotate":
-                    dir_str = direction.value if direction is not None else "unknown"
+                    GameService.rotate_robot(board, direction)
 
                 elif action_type == "move":
                     GameService.move_robot(board)

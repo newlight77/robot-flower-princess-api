@@ -12,12 +12,7 @@ class MLPlayerClientPort(ABC):
     """
 
     @abstractmethod
-    async def predict_action(
-        self,
-        game_id: str,
-        strategy: str,
-        game_state: Dict
-    ) -> Dict:
+    async def predict_action(self, game_id: str, strategy: str, game_state: Dict) -> Dict:
         """
         Request an action prediction from the ML Player.
 

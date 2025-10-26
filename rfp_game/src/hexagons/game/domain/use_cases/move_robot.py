@@ -44,7 +44,7 @@ class MoveRobotUseCase:
                 success=True,
                 game=game,
             )
-        except GameException as e:
+        except GameException:
             return MoveRobotResult(
                 success=False,
                 game=game,

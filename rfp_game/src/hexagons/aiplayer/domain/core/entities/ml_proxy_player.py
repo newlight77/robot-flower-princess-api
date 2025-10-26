@@ -75,9 +75,7 @@ class MLProxyPlayer:
         # Get prediction from ML Player service
         try:
             prediction = await self.ml_client.predict_action(
-                game_id=game_id,
-                strategy=self.strategy,
-                game_state=game_state
+                game_id=game_id, strategy=self.strategy, game_state=game_state
             )
 
             # Convert prediction to action tuple

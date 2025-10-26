@@ -39,4 +39,5 @@ class GetGamesUseCase:
         return GetGamesResult(
             games=games,
             total=len(games),
-            message=f"Games retrieved successfully: {len(games)} games")
+            message=f"Games retrieved successfully: {len(games)} games",
+        )

@@ -1,7 +1,7 @@
 """Unit tests for ML Proxy Player."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 from hexagons.aiplayer.domain.core.entities.ml_proxy_player import MLProxyPlayer
 from hexagons.game.domain.core.entities.game import Game
@@ -74,7 +74,7 @@ class TestMLProxyPlayerSolve:
             "action": "move",
             "direction": "north",
             "confidence": 0.85,
-            "board_score": 12.5
+            "board_score": 12.5,
         }
 
         player = MLProxyPlayer(mock_ml_client, strategy="default")
@@ -96,7 +96,7 @@ class TestMLProxyPlayerSolve:
         mock_ml_client.predict_action.return_value = {
             "action": "pick",
             "direction": "south",
-            "confidence": 0.92
+            "confidence": 0.92,
         }
 
         player = MLProxyPlayer(mock_ml_client)
@@ -111,7 +111,7 @@ class TestMLProxyPlayerSolve:
         mock_ml_client.predict_action.return_value = {
             "action": "give",
             "direction": "east",
-            "confidence": 0.95
+            "confidence": 0.95,
         }
 
         player = MLProxyPlayer(mock_ml_client)
@@ -126,7 +126,7 @@ class TestMLProxyPlayerSolve:
         mock_ml_client.predict_action.return_value = {
             "action": "clean",
             "direction": "west",
-            "confidence": 0.78
+            "confidence": 0.78,
         }
 
         player = MLProxyPlayer(mock_ml_client)
@@ -138,10 +138,7 @@ class TestMLProxyPlayerSolve:
     @pytest.mark.asyncio
     async def test_solve_async_without_direction(self, mock_ml_client, sample_game):
         """Test solve_async when direction is not provided."""
-        mock_ml_client.predict_action.return_value = {
-            "action": "rotate",
-            "confidence": 0.88
-        }
+        mock_ml_client.predict_action.return_value = {"action": "rotate", "confidence": 0.88}
 
         player = MLProxyPlayer(mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
@@ -167,10 +164,7 @@ class TestMLProxyPlayerGameStateConversion:
     @pytest.mark.asyncio
     async def test_game_state_conversion_in_progress(self, mock_ml_client, sample_game):
         """Test game state conversion for in-progress game."""
-        mock_ml_client.predict_action.return_value = {
-            "action": "move",
-            "direction": "north"
-        }
+        mock_ml_client.predict_action.return_value = {"action": "move", "direction": "north"}
 
         player = MLProxyPlayer(mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
@@ -196,10 +190,7 @@ class TestMLProxyPlayerGameStateConversion:
         sample_game.board.obstacles_positions.add(Position(1, 1))
         sample_game.board.obstacles_positions.add(Position(2, 1))
 
-        mock_ml_client.predict_action.return_value = {
-            "action": "clean",
-            "direction": "south"
-        }
+        mock_ml_client.predict_action.return_value = {"action": "clean", "direction": "south"}
 
         player = MLProxyPlayer(mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
@@ -209,7 +200,9 @@ class TestMLProxyPlayerGameStateConversion:
         game_state = call_args.kwargs["game_state"]
 
         # assert len(game_state["board"]["obstacles_positions"]) == sample_game.board.initial_obstacles_count
-        obstacle_positions = [Position(p["row"], p["col"]) for p in game_state["board"]["obstacles_positions"]]
+        obstacle_positions = [
+            Position(p["row"], p["col"]) for p in game_state["board"]["obstacles_positions"]
+        ]
         assert Position(1, 1) in obstacle_positions
         assert Position(2, 1) in obstacle_positions
 
@@ -218,10 +211,7 @@ class TestMLProxyPlayerGameStateConversion:
         """Test game state conversion with robot holding flowers."""
         sample_game.robot.flowers_collected = [Position(1, 1), Position(2, 2), Position(3, 3)]
 
-        mock_ml_client.predict_action.return_value = {
-            "action": "give",
-            "direction": "north"
-        }
+        mock_ml_client.predict_action.return_value = {"action": "give", "direction": "north"}
 
         player = MLProxyPlayer(mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
@@ -243,10 +233,7 @@ class TestMLProxyPlayerWithDifferentStrategies:
     @pytest.mark.asyncio
     async def test_aggressive_strategy_parameter(self, mock_ml_client, sample_game):
         """Test that aggressive strategy is passed to ML client."""
-        mock_ml_client.predict_action.return_value = {
-            "action": "move",
-            "direction": "north"
-        }
+        mock_ml_client.predict_action.return_value = {"action": "move", "direction": "north"}
 
         player = MLProxyPlayer(mock_ml_client, strategy="aggressive")
         await player.solve_async(sample_game, "test-game-123")
@@ -257,10 +244,7 @@ class TestMLProxyPlayerWithDifferentStrategies:
     @pytest.mark.asyncio
     async def test_conservative_strategy_parameter(self, mock_ml_client, sample_game):
         """Test that conservative strategy is passed to ML client."""
-        mock_ml_client.predict_action.return_value = {
-            "action": "pick",
-            "direction": "south"
-        }
+        mock_ml_client.predict_action.return_value = {"action": "pick", "direction": "south"}
 
         player = MLProxyPlayer(mock_ml_client, strategy="conservative")
         await player.solve_async(sample_game, "test-game-123")

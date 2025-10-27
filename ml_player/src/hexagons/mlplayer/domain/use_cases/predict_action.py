@@ -25,8 +25,8 @@ class PredictActionCommand:
 
         game_id, board, robot, princess = self.game_id, self.board, self.robot, self.princess
         logger.info(f"PredictActionUseCase.convert_to_game_state: Converting game state to game_id={game_id}")
-        logger.info(f"PredictActionUseCase.convert_to_game_state: Robot={robot}")
-        logger.info(f"PredictActionUseCase.convert_to_game_state: Princess={princess}")
+        # logger.info(f"PredictActionUseCase.convert_to_game_state: Robot={robot}")
+        # logger.info(f"PredictActionUseCase.convert_to_game_state: Princess={princess}")
         # logger.info(f"PredictActionUseCase.convert_to_game_state: Board={board}")
         # logger.info(f"PredictActionUseCase.convert_to_game_state: Game={game}")
 
@@ -60,12 +60,12 @@ class PredictActionCommand:
                 "obstacles_cleaned": [{"row": o["row"], "col": o["col"]} for o in robot["obstacles_cleaned"]],
                 "executed_actions": [
                     {
-                        "type": a["type"],
-                        "direction": a["direction"],
-                        "success": a["success"],
-                        "message": a["message"],
+                        "type": a.get("type", "unknown"),
+                        "direction": a.get("direction", "north"),  # Default direction
+                        "success": a.get("success", True),  # Default to True if not present
+                        "message": a.get("message", ""),  # Default to empty string if not present
                     }
-                    for a in robot["executed_actions"]
+                    for a in robot.get("executed_actions", [])
                 ],
             },
             princess={
@@ -76,9 +76,6 @@ class PredictActionCommand:
                 "flowers_received": [{"row": f["row"], "col": f["col"]} for f in princess["flowers_received"]],
                 "mood": princess["mood"],
             },
-        )
-        logger.info(
-            f"PredictActionUseCase.convert_to_game_state: GameState converted from dictionary: {game.to_dict()}"
         )
         return game
 
@@ -127,7 +124,8 @@ class PredictActionUseCase:
         """
         # Fetch game state
         logger.info(f"PredictActionUseCase.execute: Fetching game state for game_id={command.game_id}")
-        game_state: dict = await self.game_client.get_game_state(command.game_id)
+        # game_state: dict = self.game_client.get_game_state(command.game_id)
+        game_state = GameState(game_id=command.game_id, board=command.board, robot=command.robot, princess=command.princess)
 
         # Convert to BoardState
         logger.info(f"PredictActionUseCase.execute: Converting game state to GameState {command.game_id}")

@@ -33,6 +33,7 @@ class GameDataCollector:
         action: str,
         direction: str | None,
         outcome: dict[str, Any] | None = None,
+        timestamp: str | None = None,
     ) -> None:
         """
         Collect a single training sample.
@@ -43,9 +44,10 @@ class GameDataCollector:
             action: Action taken
             direction: Direction for move/rotate actions
             outcome: Result of the action (optional, for reward learning)
+            timestamp: ISO timestamp (optional, defaults to current time)
         """
         sample = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": timestamp or datetime.utcnow().isoformat(),
             "game_id": game_id,
             "game_state": game_state,
             "action": action,

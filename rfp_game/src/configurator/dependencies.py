@@ -1,4 +1,5 @@
 from functools import lru_cache
+import os
 from hexagons.game.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.game.driven.adapters.gameplay_data_collector import GameplayDataCollector
@@ -16,7 +17,11 @@ def get_game_repository() -> GameRepository:
 @lru_cache()
 def get_ml_player_client() -> MLPlayerClientPort:
     """Dependency injection for ML Player client."""
-    return HttpMLPlayerClient(base_url=settings.ml_player_service_url, timeout=settings.ml_player_service_timeout)
+    return HttpMLPlayerClient(
+        base_url=settings.ml_player_service_url or os.getenv("ML_PLAYER_SERVICE_URL", "http://localhost:8001"),
+        timeout=settings.ml_player_service_timeout or 5.0,
+        data_collection_enabled=settings.ml_player_service_data_collection_enabled or os.getenv("ML_PLAYER_SERVICE_DATA_COLLECTION_ENABLED", "true").lower() == "true" or True,
+    )
 
 
 @lru_cache()

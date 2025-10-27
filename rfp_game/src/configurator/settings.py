@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     # ML Player Service
     ml_player_service_url: str = "http://localhost:8001"
     ml_player_service_timeout: int = 30
+    ml_player_service_data_collection_enabled: bool = True
 
     class Config:
         env_file = ".env"

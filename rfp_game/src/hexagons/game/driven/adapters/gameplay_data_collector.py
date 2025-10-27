@@ -1,34 +1,40 @@
 """
 Gameplay data collector adapter.
 
-Collects gameplay data for ML training.
+Collects gameplay data for ML training by delegating to ML Player service.
 """
 
-import json
 import os
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
+import httpx
 from shared.logging import get_logger
+from configurator.settings import settings
 
 logger = get_logger("gameplay_data_collector")
 
 
 class GameplayDataCollector:
-    """Collects gameplay data for ML training."""
+    """Collects gameplay data by sending it to ML Player service for storage."""
 
-    def __init__(self, data_dir: str = "data/gameplay"):
+    def __init__(self,
+        ml_player_url: str,
+        timeout: float,
+        data_collection_enabled: bool,
+    ):
         """
         Initialize the gameplay data collector.
 
         Args:
-            data_dir: Directory to store collected data
+            ml_player_url: Base URL of ML Player service (defaults to env var ML_PLAYER_SERVICE_URL)
+            timeout: HTTP request timeout in seconds
         """
-        self.data_dir = Path(data_dir)
-        self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.enabled = os.getenv("ENABLE_DATA_COLLECTION", "false").lower() == "true"
-        logger.info(f"GameplayDataCollector initialized: enabled={self.enabled}, data_dir={data_dir}")
+        self.ml_player_url = ml_player_url
+        self.timeout = timeout
+        self.enabled = data_collection_enabled
+
+        logger.info(f"GameplayDataCollector initialized: enabled={self.enabled}, ml_player_url={self.ml_player_url}")
 
     def collect_action(
         self,
@@ -39,7 +45,7 @@ class GameplayDataCollector:
         outcome: dict[str, Any],
     ) -> None:
         """
-        Collect a gameplay action sample.
+        Collect a gameplay action sample by sending it to ML Player service.
 
         Args:
             game_id: Unique game identifier
@@ -52,7 +58,8 @@ class GameplayDataCollector:
             return
 
         try:
-            sample = {
+            # Prepare payload
+            payload = {
                 "game_id": game_id,
                 "timestamp": datetime.now().isoformat(),
                 "game_state": game_state,
@@ -61,21 +68,29 @@ class GameplayDataCollector:
                 "outcome": outcome,
             }
 
-            # Save to daily file
-            filename = f"gameplay_{datetime.now().strftime('%Y%m%d')}.jsonl"
-            filepath = self.data_dir / filename
+            # Send to ML Player service
+            url = f"{self.ml_player_url}/api/ml-player/collect"
 
-            with open(filepath, "a", encoding="utf-8") as f:
-                f.write(json.dumps(sample) + "\n")
+            with httpx.Client(timeout=self.timeout) as client:
+                response = client.post(url, json=payload)
+                response.raise_for_status()
 
-            logger.debug(f"Collected gameplay sample: game_id={game_id}, action={action}, direction={direction}")
+                result = response.json()
+                logger.debug(
+                    f"Data collected successfully: game_id={game_id}, action={action}, "
+                    f"total_samples={result.get('samples_collected', 'unknown')}"
+                )
 
+        except httpx.TimeoutException:
+            logger.warning(f"Timeout sending gameplay data to ML Player service (game_id={game_id})")
+        except httpx.HTTPError as e:
+            logger.warning(f"HTTP error sending gameplay data to ML Player: {e} (game_id={game_id})")
         except Exception as e:
-            logger.error(f"Failed to collect gameplay data: {e}")
+            logger.error(f"Failed to collect gameplay data: {e} (game_id={game_id})")
 
     def get_statistics(self) -> dict[str, Any]:
         """
-        Get statistics about collected data.
+        Get statistics about collected data from ML Player service.
 
         Returns:
             Dictionary with statistics
@@ -83,23 +98,10 @@ class GameplayDataCollector:
         if not self.enabled:
             return {"enabled": False, "message": "Data collection is disabled"}
 
-        try:
-            total_samples = 0
-            data_files = []
-
-            for filepath in self.data_dir.glob("gameplay_*.jsonl"):
-                data_files.append(filepath.name)
-                with open(filepath, "r", encoding="utf-8") as f:
-                    total_samples += sum(1 for _ in f)
-
-            return {
-                "enabled": True,
-                "total_samples": total_samples,
-                "data_files": len(data_files),
-                "files": data_files,
-                "data_dir": str(self.data_dir),
-            }
-
-        except Exception as e:
-            logger.error(f"Failed to get data collection statistics: {e}")
-            return {"enabled": True, "error": str(e)}
+        # Statistics are now managed by ML Player service
+        # This is just a placeholder for backward compatibility
+        return {
+            "enabled": True,
+            "message": "Data collection delegated to ML Player service",
+            "ml_player_url": self.ml_player_url,
+        }

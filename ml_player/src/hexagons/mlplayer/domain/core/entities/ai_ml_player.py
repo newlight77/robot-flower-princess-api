@@ -7,9 +7,10 @@ The architecture supports:
 - Future: Replace heuristics with trained ML models (sklearn, pytorch, etc.)
 """
 
-from typing import Dict, List, Optional, Tuple
+
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
 from shared.logging import logger
+
 from ..value_objects.game_state import GameState
 
 
@@ -26,7 +27,7 @@ class AIMLPlayer:
     - plan_sequence(): Plans ahead (search + heuristics → planning network)
     """
 
-    def __init__(self, config: Optional[StrategyConfig] = None):
+    def __init__(self, config: StrategyConfig | None = None):
         """
         Initialize ML player with configuration.
 
@@ -61,9 +62,13 @@ class AIMLPlayer:
         score = 0.0
 
         # Distance to nearest flower
-        if state.board["flowers_positions"] and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]:
+        if (
+            state.board["flowers_positions"]
+            and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]
+        ):
             min_flower_dist = min(
-                abs(state.robot["position"]["row"] - f["row"]) + abs(state.robot["position"]["col"] - f["col"])
+                abs(state.robot["position"]["row"] - f["row"])
+                + abs(state.robot["position"]["col"] - f["col"])
                 for f in state.board["flowers_positions"]
             )
             logger.info(f"AIMLPlayer.evaluate_board: Distance to nearest flower={min_flower_dist}")
@@ -71,7 +76,9 @@ class AIMLPlayer:
 
         # Distance to princess (when holding flowers)
         if len(state.robot["flowers_delivered"]) > 0:
-            princess_dist = state._distance_to_princess(state.robot["position"], state.princess["position"])
+            princess_dist = state._distance_to_princess(
+                state.robot["position"], state.princess["position"]
+            )
             logger.info(f"AIMLPlayer.evaluate_board: Distance to princess={princess_dist}")
             score += self.config.distance_to_princess_weight * princess_dist
 
@@ -101,7 +108,7 @@ class AIMLPlayer:
 
         return score
 
-    def select_action(self, state: GameState) -> Tuple[str, Optional[str]]:
+    def select_action(self, state: GameState) -> tuple[str, str | None]:
         """
         Select best action for current state.
 
@@ -120,7 +127,8 @@ class AIMLPlayer:
         logger.info(f"AIMLPlayer.select_action: Selecting action for state={state.to_dict()}")
 
         # If next to princess with flowers → give
-        if ( state.robot["position"] in self._get_adjacent_positions(state.princess["position"])
+        if (
+            state.robot["position"] in self._get_adjacent_positions(state.princess["position"])
             and len(state.robot["flowers_delivered"]) > 0
         ):
             return ("give", None)
@@ -152,11 +160,11 @@ class AIMLPlayer:
         # Default: do nothing (shouldn't reach here)
         return ("move", state.robot["orientation"])
 
-    def _get_direction_to_target(
-        self, current: Tuple[int, int], target: Tuple[int, int]
-    ) -> str:
+    def _get_direction_to_target(self, current: tuple[int, int], target: tuple[int, int]) -> str:
         """Get direction to move toward target."""
-        logger.info(f"AIMLPlayer._get_direction_to_target: Getting direction to target={current} -> {target}")
+        logger.info(
+            f"AIMLPlayer._get_direction_to_target: Getting direction to target={current} -> {target}"
+        )
 
         dr = target["row"] - current["row"]
         dc = target["col"] - current["col"]
@@ -168,8 +176,8 @@ class AIMLPlayer:
             return "EAST" if dc > 0 else "WEST"
 
     def plan_sequence(
-        self, state: GameState, horizon: Optional[int] = None
-    ) -> List[Tuple[str, Optional[str]]]:
+        self, state: GameState, horizon: int | None = None
+    ) -> list[tuple[str, str | None]]:
         """
         Plan a sequence of actions.
 
@@ -183,7 +191,9 @@ class AIMLPlayer:
         Returns:
             List of actions
         """
-        logger.info(f"AIMLPlayer.plan_sequence: Planning sequence for state={state.to_dict()} with horizon={horizon}")
+        logger.info(
+            f"AIMLPlayer.plan_sequence: Planning sequence for state={state.to_dict()} with horizon={horizon}"
+        )
 
         horizon = horizon or self.config.lookahead_depth
         actions = []
@@ -199,7 +209,7 @@ class AIMLPlayer:
 
         return actions
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> dict:
         """Get current configuration."""
         return self.config.to_dict()
 
@@ -224,7 +234,7 @@ class AIMLPlayer:
         logger.info(f"AIMLPlayer.save_model: Saving model to={model_path}")
         raise NotImplementedError("ML model saving will be implemented in future version")
 
-    def _get_adjacent_positions(self, position: Tuple[int, int]) -> List[Tuple[int, int]]:
+    def _get_adjacent_positions(self, position: tuple[int, int]) -> list[tuple[int, int]]:
         """Get all valid adjacent empty positions."""
         adjacent_positions = [
             {"row": position["row"] + 1, "col": position["col"]},

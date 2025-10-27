@@ -1,6 +1,5 @@
 """Pydantic schemas for ML Player API."""
 
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -8,11 +7,13 @@ from pydantic import BaseModel, Field
 class PredictActionRequest(BaseModel):
     """Request schema for action prediction."""
 
-    strategy: str = Field(
-        default="default",
-        description="Strategy to use: 'default', 'aggressive', or 'conservative'",
-        pattern="^(default|aggressive|conservative)$",
-    ),
+    strategy: str = (
+        Field(
+            default="default",
+            description="Strategy to use: 'default', 'aggressive', or 'conservative'",
+            pattern="^(default|aggressive|conservative)$",
+        ),
+    )
     game_id: str = Field(description="Game identifier")
     board: dict
     robot: dict
@@ -26,7 +27,7 @@ class PredictActionResponse(BaseModel):
 
     game_id: str = Field(description="Game identifier")
     action: str = Field(description="Predicted action (move, pick, drop, give, clean, rotate)")
-    direction: Optional[str] = Field(None, description="Direction for the action (if applicable)")
+    direction: str | None = Field(None, description="Direction for the action (if applicable)")
     confidence: float = Field(description="Confidence score for the prediction (0.0 to 1.0)")
     board_score: float = Field(description="Heuristic evaluation score of the current board state")
     config_used: dict = Field(description="Strategy configuration used for prediction")

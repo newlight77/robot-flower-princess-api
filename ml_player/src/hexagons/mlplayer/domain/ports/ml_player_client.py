@@ -1,7 +1,6 @@
 """Port for communicating with the ML Player service."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 
 class MLPlayerClientPort(ABC):
@@ -13,12 +12,7 @@ class MLPlayerClientPort(ABC):
     """
 
     @abstractmethod
-    async def predict_action(
-        self,
-        game_id: str,
-        strategy: str,
-        game_state: Dict
-    ) -> Dict:
+    async def predict_action(self, game_id: str, strategy: str, game_state: dict) -> dict:
         """
         Request an action prediction from the ML Player.
 
@@ -33,7 +27,7 @@ class MLPlayerClientPort(ABC):
         pass
 
     @abstractmethod
-    async def get_strategies(self) -> List[Dict]:
+    async def get_strategies(self) -> list[dict]:
         """
         Get list of available strategies.
 
@@ -43,7 +37,7 @@ class MLPlayerClientPort(ABC):
         pass
 
     @abstractmethod
-    async def get_strategy(self, strategy_name: str) -> Dict:
+    async def get_strategy(self, strategy_name: str) -> dict:
         """
         Get configuration for a specific strategy.
 

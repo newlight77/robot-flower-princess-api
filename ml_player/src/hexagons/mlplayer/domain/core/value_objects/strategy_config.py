@@ -1,7 +1,6 @@
 """Strategy configuration value object for ML player."""
 
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass(frozen=True)
@@ -33,18 +32,18 @@ class StrategyConfig:
     # Planning horizon
     lookahead_depth: int = 3  # How many moves to plan ahead
 
-    def to_dict(self) -> Dict[str, float]:
+    def to_dict(self) -> dict[str, float]:
         """Convert to dictionary for serialization."""
         return {
-            'distance_to_flower_weight': self.distance_to_flower_weight,
-            'distance_to_princess_weight': self.distance_to_princess_weight,
-            'obstacle_density_weight': self.obstacle_density_weight,
-            'path_clearance_weight': self.path_clearance_weight,
-            'flower_cluster_bonus': self.flower_cluster_bonus,
-            'flower_isolation_penalty': self.flower_isolation_penalty,
-            'risk_aversion': self.risk_aversion,
-            'exploration_factor': self.exploration_factor,
-            'lookahead_depth': self.lookahead_depth,
+            "distance_to_flower_weight": self.distance_to_flower_weight,
+            "distance_to_princess_weight": self.distance_to_princess_weight,
+            "obstacle_density_weight": self.obstacle_density_weight,
+            "path_clearance_weight": self.path_clearance_weight,
+            "flower_cluster_bonus": self.flower_cluster_bonus,
+            "flower_isolation_penalty": self.flower_isolation_penalty,
+            "risk_aversion": self.risk_aversion,
+            "exploration_factor": self.exploration_factor,
+            "lookahead_depth": self.lookahead_depth,
         }
 
     @classmethod

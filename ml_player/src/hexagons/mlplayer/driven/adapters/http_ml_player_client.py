@@ -1,6 +1,5 @@
 """HTTP client adapter for communicating with ML Player service."""
 
-from typing import Dict, List
 
 import httpx
 
@@ -26,12 +25,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
-    async def predict_action(
-        self,
-        game_id: str,
-        strategy: str,
-        game_state: Dict
-    ) -> Dict:
+    async def predict_action(self, game_id: str, strategy: str, game_state: dict) -> dict:
         """
         Request an action prediction from the ML Player.
 
@@ -71,13 +65,12 @@ class HttpMLPlayerClient(MLPlayerClientPort):
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
-                f"{self.base_url}/api/ml-player/predict/{game_id}",
-                json=payload
+                f"{self.base_url}/api/ml-player/predict/{game_id}", json=payload
             )
             response.raise_for_status()
             return response.json()
 
-    async def get_strategies(self) -> List[Dict]:
+    async def get_strategies(self) -> list[dict]:
         """
         Get list of available strategies.
 
@@ -94,7 +87,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
             response.raise_for_status()
             return response.json()
 
-    async def get_strategy(self, strategy_name: str) -> Dict:
+    async def get_strategy(self, strategy_name: str) -> dict:
         """
         Get configuration for a specific strategy.
 
@@ -110,13 +103,11 @@ class HttpMLPlayerClient(MLPlayerClientPort):
             httpx.HTTPError: If request fails or strategy not found
         """
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.get(
-                f"{self.base_url}/api/ml-player/strategies/{strategy_name}"
-            )
+            response = await client.get(f"{self.base_url}/api/ml-player/strategies/{strategy_name}")
             response.raise_for_status()
             return response.json()
 
-    async def health_check(self) -> Dict:
+    async def health_check(self) -> dict:
         """
         Check if ML Player service is healthy.
 

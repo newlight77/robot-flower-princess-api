@@ -1,7 +1,6 @@
 """Port for communicating with the game service."""
 
 from abc import ABC, abstractmethod
-from typing import Dict
 
 
 class GameClientPort(ABC):
@@ -12,7 +11,7 @@ class GameClientPort(ABC):
     """
 
     @abstractmethod
-    async def get_game_state(self, game_id: str) -> Dict:
+    async def get_game_state(self, game_id: str) -> dict:
         """
         Fetch current game state from the game service.
 
@@ -25,7 +24,7 @@ class GameClientPort(ABC):
         pass
 
     @abstractmethod
-    async def execute_action(self, game_id: str, action: str, direction: str = None) -> Dict:
+    async def execute_action(self, game_id: str, action: str, direction: str = None) -> dict:
         """
         Execute an action in the game.
 

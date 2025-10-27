@@ -4,11 +4,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from shared.logging import logger
 
 from configurator.settings import settings
-from hexagons.mlplayer.driver.bff.routers import ml_player_router
 from hexagons.health.driver.bff.routers import health_router
+from hexagons.mlplayer.driver.bff.routers import ml_player_router
+from shared.logging import logger
 
 
 @asynccontextmanager

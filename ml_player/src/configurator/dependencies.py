@@ -1,7 +1,7 @@
 """Dependency injection for ML Player service."""
 
-from hexagons.mlplayer.driven.adapters.http_game_client import HttpGameClient
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
+from hexagons.mlplayer.driven.adapters.http_game_client import HttpGameClient
 
 from .settings import settings
 

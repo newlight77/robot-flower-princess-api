@@ -1,9 +1,9 @@
 """Pytest configuration and fixtures for ML Player tests."""
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
-from hexagons.mlplayer.domain.core.value_objects.game_state import GameState
+import pytest
+
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 

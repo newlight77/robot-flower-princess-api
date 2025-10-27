@@ -1,7 +1,6 @@
 """FastAPI router for ML Player endpoints."""
 
 from fastapi import APIRouter, Depends, HTTPException
-from shared.logging import logger
 
 from configurator.dependencies import get_game_client
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
@@ -15,6 +14,7 @@ from hexagons.mlplayer.driver.bff.schemas.ml_player_schema import (
     PredictActionResponse,
     StrategyConfigResponse,
 )
+from shared.logging import logger
 
 router = APIRouter(prefix="/api/ml-player", tags=["ML Player"])
 
@@ -53,11 +53,13 @@ async def predict_action(
             flowers=request.flowers,
         )
 
-        logger.info(f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}")
+        logger.info(
+            f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}"
+        )
 
         result = await use_case.execute(command)
 
-        logger.info(f"Predicted action={result.action}, direction={result.direction}, confidence={result.confidence:.2f}")
+        logger.info(f"Predicted action={result.action}, dir={result.direction}, conf={result.confidence:.2f}")
 
         return PredictActionResponse(
             game_id=game_id,
@@ -84,9 +86,7 @@ async def list_strategies() -> list[StrategyConfigResponse]:
     logger.info("Listing available strategies")
 
     strategies = [
-        StrategyConfigResponse(
-            strategy_name="default", config=StrategyConfig.default().to_dict()
-        ),
+        StrategyConfigResponse(strategy_name="default", config=StrategyConfig.default().to_dict()),
         StrategyConfigResponse(
             strategy_name="aggressive", config=StrategyConfig.aggressive().to_dict()
         ),

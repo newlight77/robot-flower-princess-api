@@ -1,7 +1,8 @@
 """Unit tests for HttpMLPlayerClient."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from hexagons.mlplayer.driven.adapters import HttpMLPlayerClient
 
@@ -54,9 +55,7 @@ async def test_predict_action_success(ml_player_client, sample_game_state):
         )
 
         result = await ml_player_client.predict_action(
-            game_id="test-game-123",
-            strategy="default",
-            game_state=sample_game_state
+            game_id="test-game-123", strategy="default", game_state=sample_game_state
         )
 
         assert result["game_id"] == "test-game-123"
@@ -87,9 +86,7 @@ async def test_predict_action_with_different_strategy(ml_player_client, sample_g
         )
 
         result = await ml_player_client.predict_action(
-            game_id="test-game-123",
-            strategy="aggressive",
-            game_state=sample_game_state
+            game_id="test-game-123", strategy="aggressive", game_state=sample_game_state
         )
 
         assert result["action"] == "pick"
@@ -100,17 +97,14 @@ async def test_predict_action_with_different_strategy(ml_player_client, sample_g
 async def test_get_strategies_success(ml_player_client):
     """Test getting list of strategies."""
     mock_response = [
-        {
-            "strategy_name": "default",
-            "config": {"risk_aversion": 0.7, "exploration_factor": 0.3}
-        },
+        {"strategy_name": "default", "config": {"risk_aversion": 0.7, "exploration_factor": 0.3}},
         {
             "strategy_name": "aggressive",
-            "config": {"risk_aversion": 0.3, "exploration_factor": 0.5}
+            "config": {"risk_aversion": 0.3, "exploration_factor": 0.5},
         },
         {
             "strategy_name": "conservative",
-            "config": {"risk_aversion": 0.9, "exploration_factor": 0.1}
+            "config": {"risk_aversion": 0.9, "exploration_factor": 0.1},
         },
     ]
 
@@ -141,7 +135,7 @@ async def test_get_strategy_success(ml_player_client):
             "distance_to_princess_weight": -1.0,
             "risk_aversion": 0.7,
             "exploration_factor": 0.3,
-        }
+        },
     }
 
     with patch("httpx.AsyncClient") as mock_client:
@@ -210,16 +204,13 @@ async def test_predict_action_constructs_correct_payload(ml_player_client, sampl
     with patch("httpx.AsyncClient") as mock_client:
         mock_post = AsyncMock(
             return_value=AsyncMock(
-                raise_for_status=AsyncMock(),
-                json=AsyncMock(return_value=mock_response)
+                raise_for_status=AsyncMock(), json=AsyncMock(return_value=mock_response)
             )
         )
         mock_client.return_value.__aenter__.return_value.post = mock_post
 
         await ml_player_client.predict_action(
-            game_id="test-game-123",
-            strategy="conservative",
-            game_state=sample_game_state
+            game_id="test-game-123", strategy="conservative", game_state=sample_game_state
         )
 
         # Verify the call was made with correct URL and payload

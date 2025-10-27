@@ -150,7 +150,7 @@ ml-train-gb: # step 3
 ml-stats: # step 4
 	@echo "Training data statistics:"
 	@poetry run python -c "import sys; sys.path.insert(0, 'src'); \
-	from hexagons.mlplayer.domain.ml import GameDataCollector; \
+	from hexagons.mltraining.domain.ml import GameDataCollector; \
 	import json; \
 	c = GameDataCollector(); \
 	stats = c.get_statistics(); \

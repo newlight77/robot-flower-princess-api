@@ -1,7 +1,7 @@
 """
 Gameplay data collector adapter.
 
-Collects gameplay data for ML training by delegating to ML Player service.
+Collects gameplay data for ML training by delegating to ML Training service.
 """
 
 from datetime import datetime
@@ -14,11 +14,11 @@ logger = get_logger("gameplay_data_collector")
 
 
 class GameplayDataCollector:
-    """Collects gameplay data by sending it to ML Player service for storage."""
+    """Collects gameplay data by sending it to ML Training service for storage."""
 
     def __init__(
         self,
-        ml_player_url: str,
+        ml_training_url: str,
         timeout: float,
         data_collection_enabled: bool,
     ):
@@ -26,14 +26,15 @@ class GameplayDataCollector:
         Initialize the gameplay data collector.
 
         Args:
-            ml_player_url: Base URL of ML Player service (defaults to env var ML_PLAYER_SERVICE_URL)
+            ml_training_url: Base URL of ML Training service (defaults to env var ML_TRAINING_SERVICE_URL)
             timeout: HTTP request timeout in seconds
+            data_collection_enabled: Whether to enable data collection
         """
-        self.ml_player_url = ml_player_url
+        self.ml_training_url = ml_training_url
         self.timeout = timeout
         self.enabled = data_collection_enabled
 
-        logger.info(f"GameplayDataCollector initialized: enabled={self.enabled}, ml_player_url={self.ml_player_url}")
+        logger.info(f"GameplayDataCollector initialized: enabled={self.enabled}, ml_training_url={self.ml_training_url}")
 
     def collect_action(
         self,
@@ -44,7 +45,7 @@ class GameplayDataCollector:
         outcome: dict[str, Any],
     ) -> None:
         """
-        Collect a gameplay action sample by sending it to ML Player service.
+        Collect a gameplay action sample by sending it to ML Training service.
 
         Args:
             game_id: Unique game identifier
@@ -67,8 +68,8 @@ class GameplayDataCollector:
                 "outcome": outcome,
             }
 
-            # Send to ML Player service
-            url = f"{self.ml_player_url}/api/ml-player/collect"
+            # Send to ML Training service
+            url = f"{self.ml_training_url}/api/ml-training/collect"
 
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.post(url, json=payload)
@@ -81,15 +82,15 @@ class GameplayDataCollector:
                 )
 
         except httpx.TimeoutException:
-            logger.warning(f"Timeout sending gameplay data to ML Player service (game_id={game_id})")
+            logger.warning(f"Timeout sending gameplay data to ML Training service (game_id={game_id})")
         except httpx.HTTPError as e:
-            logger.warning(f"HTTP error sending gameplay data to ML Player: {e} (game_id={game_id})")
+            logger.warning(f"HTTP error sending gameplay data to ML Training: {e} (game_id={game_id})")
         except Exception as e:
             logger.error(f"Failed to collect gameplay data: {e} (game_id={game_id})")
 
     def get_statistics(self) -> dict[str, Any]:
         """
-        Get statistics about collected data from ML Player service.
+        Get statistics about collected data from ML Training service.
 
         Returns:
             Dictionary with statistics
@@ -97,10 +98,10 @@ class GameplayDataCollector:
         if not self.enabled:
             return {"enabled": False, "message": "Data collection is disabled"}
 
-        # Statistics are now managed by ML Player service
+        # Statistics are now managed by ML Training service
         # This is just a placeholder for backward compatibility
         return {
             "enabled": True,
-            "message": "Data collection delegated to ML Player service",
-            "ml_player_url": self.ml_player_url,
+            "message": "Data collection delegated to ML Training service",
+            "ml_training_url": self.ml_training_url,
         }

@@ -1,8 +1,6 @@
-"""Machine Learning module for model training, evaluation, and inference."""
+"""Machine Learning module for model inference."""
 
-from .data_collector import GameDataCollector
 from .feature_engineer import FeatureEngineer
 from .model_registry import ModelRegistry
-from .model_trainer import ModelTrainer
 
-__all__ = ["GameDataCollector", "FeatureEngineer", "ModelTrainer", "ModelRegistry"]
+__all__ = ["FeatureEngineer", "ModelRegistry"]

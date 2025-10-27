@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from configurator.settings import settings
 from hexagons.health.driver.bff.routers import health_router
 from hexagons.mlplayer.driver.bff.routers import ml_player_router
+from hexagons.mltraining.driver.bff.routers import ml_training_router
 from shared.logging import logger
 
 
@@ -40,3 +41,4 @@ app.add_middleware(
 # Include routers
 app.include_router(health_router.router)
 app.include_router(ml_player_router.router)
+app.include_router(ml_training_router.router)

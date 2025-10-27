@@ -2,17 +2,12 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from configurator.dependencies import get_data_collector, get_game_client
+from configurator.dependencies import get_game_client
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
-from hexagons.mlplayer.domain.ml.data_collector import GameDataCollector
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from hexagons.mlplayer.domain.use_cases.predict_action import (
     PredictActionCommand,
     PredictActionUseCase,
-)
-from hexagons.mlplayer.driver.bff.schemas.data_collection_schema import (
-    CollectDataRequest,
-    CollectDataResponse,
 )
 from hexagons.mlplayer.driver.bff.schemas.ml_player_schema import (
     PredictActionRequest,
@@ -130,50 +125,3 @@ async def get_strategy(strategy_name: str) -> StrategyConfigResponse:
     except Exception as e:
         logger.error(f"Failed to get strategy {strategy_name}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/collect", response_model=CollectDataResponse)
-async def collect_gameplay_data(
-    request: CollectDataRequest,
-    data_collector: GameDataCollector = Depends(get_data_collector),
-) -> CollectDataResponse:
-    """
-    Collect gameplay data for ML training.
-
-    Args:
-        request: Gameplay data to collect
-        data_collector: Data collector (injected)
-
-    Returns:
-        Collection confirmation with statistics
-
-    Raises:
-        HTTPException: If data collection fails
-    """
-    logger.info(f"Collecting gameplay data for game_id={request.game_id}, action={request.action}")
-
-    try:
-        # Collect the sample
-        data_collector.collect_sample(
-            game_id=request.game_id,
-            game_state=request.game_state,
-            action=request.action,
-            direction=request.direction,
-            outcome=request.outcome,
-            timestamp=request.timestamp,
-        )
-
-        # Get statistics
-        stats = data_collector.get_statistics()
-
-        logger.info(f"Data collected successfully. Total samples: {stats['total_samples']}")
-
-        return CollectDataResponse(
-            success=True,
-            message="Data collected successfully",
-            samples_collected=stats["total_samples"],
-        )
-
-    except Exception as e:
-        logger.error(f"Failed to collect gameplay data: {e}")
-        raise HTTPException(status_code=500, detail=f"Data collection failed: {str(e)}")

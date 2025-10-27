@@ -19,7 +19,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from hexagons.mlplayer.domain.ml import GameDataCollector, ModelTrainer
+from hexagons.mltraining.domain.ml import GameDataCollector, ModelTrainer
 from shared.logging import logger
 
 

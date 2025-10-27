@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from hexagons.mlplayer.domain.ml.data_collector import GameDataCollector
+from hexagons.mltraining.domain.ml import GameDataCollector
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from hexagons.mlplayer.driven.adapters.http_game_client import HttpGameClient
 

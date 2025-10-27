@@ -30,7 +30,7 @@ def get_gameplay_data_collector() -> GameplayDataCollector:
     enabled = os.getenv("ENABLE_DATA_COLLECTION", "false").lower() == "true"
 
     return GameplayDataCollector(
-        ml_player_url=os.getenv("ML_PLAYER_SERVICE_URL", "http://localhost:8001"),
+        ml_training_url=os.getenv("ML_PLAYER_SERVICE_URL", "http://localhost:8001"),
         timeout=5.0,
         data_collection_enabled=enabled,
     )

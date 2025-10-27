@@ -79,12 +79,12 @@ def test_data_collection_enabled(client: TestClient, create_game, enable_data_co
     # Note: Move might fail if robot hits boundary or obstacle - that's OK for data collection test
     # We just want to verify data was collected regardless of action success
 
-    # Verify HTTP call was made to ML Player
+    # Verify HTTP call was made to ML Training hexagon
     mock_ml_player_http.post.assert_called_once()
     call_args = mock_ml_player_http.post.call_args
 
     # Verify the URL
-    assert "/api/ml-player/collect" in call_args[0][0]
+    assert "/api/ml-training/collect" in call_args[0][0]
 
     # Verify the payload structure
     payload = call_args[1]["json"]

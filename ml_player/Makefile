@@ -33,11 +33,12 @@ help:
 	@echo "  make clean        - Clean cache files"
 	@echo ""
 	@echo "ML Commands:"
-	@echo "  make ml-generate-data  - Generate synthetic training data"
-	@echo "  make ml-train          - Train Random Forest model"
-	@echo "  make ml-train-gb       - Train Gradient Boosting model"
-	@echo "  make ml-stats          - Show training data statistics"
-	@echo "  make ml-list-models    - List all trained models"
+	@echo "  make ml-generate-data       - Generate synthetic training data"
+	@echo "  make ml-collect-data-ai-games  - Collect data from AI-solved games"
+	@echo "  make ml-train                - Train Random Forest model"
+	@echo "  make ml-train-gb             - Train Gradient Boosting model"
+	@echo "  make ml-stats                - Show training data statistics"
+	@echo "  make ml-list-models          - List all trained models"
 
 install:
 	brew install
@@ -138,6 +139,10 @@ clean:
 ml-generate-data: # step 1
 	@echo "Generating synthetic training data..."
 	poetry run python scripts/generate_training_data.py --num-samples 1000
+
+ml-collect-data-ai-games:
+	@echo "Collecting data from AI-solved games..."
+	poetry run python scripts/collect_from_ai_solved_games.py --num-games 500 --output-dir data/training
 
 ml-train: # step 2
 	@echo "Training Random Forest model..."

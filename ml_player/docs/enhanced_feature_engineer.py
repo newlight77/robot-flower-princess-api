@@ -15,7 +15,7 @@ import numpy as np
 from collections import defaultdict
 
 
-class FeatureEngineer:
+class EnhancedFeatureEngineer:
     """Enhanced feature extraction with spatial and strategic awareness."""
 
     @staticmethod
@@ -70,34 +70,34 @@ class FeatureEngineer:
 
         for direction in directions:
             # 1. Adjacent cell type (5 features - one-hot)
-            adjacent_pos = FeatureEngineer._get_adjacent_position(robot_pos, direction)
-            cell_type = FeatureEngineer._get_cell_type(
+            adjacent_pos = EnhancedFeatureEngineer._get_adjacent_position(robot_pos, direction)
+            cell_type = EnhancedFeatureEngineer._get_cell_type(
                 adjacent_pos, flowers_positions, obstacles_positions,
                 princess["position"], board
             )
-            features.extend(FeatureEngineer._one_hot_cell_type(cell_type))
+            features.extend(EnhancedFeatureEngineer._one_hot_cell_type(cell_type))
 
             # 2. Distance to nearest flower in this direction (1 feature)
             features.append(
-                FeatureEngineer._nearest_in_direction(
+                EnhancedFeatureEngineer._nearest_in_direction(
                     robot_pos, direction, flowers_positions
                 )
             )
 
             # 3. Distance to nearest obstacle in this direction (1 feature)
             features.append(
-                FeatureEngineer._nearest_in_direction(
+                EnhancedFeatureEngineer._nearest_in_direction(
                     robot_pos, direction, obstacles_positions
                 )
             )
 
             # 4. Is this direction towards nearest flower? (1 feature)
             if flowers_positions:
-                nearest_flower = FeatureEngineer._find_nearest(
+                nearest_flower = EnhancedFeatureEngineer._find_nearest(
                     robot_pos, flowers_positions
                 )
                 features.append(
-                    1.0 if FeatureEngineer._is_direction_towards(
+                    1.0 if EnhancedFeatureEngineer._is_direction_towards(
                         robot_pos, direction, nearest_flower
                     ) else 0.0
                 )
@@ -128,28 +128,28 @@ class FeatureEngineer:
         princess_pos = (princess["position"]["row"], princess["position"]["col"])
 
         if flowers_positions:
-            nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
+            nearest_flower = EnhancedFeatureEngineer._find_nearest(robot_pos, flowers_positions)
             features.append(
-                FeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
+                EnhancedFeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
             )
         else:
             features.append(0.0)
 
         features.append(
-            FeatureEngineer._manhattan_distance(robot_pos, princess_pos)
+            EnhancedFeatureEngineer._manhattan_distance(robot_pos, princess_pos)
         )
 
         # Obstacles blocking path to nearest target
         if flowers_positions:
-            nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
+            nearest_flower = EnhancedFeatureEngineer._find_nearest(robot_pos, flowers_positions)
             features.append(
-                float(FeatureEngineer._obstacles_in_line(
+                float(EnhancedFeatureEngineer._obstacles_in_line(
                     robot_pos, nearest_flower, obstacles_positions
                 ))
             )
         else:
             features.append(
-                float(FeatureEngineer._obstacles_in_line(
+                float(EnhancedFeatureEngineer._obstacles_in_line(
                     robot_pos, princess_pos, obstacles_positions
                 ))
             )
@@ -170,9 +170,9 @@ class FeatureEngineer:
         # ============================================================
         # To nearest flower (if any)
         if flowers_positions:
-            nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
-            manhattan = FeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
-            obstacles_count = FeatureEngineer._obstacles_in_line(
+            nearest_flower = EnhancedFeatureEngineer._find_nearest(robot_pos, flowers_positions)
+            manhattan = EnhancedFeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
+            obstacles_count = EnhancedFeatureEngineer._obstacles_in_line(
                 robot_pos, nearest_flower, obstacles_positions
             )
             features.append(manhattan)
@@ -182,8 +182,8 @@ class FeatureEngineer:
             features.extend([0.0, 0.0, 0.0])
 
         # To princess
-        manhattan_princess = FeatureEngineer._manhattan_distance(robot_pos, princess_pos)
-        obstacles_to_princess = FeatureEngineer._obstacles_in_line(
+        manhattan_princess = EnhancedFeatureEngineer._manhattan_distance(robot_pos, princess_pos)
+        obstacles_to_princess = EnhancedFeatureEngineer._obstacles_in_line(
             robot_pos, princess_pos, obstacles_positions
         )
         features.append(manhattan_princess)
@@ -204,7 +204,7 @@ class FeatureEngineer:
         if flowers_positions:
             # Distances to nearest 3 flowers
             distances = sorted([
-                FeatureEngineer._manhattan_distance(robot_pos,
+                EnhancedFeatureEngineer._manhattan_distance(robot_pos,
                     (f["row"], f["col"]))
                 for f in flowers_positions
             ])
@@ -312,7 +312,7 @@ class FeatureEngineer:
 
         for target in targets:
             target_pos = (target["row"], target["col"])
-            dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
+            dist = EnhancedFeatureEngineer._manhattan_distance(robot_pos, target_pos)
             if dist < min_dist:
                 min_dist = dist
                 nearest = target_pos
@@ -336,16 +336,16 @@ class FeatureEngineer:
 
             # Check if target is in the specified direction
             if direction == "NORTH" and target_pos[0] < robot_pos[0]:
-                dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
+                dist = EnhancedFeatureEngineer._manhattan_distance(robot_pos, target_pos)
                 min_dist = min(min_dist, dist)
             elif direction == "SOUTH" and target_pos[0] > robot_pos[0]:
-                dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
+                dist = EnhancedFeatureEngineer._manhattan_distance(robot_pos, target_pos)
                 min_dist = min(min_dist, dist)
             elif direction == "EAST" and target_pos[1] > robot_pos[1]:
-                dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
+                dist = EnhancedFeatureEngineer._manhattan_distance(robot_pos, target_pos)
                 min_dist = min(min_dist, dist)
             elif direction == "WEST" and target_pos[1] < robot_pos[1]:
-                dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
+                dist = EnhancedFeatureEngineer._manhattan_distance(robot_pos, target_pos)
                 min_dist = min(min_dist, dist)
 
         return float(min_dist) if min_dist != float('inf') else 0.0

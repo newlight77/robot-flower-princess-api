@@ -38,7 +38,6 @@ class GameState:
         Future: This will be input to ML model.
         Current: Used for weighted scoring.
         """
-        logger.info(f"GameState.to_feature_vector: Converting board state to feature vector={self.to_dict()}")
         features = [
             float(self.board["rows"]),  # rows
             float(self.board["cols"]),  # cols
@@ -58,6 +57,7 @@ class GameState:
             self._closest_flower_distance(),  # closest_flower_distance
             self._obstacle_density(),  # obstacle_density
         ]
+        logger.info(f"GameState.to_feature_vector: Feature vector={features}")
         return features
 
     def _distance_to_princess(self) -> float:
@@ -138,7 +138,5 @@ class GameState:
                 "mood": self.princess["mood"],
             },
         }
-
-        logger.info(f"GameState.to_dict: GameState converted to dictionary={game_state}")
 
         return game_state

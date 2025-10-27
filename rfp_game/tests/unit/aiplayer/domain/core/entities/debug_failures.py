@@ -48,7 +48,7 @@ def debug_failing_board(seed, config):
     # Try to solve
     print("\nAttempting to solve...")
     tester = AIPlayerTester()
-    result = tester.test_board(board, board_id=f"debug_{seed}")
+    result = tester.test_board(board, game_id=f"debug_{seed}")
 
     print(f"\nResult: {'✅ SUCCESS' if result['success'] else '❌ FAILED'}")
     if not result["success"]:

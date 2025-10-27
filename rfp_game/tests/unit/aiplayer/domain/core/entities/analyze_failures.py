@@ -70,7 +70,7 @@ def save_failing_boards():
         print(f"  Accessible flowers: {accessible_flowers}/{len(board.flowers)}")
 
         # Test it
-        result = tester.test_board(board, board_id=f"failing_{i}")
+        result = tester.test_board(board, game_id=f"failing_{i}")
 
         status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
         print(f"  Result: {status}")

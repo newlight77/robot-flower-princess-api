@@ -179,7 +179,7 @@ board = RandomBoardGenerator.generate_board(
 
 # Test it
 tester = AIPlayerTester()
-result = tester.test_board(board, board_id="custom-test")
+result = tester.test_board(board, game_id="custom-test")
 
 print(f"Success: {result['success']}")
 print(f"Actions: {result['actions_taken']}")

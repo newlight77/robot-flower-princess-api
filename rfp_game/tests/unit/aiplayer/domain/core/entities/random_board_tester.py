@@ -90,7 +90,7 @@ def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | 
             f"{config['num_flowers']} flowers, {config['num_obstacles']} obstacles"
         )
 
-        result = tester.test_board(board, board_id=f"iter{iteration}_test{i+1}")
+        result = tester.test_board(board, game_id=f"iter{iteration}_test{i+1}")
 
         status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
         print(f"  Result: {status}")

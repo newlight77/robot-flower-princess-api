@@ -22,30 +22,30 @@ class AIPlayerTester:
             "other": 0,
         }
 
-    def test_board(self, board: Game, board_id: str = "test") -> Dict:
+    def test_board(self, game: Game, game_id: str = "test") -> Dict:
         """Test a single board and return results."""
-        initial_flowers = len(board.flowers)
-        initial_obstacles = len(board.obstacles)
+        initial_flowers = len(game.flowers)
+        initial_obstacles = len(game.obstacles)
 
         try:
             # Try to solve
-            actions = self.player.solve(board)
+            actions = self.player.solve(game)
 
             # Check if solved
-            success = len(board.flowers) == 0 and board.robot.flowers_held == 0 and board.flowers_delivered > 0
+            success = len(game.flowers) == 0 and game.robot.flowers_held == 0 and game.flowers_delivered > 0
 
             result = {
-                "board_id": board_id,
+                "game_id": game_id,
                 "success": success,
                 "actions_taken": len(actions),
                 "initial_flowers": initial_flowers,
-                "remaining_flowers": len(board.flowers),
-                "flowers_delivered": board.flowers_delivered,
+                "remaining_flowers": len(game.flowers),
+                "flowers_delivered": game.flowers_delivered,
                 "initial_obstacles": initial_obstacles,
-                "remaining_obstacles": len(board.obstacles),
-                "obstacles_cleaned": initial_obstacles - len(board.obstacles),
-                "robot_final_position": f"({board.robot.position.row},{board.robot.position.col})",
-                "robot_flowers_held": board.robot.flowers_held,
+                "remaining_obstacles": len(game.obstacles),
+                "obstacles_cleaned": initial_obstacles - len(game.obstacles),
+                "robot_final_position": f"({game.robot.position.row},{game.robot.position.col})",
+                "robot_flowers_held": game.robot.flowers_held,
             }
 
             if success:
@@ -53,14 +53,14 @@ class AIPlayerTester:
             else:
                 self.failure_count += 1
                 # Analyze failure pattern
-                self._analyze_failure(board, actions, result)
+                self._analyze_failure(game, actions, result)
 
             self.results.append(result)
             return result
 
         except Exception as e:
             self.failure_count += 1
-            result = {"board_id": board_id, "success": False, "error": str(e), "actions_taken": 0}
+            result = {"game_id": game_id, "success": False, "error": str(e), "actions_taken": 0}
             self.results.append(result)
             self.failure_patterns["other"] += 1
             return result

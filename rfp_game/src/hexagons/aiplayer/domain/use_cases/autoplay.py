@@ -66,7 +66,7 @@ class AutoplayUseCase:
                 actions = AIGreedyPlayer.solve(game_copy)
                 strategy_name = "Greedy AI (Safe)"
 
-            self.logger.info("Using %s, generated %d actions", strategy_name, len(actions))
+            logger.info("Using %s, generated %d actions", strategy_name, len(actions))
 
             # Apply actions to original board
             for action_type, direction in actions:

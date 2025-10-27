@@ -11,8 +11,9 @@ from ..schemas.game_schema import (
     ActionResponse,
     GamesResponse,
 )
-from configurator.dependencies import get_game_repository
+from configurator.dependencies import get_game_repository, get_gameplay_data_collector
 from ....domain.ports.game_repository import GameRepository
+from ....driven.adapters.gameplay_data_collector import GameplayDataCollector
 from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
 from ....domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
@@ -155,6 +156,7 @@ def perform_action(
         ),
     ),
     repository: GameRepository = Depends(get_game_repository),
+    data_collector: GameplayDataCollector = Depends(get_gameplay_data_collector),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.
 
@@ -169,10 +171,25 @@ def perform_action(
     )
 
     try:
+        # Get game state BEFORE action for data collection
+        get_state_use_case = GetGameStateUseCase(repository)
+        state_before = get_state_use_case.execute(GetGameStateQuery(game_id=game_id))
+        game_state_before = state_before.game.to_dict()
+
         action = request.action
 
         # direction required for all actions now
         direction = Direction(request.direction)
+
+        # Map action types to string names for data collection
+        action_name_map = {
+            ActionType.rotate: "rotate",
+            ActionType.move: "move",
+            ActionType.pickFlower: "pick",
+            ActionType.dropFlower: "drop",
+            ActionType.giveFlower: "give",
+            ActionType.clean: "clean",
+        }
 
         if action == ActionType.rotate:
             use_case = RotateRobotUseCase(repository)
@@ -194,6 +211,15 @@ def perform_action(
             result = use_case.execute(CleanObstacleCommand(game_id=game_id, direction=direction))
         else:
             raise ValueError(f"Unknown action: {action}")
+
+        # Collect gameplay data for ML training
+        data_collector.collect_action(
+            game_id=game_id,
+            game_state=game_state_before,
+            action=action_name_map[action],
+            direction=direction.value,
+            outcome={"success": result.success, "message": "action performed successfully" if result.success else "failed"},
+        )
 
         return ActionResponse(
             success=result.success,

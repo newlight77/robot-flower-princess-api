@@ -56,7 +56,7 @@ class GameDataCollector:
         }
 
         # Store in daily batches
-        date_str = datetime.utcnow().strftime("%Y-%m-%d")
+        date_str = datetime.now().strftime("%Y-%m-%d")
         sample_file = self.data_dir / f"samples_{date_str}.jsonl"
 
         with open(sample_file, "a") as f:

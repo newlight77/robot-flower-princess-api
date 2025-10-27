@@ -1,13 +1,16 @@
 """
-AI ML Player - Hybrid approach combining heuristics with ML-ready architecture.
+AI ML Player - Hybrid approach combining heuristics with machine learning.
 
-This player uses weighted heuristics for the MVP, designed for future ML upgrade.
+This player uses trained ML models when available, with heuristics as fallback.
 The architecture supports:
-- Current: Heuristic-based decision making with tuned weights
-- Future: Replace heuristics with trained ML models (sklearn, pytorch, etc.)
+- Primary: Trained ML models (Random Forest, Gradient Boosting)
+- Fallback: Heuristic-based decision making
 """
 
+from typing import Any
+
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
+from hexagons.mlplayer.domain.ml import FeatureEngineer, ModelRegistry
 from shared.logging import logger
 
 from ..value_objects.game_state import GameState
@@ -15,26 +18,61 @@ from ..value_objects.game_state import GameState
 
 class AIMLPlayer:
     """
-    ML-inspired AI player using hybrid heuristic + ML approach.
+    ML-based AI player with hybrid approach.
 
-    MVP: Uses weighted heuristics with configurable parameters
-    Future: Can swap heuristics with trained ML models
+    Primary: Uses trained ML models for action prediction
+    Fallback: Uses weighted heuristics when no model available
 
     Architecture:
-    - evaluate_board(): Scores current state (heuristics → ML model)
-    - select_action(): Chooses best action (rule-based → policy network)
-    - plan_sequence(): Plans ahead (search + heuristics → planning network)
+    - evaluate_board(): Scores current state (ML model or heuristics)
+    - select_action(): Chooses best action (ML prediction or rule-based)
+    - plan_sequence(): Plans ahead (ML-guided or search + heuristics)
     """
 
-    def __init__(self, config: StrategyConfig | None = None):
+    def __init__(self, config: StrategyConfig | None = None, model_path: str | None = None):
         """
         Initialize ML player with configuration.
 
         Args:
             config: Strategy configuration (weights, hyperparameters)
+            model_path: Optional path to specific model, otherwise loads best model
         """
         self.config = config or StrategyConfig.default()
-        self.model = None  # Future: Load trained ML model here
+
+        # Try to load trained ML model
+        self.model: Any | None = None
+        self.model_metadata = None
+        self.feature_engineer = FeatureEngineer()
+        self.use_ml = False
+        logger.info(f"AIMLPlayer.init: Initializing with config={self.config.to_dict()}")
+        try:
+            registry = ModelRegistry()
+            logger.info(f"AIMLPlayer.init: Model registry initialized: {registry}")
+            if model_path:
+                # Load specific model
+                import os
+                logger.info(f"AIMLPlayer.init: Loading specific model: {model_path}")
+                model_name = os.path.splitext(os.path.basename(model_path))[0]
+                self.model = registry.load_model(model_name)
+                logger.info(f"AIMLPlayer.init: Loaded specific model: {model_name}")
+                self.use_ml = True
+            else:
+                # Load best model
+                logger.info("AIMLPlayer.init: Loading best model")
+                self.model, self.model_metadata = registry.load_best_model()
+                if self.model:
+                    logger.info(
+                        f"AIMLPlayer.init: Loaded best model: {self.model_metadata.name} "
+                        f"ML model loaded: {self.model_metadata.name} "
+                        f"(accuracy={self.model_metadata.test_accuracy:.4f})"
+                    )
+                    self.use_ml = True
+                else:
+                    logger.warning("No trained model found, using heuristics")
+        except Exception as e:
+            logger.warning(f"Failed to load ML model: {e}, using heuristics")
+            self.model = None
+            self.use_ml = False
 
     def evaluate_board(self, state: GameState) -> float:
         """
@@ -108,8 +146,8 @@ class AIMLPlayer:
         """
         Select best action for current state.
 
-        MVP: Rule-based decision tree with heuristics
-        Future: Replace with policy network
+        Primary: Uses trained ML model for prediction
+        Fallback: Uses rule-based decision tree with heuristics
 
         Args:
             state: Current board state
@@ -117,27 +155,72 @@ class AIMLPlayer:
         Returns:
             Tuple of (action_type, direction) e.g. ("move", "NORTH")
         """
-        # Simple decision tree for MVP
-        # Future: Replace with neural network policy
+        logger.info("AIMLPlayer.select_action: Selecting action for state")
 
-        logger.info(f"AIMLPlayer.select_action: Selecting action for state={state.to_dict()}")
+        # Try ML prediction first
+        if self.use_ml and self.model is not None:
+            try:
+                action, direction = self._predict_with_ml(state)
+                logger.info(f"ML prediction: {action} {direction or ''}")
+                return (action, direction)
+            except Exception as e:
+                logger.warning(f"ML prediction failed: {e}, falling back to heuristics")
+
+        # Fallback to heuristics
+        return self._select_action_heuristic(state)
+
+    def _predict_with_ml(self, state: GameState) -> tuple[str, str | None]:
+        """
+        Predict action using trained ML model.
+
+        Args:
+            state: Current game state
+
+        Returns:
+            Tuple of (action, direction)
+        """
+        # Extract features
+        features = self.feature_engineer.extract_features(state.to_dict())
+
+        # Predict action label
+        label = self.model.predict([features])[0]
+
+        # Decode action
+        action, direction = self.feature_engineer.decode_action(int(label))
+
+        return (action, direction)
+
+    def _select_action_heuristic(self, state: GameState) -> tuple[str, str | None]:
+        """
+        Select action using heuristics (fallback).
+
+        Args:
+            state: Current game state
+
+        Returns:
+            Tuple of (action, direction)
+        """
+        logger.info("Using heuristic action selection")
 
         # If next to princess with flowers → give
         if (
             state.robot["position"] in self._get_adjacent_positions(state.princess["position"])
-            and len(state.robot["flowers_delivered"]) > 0
+            and len(state.robot["flowers_collected"]) > 0
         ):
             return ("give", None)
 
         # If at flower and not full → pick
-        if (
-            state.robot["position"] in state.board["flowers_positions"]
-            and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]
-        ):
-            return ("pick", None)
+        robot_pos = state.robot["position"]
+        for flower_pos in state.board["flowers_positions"]:
+            if (
+                robot_pos["row"] == flower_pos["row"]
+                and robot_pos["col"] == flower_pos["col"]
+                and len(state.robot["flowers_collected"]) < state.robot["flowers_collection_capacity"]
+            ):
+                return ("pick", None)
 
         # If holding flowers → move toward princess
-        if len(state.robot["flowers_delivered"]) > 0:
+        if len(state.robot["flowers_collected"]) > 0:
             direction = self._get_direction_to_target(state.robot["position"], state.princess["position"])
             return ("move", direction)
 
@@ -201,26 +284,26 @@ class AIMLPlayer:
         """Get current configuration."""
         return self.config.to_dict()
 
-    def load_model(self, model_path: str) -> None:
+    def get_model_info(self) -> dict[str, Any]:
         """
-        Load a trained ML model.
+        Get information about the loaded model.
 
-        Future implementation:
-        - Load sklearn model: joblib.load(model_path)
-        - Load pytorch model: torch.load(model_path)
-        - Load tensorflow model: tf.keras.models.load_model(model_path)
+        Returns:
+            Dictionary with model information
         """
-        logger.info(f"AIMLPlayer.load_model: Loading model from={model_path}")
-        raise NotImplementedError("ML model loading will be implemented in future version")
-
-    def save_model(self, model_path: str) -> None:
-        """
-        Save the current ML model.
-
-        Future implementation for model persistence.
-        """
-        logger.info(f"AIMLPlayer.save_model: Saving model to={model_path}")
-        raise NotImplementedError("ML model saving will be implemented in future version")
+        if self.model_metadata:
+            return {
+                "model_loaded": True,
+                "model_name": self.model_metadata.name,
+                "model_type": self.model_metadata.model_type,
+                "test_accuracy": self.model_metadata.test_accuracy,
+                "train_samples": self.model_metadata.train_samples,
+                "created_at": self.model_metadata.created_at,
+            }
+        return {
+            "model_loaded": False,
+            "fallback_mode": "heuristics",
+        }
 
     def _get_adjacent_positions(self, position: tuple[int, int]) -> list[tuple[int, int]]:
         """Get all valid adjacent empty positions."""

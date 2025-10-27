@@ -46,6 +46,7 @@ coverage/
 
 # ML Models
 models/
+data/
 *.pkl
 *.pth
 *.h5

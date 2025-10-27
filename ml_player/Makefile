@@ -135,19 +135,19 @@ clean:
 	rm -rf coverage || true
 
 # Machine Learning commands
-ml-generate-data:
+ml-generate-data: # step 1
 	@echo "Generating synthetic training data..."
 	poetry run python scripts/generate_training_data.py --num-samples 1000
 
-ml-train:
+ml-train: # step 2
 	@echo "Training Random Forest model..."
 	poetry run python scripts/train_model.py --model-type random_forest
 
-ml-train-gb:
+ml-train-gb: # step 3
 	@echo "Training Gradient Boosting model..."
 	poetry run python scripts/train_model.py --model-type gradient_boosting
 
-ml-stats:
+ml-stats: # step 4
 	@echo "Training data statistics:"
 	@poetry run python -c "import sys; sys.path.insert(0, 'src'); \
 	from hexagons.mlplayer.domain.ml import GameDataCollector; \

@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from hexagons.mlplayer.domain.core.entities import AIMLPlayer, GameState
-from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
+from hexagons.mlplayer.domain.core.entities import AIMLPlayer
+from hexagons.mlplayer.domain.core.value_objects import GameState, StrategyConfig
 from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from shared.logging import logger
 

@@ -50,7 +50,7 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             },
             "princess": {"position": {"row": 4, "col": 4}, "flowers_received": [], "mood": "neutral"},
         }
-        return game_state, "pick", None
+        return game_state, "pick", "EAST"
 
     elif scenario == "give_flowers":
         # Robot at (3, 4) with flowers, princess at (4, 4)
@@ -73,7 +73,7 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             },
             "princess": {"position": {"row": 4, "col": 4}, "flowers_received": [], "mood": "neutral"},
         }
-        return game_state, "give", None
+        return game_state, "give", "SOUTH"
 
     elif scenario == "move_to_flower":
         # Robot at (1, 1), flower at (1, 3)
@@ -142,7 +142,7 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             },
             "princess": {"position": {"row": 4, "col": 4}, "flowers_received": [], "mood": "neutral"},
         }
-        return game_state, "clean", None
+        return game_state, "clean", "EAST"
 
     else:  # random
         # Generate random valid scenario

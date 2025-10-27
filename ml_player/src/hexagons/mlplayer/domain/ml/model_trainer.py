@@ -57,6 +57,7 @@ class ModelTrainer:
 
                 # Encode action as label
                 label = self.feature_engineer.encode_action(sample["action"], sample.get("direction"))
+                logger.info(f"Encoded action: {sample['action']} {sample.get('direction')} -> {label}")
                 y_list.append(label)
 
             except Exception as e:

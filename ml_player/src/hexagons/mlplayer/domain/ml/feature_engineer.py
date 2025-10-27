@@ -146,10 +146,10 @@ class FeatureEngineer:
         # Action encoding:
         # 0-3: move (NORTH, SOUTH, EAST, WEST)
         # 4-7: rotate (NORTH, SOUTH, EAST, WEST)
-        # 8: pick
-        # 9: drop
-        # 10: give
-        # 11: clean
+        # 8-11: pick (NORTH, SOUTH, EAST, WEST)
+        # 12-15: drop (NORTH, SOUTH, EAST, WEST)
+        # 16-19: give (NORTH, SOUTH, EAST, WEST)
+        # 20-23: clean (NORTH, SOUTH, EAST, WEST)
 
         if action == "move":
             if direction == "NORTH":
@@ -170,13 +170,41 @@ class FeatureEngineer:
             elif direction == "WEST":
                 return 7
         elif action == "pick":
-            return 8
+            if direction == "NORTH":
+                return 8
+            elif direction == "SOUTH":
+                return 9
+            elif direction == "EAST":
+                return 10
+            elif direction == "WEST":
+                return 11
         elif action == "drop":
-            return 9
+            if direction == "NORTH":
+                return 12
+            elif direction == "SOUTH":
+                return 13
+            elif direction == "EAST":
+                return 14
+            elif direction == "WEST":
+                return 15
         elif action == "give":
-            return 10
+            if direction == "NORTH":
+                return 16
+            elif direction == "SOUTH":
+                return 17
+            elif direction == "EAST":
+                return 18
+            elif direction == "WEST":
+                return 19
         elif action == "clean":
-            return 11
+            if direction == "NORTH":
+                return 20
+            elif direction == "SOUTH":
+                return 21
+            elif direction == "EAST":
+                return 22
+            elif direction == "WEST":
+                return 23
 
         raise ValueError(f"Unknown action: {action} with direction: {direction}")
 
@@ -200,10 +228,22 @@ class FeatureEngineer:
             5: ("rotate", "SOUTH"),
             6: ("rotate", "EAST"),
             7: ("rotate", "WEST"),
-            8: ("pick", None),
-            9: ("drop", None),
-            10: ("give", None),
-            11: ("clean", None),
+            8: ("pick", "NORTH"),
+            9: ("pick", "SOUTH"),
+            10: ("pick", "EAST"),
+            11: ("pick", "WEST"),
+            12: ("drop", "NORTH"),
+            13: ("drop", "SOUTH"),
+            14: ("drop", "EAST"),
+            15: ("drop", "WEST"),
+            16: ("give", "NORTH"),
+            17: ("give", "SOUTH"),
+            18: ("give", "EAST"),
+            19: ("give", "WEST"),
+            20: ("clean", "NORTH"),
+            21: ("clean", "SOUTH"),
+            22: ("clean", "EAST"),
+            23: ("clean", "WEST"),
         }
 
         if label not in action_map:

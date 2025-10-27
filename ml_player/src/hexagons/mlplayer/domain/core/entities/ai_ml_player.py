@@ -305,7 +305,7 @@ class AIMLPlayer:
             "fallback_mode": "heuristics",
         }
 
-    def _get_adjacent_positions(self, position: tuple[int, int]) -> list[tuple[int, int]]:
+    def _get_adjacent_positions(self, position: tuple[int, int], state: GameState) -> list[tuple[int, int]]:
         """Get all valid adjacent empty positions."""
         adjacent_positions = [
             {"row": position["row"] + 1, "col": position["col"]},
@@ -313,5 +313,25 @@ class AIMLPlayer:
             {"row": position["row"], "col": position["col"] + 1},
             {"row": position["row"], "col": position["col"] - 1},
         ]
+
+        # filter out positions that are out of bounds
+        adjacent_positions = [p for p in adjacent_positions
+            if p["row"] >= 0
+            and p["row"] < state.board["rows"]
+            and p["col"] >= 0
+            and p["col"] < state.board["cols"]
+        ]
+
+        # # filter out positions that are obstacles
+        # adjacent_positions = [p for p in adjacent_positions if p not in state.board["obstacles_positions"]]
+
+        # # filter out positions that are flowers
+        # adjacent_positions = [p for p in adjacent_positions if p not in state.board["flowers_positions"]]
+
+        # # filter out positions that are princess
+        # adjacent_positions = [p for p in adjacent_positions if p not in state.princess["position"]]
+
+        # # filter out positions that are robot
+        # adjacent_positions = [p for p in adjacent_positions if p not in state.robot["position"]]
 
         return adjacent_positions

@@ -1,10 +1,8 @@
 """FastAPI router for ML Player endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
-from configurator.dependencies import get_game_client
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
-from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from hexagons.mlplayer.domain.use_cases.predict_action import (
     PredictActionCommand,
     PredictActionUseCase,
@@ -20,29 +18,27 @@ router = APIRouter(prefix="/api/ml-player", tags=["ML Player"])
 
 
 @router.post("/predict/{game_id}", response_model=PredictActionResponse)
-async def predict_action(
+def predict_action(
     game_id: str,
     request: PredictActionRequest,
-    game_client: GameClientPort = Depends(get_game_client),
 ) -> PredictActionResponse:
     """
     Predict the next best action for a game using ML player.
 
     Args:
         game_id: Game identifier
-        request: Prediction request with strategy
-        game_client: Game service client (injected)
+        request: Prediction request with game state and strategy
 
     Returns:
         Predicted action with confidence and metadata
 
     Raises:
-        HTTPException: If game not found or prediction fails
+        HTTPException: If prediction fails
     """
     logger.info(f"Predicting action for game_id={game_id} with strategy={request.strategy}")
 
     try:
-        use_case = PredictActionUseCase(game_client)
+        use_case = PredictActionUseCase()
         command = PredictActionCommand(
             strategy=request.strategy,
             game_id=game_id,
@@ -55,7 +51,7 @@ async def predict_action(
 
         logger.info(f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}")
 
-        result = await use_case.execute(command)
+        result = use_case.execute(command)
 
         logger.info(f"Predicted action={result.action}, dir={result.direction}, conf={result.confidence:.2f}")
 

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 from hexagons.mlplayer.domain.core.entities import AIMLPlayer
 from hexagons.mlplayer.domain.core.value_objects import GameState, StrategyConfig
-from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from shared.logging import logger
 
 
@@ -97,40 +96,26 @@ class PredictActionUseCase:
     Use case for predicting the next best action using the ML player.
 
     This use case:
-    1. Fetches current game state
-    2. Converts it to BoardState
+    1. Receives game state from command (passed via API request)
+    2. Converts it to GameState
     3. Uses AIMLPlayer to predict action
-    4. Returns the prediction
+    4. Returns the prediction (action is executed by MLProxyPlayer in rfp_game)
     """
 
-    def __init__(self, game_client: GameClientPort):
-        """
-        Initialize use case.
-
-        Args:
-            game_client: Client for fetching game state
-        """
-        self.game_client = game_client
-
-    async def execute(self, command: PredictActionCommand) -> PredictActionResult:
+    def execute(self, command: PredictActionCommand) -> PredictActionResult:
         """
         Execute prediction use case.
 
         Args:
-            command: Prediction command
+            command: Prediction command with game state
 
         Returns:
-            Prediction result
+            Prediction result with recommended action
         """
-        # Fetch game state
-        logger.info(f"PredictActionUseCase.execute: Fetching game state for game_id={command.game_id}")
-        # game_state: dict = self.game_client.get_game_state(command.game_id)
-        game_state = GameState(game_id=command.game_id, board=command.board, robot=command.robot, princess=command.princess)
-
-        # Convert to BoardState
-        logger.info(f"PredictActionUseCase.execute: Converting game state to GameState {command.game_id}")
+        # Convert command data to GameState
+        logger.info(f"PredictActionUseCase.execute: Converting game state to GameState for game_id={command.game_id}")
         game_state: GameState = command.convert_to_game_state()
-        logger.info(f"PredictActionUseCase.execute: GameState {game_state.to_dict()}")
+        logger.info(f"PredictActionUseCase.execute: GameState converted {game_state.to_dict()}")
 
         # Get configuration
         logger.info(f"PredictActionUseCase.execute: Getting configuration for strategy={command.strategy}")

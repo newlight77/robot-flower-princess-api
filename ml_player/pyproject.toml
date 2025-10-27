@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "ML-based player for Robot Flower Princess game using hybrid heuristic and future ML capabilities"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "hexagons", from = "src"}, {include = "shared", from = "src"}, {include = "configurator", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.13"

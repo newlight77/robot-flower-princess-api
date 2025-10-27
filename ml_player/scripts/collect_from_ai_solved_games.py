@@ -18,13 +18,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Add paths
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-rfp_game_path = Path(__file__).parent.parent.parent / "rfp_game" / "src"
-sys.path.insert(0, str(rfp_game_path))
+# Add paths FIRST before any hexagons imports
+script_path = Path(__file__).resolve()
+rfp_game_path = script_path.parent.parent.parent / "rfp_game" / "src"
+ml_player_path = script_path.parent.parent / "src"
 
+sys.path.insert(0, str(rfp_game_path))
+sys.path.insert(0, str(ml_player_path))
+
+# Now import everything
 from hexagons.mltraining.domain.ml import GameDataCollector
-from shared.logging import logger
+from shared.logging import get_logger
 
 # Import from rfp_game
 from hexagons.game.domain.core.entities.game import Game
@@ -32,6 +36,8 @@ from hexagons.game.domain.core.value_objects.game_status import GameStatus
 from hexagons.game.domain.services.game_service import GameService
 from hexagons.aiplayer.domain.core.entities.ai_greedy_player import AIGreedyPlayer
 from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPlayer
+
+logger = get_logger("collect_from_ai_solved_games")
 
 
 def execute_action_on_game(game: Game, action: str, direction: Any) -> bool:

@@ -17,6 +17,10 @@
 
 The project uses **GitHub Actions** for Continuous Integration and Continuous Deployment (CI/CD). The pipeline ensures code quality, runs comprehensive tests, checks coverage, and deploys to production.
 
+This project contains **two separate services**, each with its own CI workflow:
+- **RFP Game** (`rfp_game/`) - Main game service
+- **ML Player** (`ml_player/`) - Machine learning player service
+
 ### Pipeline Goals
 
 - ✅ **Automated Testing**: Run all tests on every push/PR
@@ -24,34 +28,70 @@ The project uses **GitHub Actions** for Continuous Integration and Continuous De
 - ✅ **Coverage**: Maintain 80%+ test coverage
 - ✅ **Docker Build**: Verify containerization works
 - ✅ **Fast Feedback**: Parallel test execution
+- ✅ **Isolation**: Each service has independent CI pipeline
 - ✅ **Deployment**: Automated deployment on successful builds
 
 ### Workflow Triggers
 
+**RFP Game CI** (`.github/workflows/ci.yml`):
 ```yaml
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'rfp_game/**'
+      - '.github/workflows/ci.yml'
+      - '.gitignore'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'rfp_game/**'
+      - '.github/workflows/ci.yml'
+      - '.gitignore'
+```
+
+**ML Player CI** (`.github/workflows/ml_player-ci.yml`):
+```yaml
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ml_player/**'
+      - '.github/workflows/ml_player-ci.yml'
+      - '.gitignore'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ml_player/**'
+      - '.github/workflows/ml_player-ci.yml'
+      - '.gitignore'
 ```
 
 **Triggers**:
-- Push to `main` branch
-- Pull requests targeting `main` branch
+- Push to `main` branch (only when files in respective project change)
+- Pull requests targeting `main` branch (only when files in respective project change)
+- Changes to the workflow file itself
+- Changes to `.gitignore`
+
+**Benefits**:
+- ⚡ **Faster CI**: Only runs tests for changed services
+- 💰 **Cost Efficient**: Reduces unnecessary CI runs
+- 🔒 **Isolation**: Changes to one service don't trigger tests for the other
+- 🎯 **Clear Feedback**: CI results are specific to the changed service
 
 ---
 
-## GitHub Actions Workflow
+## GitHub Actions Workflows
 
-### Workflow File
+### Workflow Files
 
-**Location**: `.github/workflows/ci.yml`
+**RFP Game CI**: `.github/workflows/ci.yml`
+**ML Player CI**: `.github/workflows/ml_player-ci.yml`
 
-**Overview**:
+**RFP Game Workflow Overview**:
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   GitHub Actions Workflow                    │
+│                   RFP Game CI Workflow                       │
 └─────────────────────────────────────────────────────────────┘
                             │
               ┌─────────────┼─────────────┐
@@ -86,6 +126,43 @@ on:
                      │ (if main)   │
                      └─────────────┘
 ```
+
+**ML Player Workflow Overview**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   ML Player CI Workflow                      │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+                       ┌─────────┐
+                       │  Unit   │
+                       │  Tests  │
+                       └─────────┘
+                            │
+                            ▼
+                  ┌──────────────────┐
+                  │  Code Coverage   │
+                  │  Quality Check   │
+                  └──────────────────┘
+                            │
+                            ▼
+                     ┌─────────────┐
+                     │    Lint     │
+                     └─────────────┘
+                            │
+                            ▼
+                    ┌──────────────┐
+                    │Docker Build  │
+                    │  & Test      │
+                    └──────────────┘
+```
+
+**Key Differences**:
+- RFP Game has full test pyramid (unit, integration, feature-component)
+- ML Player currently has unit tests only (integration/feature tests pending)
+- Both enforce 80% coverage threshold
+- Both build and test Docker images
+- Workflows run independently based on file changes
 
 ---
 

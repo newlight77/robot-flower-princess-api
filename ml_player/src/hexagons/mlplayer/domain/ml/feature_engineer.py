@@ -464,16 +464,88 @@ class FeatureEngineer:
         return names
 
     # Keep existing encode_action and decode_action methods
-    # (Same as current implementation - 24 action classes)
+    # (Same as current implementation - 12 action classes)
 
     @staticmethod
     def encode_action(action: str, direction: str | None = None) -> int:
-        """Encode action as integer label (same as current)."""
-        # ... (keep existing implementation)
-        pass
+        """
+        Encode action as integer label for classification.
+
+        Args:
+            action: Action type
+            direction: Direction for move/rotate actions
+
+        Returns:
+            Integer label
+        """
+        # Action encoding:
+        # 0-3: move (NORTH, SOUTH, EAST, WEST)
+        # 4-7: rotate (NORTH, SOUTH, EAST, WEST)
+        # 8: pick
+        # 9: drop
+        # 10: give
+        # 11: clean
+
+        # Normalize direction to uppercase if provided
+        if direction:
+            direction = direction.upper()
+
+        if action == "move":
+            if direction == "NORTH":
+                return 0
+            elif direction == "SOUTH":
+                return 1
+            elif direction == "EAST":
+                return 2
+            elif direction == "WEST":
+                return 3
+        elif action == "rotate":
+            if direction == "NORTH":
+                return 4
+            elif direction == "SOUTH":
+                return 5
+            elif direction == "EAST":
+                return 6
+            elif direction == "WEST":
+                return 7
+        elif action == "pick":
+            return 8
+        elif action == "drop":
+            return 9
+        elif action == "give":
+            return 10
+        elif action == "clean":
+            return 11
+
+        raise ValueError(f"Unknown action: {action} with direction: {direction}")
 
     @staticmethod
     def decode_action(label: int) -> tuple[str, str | None]:
-        """Decode integer label back to action (same as current)."""
-        # ... (keep existing implementation)
-        pass
+        """
+        Decode integer label back to action and direction.
+
+        Args:
+            label: Integer label
+
+        Returns:
+            Tuple of (action, direction)
+        """
+        action_map = {
+            0: ("move", "NORTH"),
+            1: ("move", "SOUTH"),
+            2: ("move", "EAST"),
+            3: ("move", "WEST"),
+            4: ("rotate", "NORTH"),
+            5: ("rotate", "SOUTH"),
+            6: ("rotate", "EAST"),
+            7: ("rotate", "WEST"),
+            8: ("pick", None),
+            9: ("drop", None),
+            10: ("give", None),
+            11: ("clean", None),
+        }
+
+        if label not in action_map:
+            raise ValueError(f"Unknown label: {label}")
+
+        return action_map[label]

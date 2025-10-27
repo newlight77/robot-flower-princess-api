@@ -132,12 +132,16 @@ def collect_from_ai_solved_game(
         # Get current state BEFORE action
         game_state = game_replay.to_dict()
 
+        # For move actions without direction, use robot's current orientation
+        if action == "move" and direction is None:
+            direction = game_replay.robot.orientation
+
         # Collect sample
         collector.collect_sample(
             game_id=game_id,
             game_state=game_state,
             action=action,
-            direction=str(direction) if direction else None,
+            direction=direction.value if direction else None,
             outcome={
                 "success": True,
                 "step": i,

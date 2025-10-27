@@ -37,7 +37,7 @@ async def autoplay(
     game_id: str,
     strategy: AIStrategy = Query(
         default="greedy",
-        description="AI strategy: 'greedy' (safe, 75% success), 'optimal' (fast, 62% success, -25% actions), or 'ml' (hybrid ML/heuristic)",
+        description="AI strategy: 'greedy' (safe, 75% success), 'optimal' (fast, -25% actions), or 'ml' (hybrid ML)",
     ),
     repository: GameRepository = Depends(get_game_repository),
     ml_client: MLPlayerClientPort = Depends(get_ml_player_client),
@@ -47,8 +47,8 @@ async def autoplay(
 
     Three strategies available:
     - **greedy** (default): Safe & reliable. 75% success rate. Checks safety before picking flowers.
-    - **optimal**: Fast & efficient. 62% success rate, but 25% fewer actions. Uses A* pathfinding and multi-step planning.
-    - **ml**: Hybrid ML/heuristic approach. Uses ML Player service for predictions. Learns from game patterns.
+    - **optimal**: Fast & efficient. 62% success rate, 25% fewer actions. Uses A* pathfinding and planning.
+    - **ml**: Hybrid ML/heuristic approach. Uses ML Player service for predictions. Learns from patterns.
     """
 
     logger.info("autoplay: game_id=%s strategy=%s", game_id, strategy)

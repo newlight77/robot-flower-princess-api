@@ -2,8 +2,9 @@
 Data collection schemas for the ML Player API.
 """
 
-from pydantic import BaseModel, Field
 from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class CollectDataRequest(BaseModel):

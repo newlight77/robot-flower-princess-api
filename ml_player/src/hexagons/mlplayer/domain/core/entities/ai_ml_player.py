@@ -51,6 +51,7 @@ class AIMLPlayer:
             if model_path:
                 # Load specific model
                 import os
+
                 logger.info(f"AIMLPlayer.init: Loading specific model: {model_path}")
                 model_name = os.path.splitext(os.path.basename(model_path))[0]
                 self.model = registry.load_model(model_name)
@@ -315,11 +316,10 @@ class AIMLPlayer:
         ]
 
         # filter out positions that are out of bounds
-        adjacent_positions = [p for p in adjacent_positions
-            if p["row"] >= 0
-            and p["row"] < state.board["rows"]
-            and p["col"] >= 0
-            and p["col"] < state.board["cols"]
+        adjacent_positions = [
+            p
+            for p in adjacent_positions
+            if p["row"] >= 0 and p["row"] < state.board["rows"] and p["col"] >= 0 and p["col"] < state.board["cols"]
         ]
 
         # # filter out positions that are obstacles

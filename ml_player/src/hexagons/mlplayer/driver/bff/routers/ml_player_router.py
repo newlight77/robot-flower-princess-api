@@ -2,22 +2,22 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from configurator.dependencies import get_game_client, get_data_collector
+from configurator.dependencies import get_data_collector, get_game_client
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
-from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from hexagons.mlplayer.domain.ml.data_collector import GameDataCollector
+from hexagons.mlplayer.domain.ports.game_client import GameClientPort
 from hexagons.mlplayer.domain.use_cases.predict_action import (
     PredictActionCommand,
     PredictActionUseCase,
+)
+from hexagons.mlplayer.driver.bff.schemas.data_collection_schema import (
+    CollectDataRequest,
+    CollectDataResponse,
 )
 from hexagons.mlplayer.driver.bff.schemas.ml_player_schema import (
     PredictActionRequest,
     PredictActionResponse,
     StrategyConfigResponse,
-)
-from hexagons.mlplayer.driver.bff.schemas.data_collection_schema import (
-    CollectDataRequest,
-    CollectDataResponse,
 )
 from shared.logging import logger
 

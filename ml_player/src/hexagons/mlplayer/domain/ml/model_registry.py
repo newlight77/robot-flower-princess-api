@@ -239,9 +239,7 @@ class ModelRegistry:
             metrics_path=str(metrics_path),
         )
 
-        logger.info(
-            f"Model registered: {model_name} (accuracy={metadata.test_accuracy:.4f})"
-        )
+        logger.info(f"Model registered: {model_name} (accuracy={metadata.test_accuracy:.4f})")
 
         return metadata
 

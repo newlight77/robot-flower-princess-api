@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     enable_ml_models: bool = False  # Set to True when ML models are available
     model_path: str = "./models"
 
+    # Data Collection
+    data_dir: str = "data/training"
+
     # Logging
     log_level: str = "INFO"
 

@@ -195,9 +195,7 @@ class TestMLProxyPlayerGameStateConversion:
         game_state = call_args.kwargs["game_state"]
 
         # assert len(game_state["board"]["obstacles_positions"]) == sample_game.board.initial_obstacles_count
-        obstacle_positions = [
-            Position(p["row"], p["col"]) for p in game_state["board"]["obstacles_positions"]
-        ]
+        obstacle_positions = [Position(p["row"], p["col"]) for p in game_state["board"]["obstacles_positions"]]
         assert Position(1, 1) in obstacle_positions
         assert Position(2, 1) in obstacle_positions
 

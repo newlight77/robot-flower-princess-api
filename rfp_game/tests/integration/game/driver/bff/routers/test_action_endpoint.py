@@ -4,9 +4,7 @@ from hexagons.game.domain.core.value_objects.direction import Direction
 def test_rotate_changes_orientation(client, create_game):
     game_id, board = create_game()
 
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"}
-    )
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
@@ -20,9 +18,7 @@ def test_robot_move(client, save_board, make_empty_board):
     board.robot.orientation = Direction.NORTH
     save_board(game_id, board)
 
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"}
-    )
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True or data["success"] is False
@@ -35,9 +31,7 @@ def test_invalid_direction_payload(client, seeded_board):
     game_id, board = seeded_board("invalid-dir")
 
     # Send an invalid direction value
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "upwards"}
-    )
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "upwards"})
     assert resp.status_code == 422
     assert "detail" in resp.json()
 
@@ -58,9 +52,7 @@ def test_move_with_helpers(client, make_empty_board, save_board):
     # place robot at center facing north
     save_board(game_id, board)
 
-    resp = client.post(
-        f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"}
-    )
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"})
     assert resp.status_code == 200
     data = resp.json()
     # if move succeeded, robot moved to row 0, col 1

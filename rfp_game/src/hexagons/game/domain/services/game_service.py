@@ -64,9 +64,7 @@ class GameService:
             raise GameOverException("Game is already over")
 
         if not board.robot.can_pick():
-            raise InvalidPickException(
-                f"Robot cannot hold more than {board.robot.max_flowers} flowers"
-            )
+            raise InvalidPickException(f"Robot cannot hold more than {board.robot.max_flowers} flowers")
 
         # Get position in front of robot
         row_delta, col_delta = board.robot.orientation.get_delta()

@@ -23,9 +23,7 @@ def debug_failing_board(seed, config):
     print("Initial State:")
     print(f"  Robot: {initial_robot_pos}")
     print(f"  Princess: {initial_princess_pos}")
-    print(
-        f"  Flowers: {initial_flowers} at {list(board.flowers)[:3]}{'...' if initial_flowers > 3 else ''}"
-    )
+    print(f"  Flowers: {initial_flowers} at {list(board.flowers)[:3]}{'...' if initial_flowers > 3 else ''}")
     print(f"  Obstacles: {initial_obstacles}")
 
     # Check initial paths
@@ -35,9 +33,7 @@ def debug_failing_board(seed, config):
     if princess_adj:
         closest_princess = min(princess_adj, key=lambda p: initial_robot_pos.manhattan_distance(p))
         path_to_princess = AIGreedyPlayer._find_path(board, initial_robot_pos, closest_princess)
-        print(
-            f"  Initial path to princess: {'YES (%d steps)' % len(path_to_princess) if path_to_princess else 'NO'}"
-        )
+        print(f"  Initial path to princess: {'YES (%d steps)' % len(path_to_princess) if path_to_princess else 'NO'}")
 
     # Check flower accessibility
     accessible = 0
@@ -59,9 +55,7 @@ def debug_failing_board(seed, config):
         print(f"  Reason: {result.get('failure_reason', 'unknown')}")
         print(f"  Detail: {result.get('failure_detail', 'N/A')}")
         print(f"  Actions taken: {result['actions_taken']}")
-        print(
-            f"  Flowers picked: {initial_flowers - result['remaining_flowers']}/{initial_flowers}"
-        )
+        print(f"  Flowers picked: {initial_flowers - result['remaining_flowers']}/{initial_flowers}")
         print(f"  Flowers delivered: {result['flowers_delivered']}")
         print(f"  Robot holding: {result['robot_flowers_held']}")
         print(f"  Obstacles cleaned: {result['obstacles_cleaned']}")
@@ -77,9 +71,7 @@ def debug_failing_board(seed, config):
                 row, col = map(int, final_pos_str.strip("()").split(","))
                 final_pos = Position(row, col)
                 path_from_final = AIGreedyPlayer._find_path(board, final_pos, closest_princess)
-                print(
-                    f"  Path from final position to princess: {'YES' if path_from_final else 'NO'}"
-                )
+                print(f"  Path from final position to princess: {'YES' if path_from_final else 'NO'}")
 
         elif result.get("failure_reason") == "robot_blocked":
             print(f"\n  Analysis: Robot gave up after {result['actions_taken']} actions")

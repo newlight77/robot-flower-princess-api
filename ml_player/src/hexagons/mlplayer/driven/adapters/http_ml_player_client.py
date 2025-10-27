@@ -1,6 +1,5 @@
 """HTTP client adapter for communicating with ML Player service."""
 
-
 import httpx
 
 from hexagons.mlplayer.domain.ports.ml_player_client import MLPlayerClientPort
@@ -64,9 +63,7 @@ class HttpMLPlayerClient(MLPlayerClientPort):
         }
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                f"{self.base_url}/api/ml-player/predict/{game_id}", json=payload
-            )
+            response = await client.post(f"{self.base_url}/api/ml-player/predict/{game_id}", json=payload)
             response.raise_for_status()
             return response.json()
 

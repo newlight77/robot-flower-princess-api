@@ -53,9 +53,7 @@ async def predict_action(
             flowers=request.flowers,
         )
 
-        logger.info(
-            f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}"
-        )
+        logger.info(f"Executing predict action use case for game_id={game_id} with strategy={request.strategy}")
 
         result = await use_case.execute(command)
 
@@ -87,12 +85,8 @@ async def list_strategies() -> list[StrategyConfigResponse]:
 
     strategies = [
         StrategyConfigResponse(strategy_name="default", config=StrategyConfig.default().to_dict()),
-        StrategyConfigResponse(
-            strategy_name="aggressive", config=StrategyConfig.aggressive().to_dict()
-        ),
-        StrategyConfigResponse(
-            strategy_name="conservative", config=StrategyConfig.conservative().to_dict()
-        ),
+        StrategyConfigResponse(strategy_name="aggressive", config=StrategyConfig.aggressive().to_dict()),
+        StrategyConfigResponse(strategy_name="conservative", config=StrategyConfig.conservative().to_dict()),
     ]
 
     return strategies

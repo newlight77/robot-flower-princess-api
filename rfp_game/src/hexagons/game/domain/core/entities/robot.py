@@ -28,9 +28,7 @@ class Robot:
         return action
 
     def pick_flower(self, flower_position: Position = None) -> Action:
-        action = Action(
-            action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position
-        )
+        action = Action(action_type=ActionType.PICK, direction=self.orientation, flower_position=flower_position)
         self.add_executed_action(action)
 
         if len(self.flowers_collected) >= self.max_flowers:
@@ -44,9 +42,7 @@ class Robot:
         return action
 
     def drop_flower(self, drop_position: Position = None) -> Action:
-        action = Action(
-            action_type=ActionType.DROP, direction=self.orientation, drop_position=drop_position
-        )
+        action = Action(action_type=ActionType.DROP, direction=self.orientation, drop_position=drop_position)
         self.add_executed_action(action)
 
         if len(self.flowers_collected) == 0:

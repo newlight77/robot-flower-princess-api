@@ -35,9 +35,7 @@ class AutoplayUseCase:
 
     async def execute(self, command: AutoplayCommand) -> AutoplayResult:
         """Let AI solve the game automatically."""
-        logger.info(
-            "execute: AutoplayCommand game_id=%s strategy=%s", command.game_id, command.strategy
-        )
+        logger.info("execute: AutoplayCommand game_id=%s strategy=%s", command.game_id, command.strategy)
         game = self.repository.get(command.game_id)
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")
@@ -99,9 +97,7 @@ class AutoplayUseCase:
             status = game.get_status().value
             success = status == "victory"
             message = (
-                "AI completed the game successfully!"
-                if success
-                else "AI attempted to solve but couldn't complete"
+                "AI completed the game successfully!" if success else "AI attempted to solve but couldn't complete"
             )
 
             return AutoplayResult(

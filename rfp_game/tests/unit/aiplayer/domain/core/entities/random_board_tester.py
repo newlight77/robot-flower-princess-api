@@ -61,9 +61,7 @@ class RandomBoardGenerator:
         return board
 
 
-def run_iteration(
-    iteration: int, num_tests: int = 10, player: AIGreedyPlayer | AIOptimalPlayer = AIGreedyPlayer()
-):
+def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | AIOptimalPlayer = AIGreedyPlayer()):
     """Run one iteration of testing."""
     print(f"\n{'='*60}")
     print(f"ITERATION {iteration}")
@@ -97,9 +95,7 @@ def run_iteration(
         status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
         print(f"  Result: {status}")
         if result["success"]:
-            print(
-                f"  Actions: {result['actions_taken']}, " f"Cleaned: {result['obstacles_cleaned']}"
-            )
+            print(f"  Actions: {result['actions_taken']}, " f"Cleaned: {result['obstacles_cleaned']}")
         else:
             print(f"  Reason: {result.get('failure_reason', 'unknown')}")
 

@@ -503,9 +503,7 @@ def should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers():
 
         # Verify the endpoint works with optimal strategy
         data = resp.json()
-        print(
-            f"should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers Data: {data}"
-        )
+        print(f"should_autoplay_successfully_with_optimal_strategy_and_multiple_flowers Data: {data}")
         assert "success" in data["message"] or "board" in data
         assert len(data["game"]["robot"]["executed_actions"]) >= 10
         assert data["game"]["status"] == "victory"
@@ -594,9 +592,7 @@ def should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_patt
 
         # Verify the endpoint works with optimal strategy
         data = resp.json()
-        print(
-            f"should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_pattern Data: {data}"
-        )
+        print(f"should_autoplay_successfully_with_optimal_strategy_and_complex_obstacle_pattern Data: {data}")
         assert "success" in data["message"] or "board" in data
 
     finally:

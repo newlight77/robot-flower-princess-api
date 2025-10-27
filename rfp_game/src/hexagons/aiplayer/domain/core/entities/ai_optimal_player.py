@@ -61,30 +61,23 @@ class AIOptimalPlayer:
             # If holding flowers and need to deliver
             # Strategy: Deliver incrementally (every 2-3 flowers) to avoid getting stuck
             should_deliver = board.robot.flowers_held > 0 and (
-                board.robot.flowers_held
-                >= min(3, board.robot.max_flowers)  # Deliver after 3 flowers
+                board.robot.flowers_held >= min(3, board.robot.max_flowers)  # Deliver after 3 flowers
                 or board.robot.flowers_held == board.robot.max_flowers  # Or when at max capacity
                 or len(board.flowers) == 0  # Or when no more flowers left
             )
 
             if should_deliver:
                 # Navigate adjacent to princess (not TO princess)
-                adjacent_positions = AIOptimalPlayer._get_adjacent_positions(
-                    board.princess.position, board
-                )
+                adjacent_positions = AIOptimalPlayer._get_adjacent_positions(board.princess.position, board)
                 if not adjacent_positions:
                     # No empty adjacent positions near princess - need to clean obstacles
                     # But we can't clean while holding flowers, so drop them first
-                    drop_positions = AIOptimalPlayer._get_adjacent_positions(
-                        board.robot.position, board
-                    )
+                    drop_positions = AIOptimalPlayer._get_adjacent_positions(board.robot.position, board)
                     if drop_positions:
                         # Drop all flowers
                         while board.robot.flowers_held > 0:
                             drop_pos = drop_positions[0]
-                            direction = AIOptimalPlayer._get_direction(
-                                board.robot.position, drop_pos
-                            )
+                            direction = AIOptimalPlayer._get_direction(board.robot.position, drop_pos)
                             actions.append(("rotate", direction))
                             GameService.rotate_robot(board, direction)
 
@@ -92,18 +85,14 @@ class AIOptimalPlayer:
                             GameService.drop_flower(board)
 
                         # Now try to clean an obstacle near princess
-                        if AIOptimalPlayer._clean_obstacle_near_flower(
-                            board, board.princess.position, actions
-                        ):
+                        if AIOptimalPlayer._clean_obstacle_near_flower(board, board.princess.position, actions):
                             continue
 
                     # If we still can't proceed, give up
                     break
 
                 # Find closest adjacent position
-                target = min(
-                    adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p)
-                )
+                target = min(adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p))
 
                 path = AIOptimalPlayer._find_path(board, board.robot.position, target)
 
@@ -112,17 +101,13 @@ class AIOptimalPlayer:
                     # Strategy: Drop flowers, clean obstacles, pick flowers back up
 
                     # Find an empty adjacent cell to drop flowers
-                    drop_positions = AIOptimalPlayer._get_adjacent_positions(
-                        board.robot.position, board
-                    )
+                    drop_positions = AIOptimalPlayer._get_adjacent_positions(board.robot.position, board)
                     if drop_positions:
                         # Drop all flowers one by one
                         while board.robot.flowers_held > 0:
                             # Find direction to an empty adjacent cell
                             drop_pos = drop_positions[0]  # Just pick the first one
-                            direction = AIOptimalPlayer._get_direction(
-                                board.robot.position, drop_pos
-                            )
+                            direction = AIOptimalPlayer._get_direction(board.robot.position, drop_pos)
                             actions.append(("rotate", direction))
                             GameService.rotate_robot(board, direction)
 
@@ -145,9 +130,7 @@ class AIOptimalPlayer:
                     GameService.move_robot(board)
 
                 # Face princess and give flowers
-                direction = AIOptimalPlayer._get_direction(
-                    board.robot.position, board.princess.position
-                )
+                direction = AIOptimalPlayer._get_direction(board.robot.position, board.princess.position)
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
 
@@ -160,17 +143,13 @@ class AIOptimalPlayer:
                 # This prevents getting stuck with flowers and no way to deliver them
 
                 # First, handle case where princess is surrounded by obstacles
-                princess_adjacent = AIOptimalPlayer._get_adjacent_positions(
-                    board.princess.position, board
-                )
+                princess_adjacent = AIOptimalPlayer._get_adjacent_positions(board.princess.position, board)
 
                 if not princess_adjacent:
                     # Princess is completely surrounded! Must clean obstacles around her
                     if board.robot.flowers_held == 0:  # Can only clean without flowers
                         # Try to clean an obstacle adjacent to princess
-                        cleaned = AIOptimalPlayer._clean_obstacle_near_flower(
-                            board, board.princess.position, actions
-                        )
+                        cleaned = AIOptimalPlayer._clean_obstacle_near_flower(board, board.princess.position, actions)
                         if cleaned:
                             continue  # Successfully cleaned, check again
 
@@ -187,32 +166,24 @@ class AIOptimalPlayer:
                             if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
                                 # Try to reach this obstacle
                                 # Find adjacent empty position to this obstacle
-                                obstacle_adjacent = AIOptimalPlayer._get_adjacent_positions(
-                                    adj_pos, board
-                                )
+                                obstacle_adjacent = AIOptimalPlayer._get_adjacent_positions(adj_pos, board)
                                 if obstacle_adjacent:
                                     target = min(
                                         obstacle_adjacent,
                                         key=lambda p: board.robot.position.manhattan_distance(p),
                                     )
-                                    path = AIOptimalPlayer._find_path(
-                                        board, board.robot.position, target
-                                    )
+                                    path = AIOptimalPlayer._find_path(board, board.robot.position, target)
                                     if path:
                                         # Navigate to obstacle and clean it
                                         for next_pos in path:
-                                            dir = AIOptimalPlayer._get_direction(
-                                                board.robot.position, next_pos
-                                            )
+                                            dir = AIOptimalPlayer._get_direction(board.robot.position, next_pos)
                                             actions.append(("rotate", dir))
                                             GameService.rotate_robot(board, dir)
                                             actions.append(("move", None))
                                             GameService.move_robot(board)
 
                                         # Clean the obstacle
-                                        clean_dir = AIOptimalPlayer._get_direction(
-                                            board.robot.position, adj_pos
-                                        )
+                                        clean_dir = AIOptimalPlayer._get_direction(board.robot.position, adj_pos)
                                         actions.append(("rotate", clean_dir))
                                         GameService.rotate_robot(board, clean_dir)
                                         actions.append(("clean", None))
@@ -229,15 +200,11 @@ class AIOptimalPlayer:
                         break
                     else:
                         # Holding flowers but princess is surrounded - must drop flowers first
-                        drop_positions = AIOptimalPlayer._get_adjacent_positions(
-                            board.robot.position, board
-                        )
+                        drop_positions = AIOptimalPlayer._get_adjacent_positions(board.robot.position, board)
                         if drop_positions:
                             while board.robot.flowers_held > 0:
                                 drop_pos = drop_positions[0]
-                                direction = AIOptimalPlayer._get_direction(
-                                    board.robot.position, drop_pos
-                                )
+                                direction = AIOptimalPlayer._get_direction(board.robot.position, drop_pos)
                                 actions.append(("rotate", direction))
                                 GameService.rotate_robot(board, direction)
                                 actions.append(("drop", None))
@@ -251,18 +218,14 @@ class AIOptimalPlayer:
                     princess_adjacent,
                     key=lambda p: board.robot.position.manhattan_distance(p),
                 )
-                path_to_princess = AIOptimalPlayer._find_path(
-                    board, board.robot.position, closest_to_princess
-                )
+                path_to_princess = AIOptimalPlayer._find_path(board, board.robot.position, closest_to_princess)
 
                 # No path to princess = must clean obstacles OR be very careful
                 if not path_to_princess:
                     if board.robot.flowers_held == 0:
                         # Not holding flowers yet - MUST clean obstacles before picking
                         # This prevents getting stuck after picking
-                        cleaned = AIOptimalPlayer._clean_blocking_obstacle(
-                            board, closest_to_princess, actions
-                        )
+                        cleaned = AIOptimalPlayer._clean_blocking_obstacle(board, closest_to_princess, actions)
                         if cleaned:
                             continue  # Successfully cleaned, check path again
 
@@ -270,18 +233,14 @@ class AIOptimalPlayer:
                         # As a last resort, try to find a different accessible flower
                         # that might give us a better position
                         accessible_flower_found = False
-                        for flower in sorted(
-                            board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)
-                        ):
+                        for flower in sorted(board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)):
                             adj_positions = AIOptimalPlayer._get_adjacent_positions(flower, board)
                             if adj_positions:
                                 target = min(
                                     adj_positions,
                                     key=lambda p: board.robot.position.manhattan_distance(p),
                                 )
-                                path = AIOptimalPlayer._find_path(
-                                    board, board.robot.position, target
-                                )
+                                path = AIOptimalPlayer._find_path(board, board.robot.position, target)
                                 if path:
                                     # Check if from this flower position, we could reach princess
                                     # (or at least clean obstacles toward princess)
@@ -319,12 +278,8 @@ class AIOptimalPlayer:
                     if not adj_to_flower:
                         continue  # Flower surrounded, skip
 
-                    target_near_flower = min(
-                        adj_to_flower, key=lambda p: board.robot.position.manhattan_distance(p)
-                    )
-                    path_to_flower = AIOptimalPlayer._find_path(
-                        board, board.robot.position, target_near_flower
-                    )
+                    target_near_flower = min(adj_to_flower, key=lambda p: board.robot.position.manhattan_distance(p))
+                    path_to_flower = AIOptimalPlayer._find_path(board, board.robot.position, target_near_flower)
 
                     if not path_to_flower:
                         continue  # Can't reach this flower right now, skip
@@ -336,9 +291,7 @@ class AIOptimalPlayer:
 
                 # If no flowers from the plan are reachable, fall back to any accessible flower
                 if not safe_flower and board.flowers:
-                    for flower in sorted(
-                        board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)
-                    ):
+                    for flower in sorted(board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)):
                         adj_to_flower = AIOptimalPlayer._get_adjacent_positions(flower, board)
                         if not adj_to_flower:
                             continue
@@ -346,9 +299,7 @@ class AIOptimalPlayer:
                         target_near_flower = min(
                             adj_to_flower, key=lambda p: board.robot.position.manhattan_distance(p)
                         )
-                        path_to_flower = AIOptimalPlayer._find_path(
-                            board, board.robot.position, target_near_flower
-                        )
+                        path_to_flower = AIOptimalPlayer._find_path(board, board.robot.position, target_near_flower)
 
                         if not path_to_flower:
                             continue
@@ -387,31 +338,23 @@ class AIOptimalPlayer:
                             continue
                         else:
                             # Can't deliver - try drop-clean-repick
-                            drop_positions = AIOptimalPlayer._get_adjacent_positions(
-                                board.robot.position, board
-                            )
+                            drop_positions = AIOptimalPlayer._get_adjacent_positions(board.robot.position, board)
                             if drop_positions:
                                 # Drop all flowers
                                 while board.robot.flowers_held > 0:
                                     drop_pos = drop_positions[0]
-                                    direction = AIOptimalPlayer._get_direction(
-                                        board.robot.position, drop_pos
-                                    )
+                                    direction = AIOptimalPlayer._get_direction(board.robot.position, drop_pos)
                                     actions.append(("rotate", direction))
                                     GameService.rotate_robot(board, direction)
                                     actions.append(("drop", None))
                                     GameService.drop_flower(board)
 
                                 # Now try to clean obstacles
-                                if AIOptimalPlayer._clean_blocking_obstacle(
-                                    board, closest_to_princess, actions
-                                ):
+                                if AIOptimalPlayer._clean_blocking_obstacle(board, closest_to_princess, actions):
                                     continue
                     else:
                         # No flowers held - try cleaning obstacles to open up paths
-                        if AIOptimalPlayer._clean_blocking_obstacle(
-                            board, closest_to_princess, actions
-                        ):
+                        if AIOptimalPlayer._clean_blocking_obstacle(board, closest_to_princess, actions):
                             continue
 
                     # No safe moves, give up
@@ -421,9 +364,7 @@ class AIOptimalPlayer:
                 path = AIOptimalPlayer._find_path(board, board.robot.position, safe_flower_target)
                 if not path:
                     # Shouldn't happen since we verified above, but be safe
-                    if not AIOptimalPlayer._clean_blocking_obstacle(
-                        board, safe_flower_target, actions
-                    ):
+                    if not AIOptimalPlayer._clean_blocking_obstacle(board, safe_flower_target, actions):
                         break
                     continue
 
@@ -448,17 +389,13 @@ class AIOptimalPlayer:
                 # This is especially important when obstacles were cleaned or robot moved
                 if board.robot.flowers_held >= min(3, board.robot.max_flowers):
                     # We have enough flowers to deliver, check if path exists NOW
-                    princess_adjacent_now = AIOptimalPlayer._get_adjacent_positions(
-                        board.princess.position, board
-                    )
+                    princess_adjacent_now = AIOptimalPlayer._get_adjacent_positions(board.princess.position, board)
                     if princess_adjacent_now:
                         closest_now = min(
                             princess_adjacent_now,
                             key=lambda p: board.robot.position.manhattan_distance(p),
                         )
-                        path_now = AIOptimalPlayer._find_path(
-                            board, board.robot.position, closest_now
-                        )
+                        path_now = AIOptimalPlayer._find_path(board, board.robot.position, closest_now)
                         # If path exists now, continue to delivery phase on next iteration
                         # The main loop will handle delivery
                         if path_now:
@@ -510,11 +447,7 @@ class AIOptimalPlayer:
                     return path + [next_pos]
 
                 # Check if next position is valid and not yet processed
-                if (
-                    board.is_valid_position(next_pos)
-                    and board.is_empty(next_pos)
-                    and next_pos not in visited
-                ):
+                if board.is_valid_position(next_pos) and board.is_empty(next_pos) and next_pos not in visited:
                     new_g_score = g_score + 1
 
                     # Only add if we haven't seen this position or found a better path
@@ -605,9 +538,7 @@ class AIOptimalPlayer:
             best_cost = 99999
 
             for perm in permutations(flowers_list):
-                cost, is_valid = AIOptimalPlayer._score_flower_sequence(
-                    board, list(perm), robot_pos, princess_pos
-                )
+                cost, is_valid = AIOptimalPlayer._score_flower_sequence(board, list(perm), robot_pos, princess_pos)
                 if is_valid and cost < best_cost:
                     best_cost = cost
                     best_sequence = list(perm)
@@ -641,9 +572,7 @@ class AIOptimalPlayer:
                 # Look ahead: what's the best next flower after this one?
                 remaining_after = remaining - {flower}
                 if remaining_after:
-                    min_next_cost = min(
-                        flower.manhattan_distance(next_f) for next_f in remaining_after
-                    )
+                    min_next_cost = min(flower.manhattan_distance(next_f) for next_f in remaining_after)
                 else:
                     # Last flower - cost to princess
                     princess_adj = AIOptimalPlayer._get_adjacent_positions(princess_pos, board)
@@ -697,9 +626,7 @@ class AIOptimalPlayer:
 
             # Check all distances up to 3 squares away
             for distance in range(1, 4):
-                obstacle_pos = Position(
-                    robot_pos.row + (row_delta * distance), robot_pos.col + (col_delta * distance)
-                )
+                obstacle_pos = Position(robot_pos.row + (row_delta * distance), robot_pos.col + (col_delta * distance))
 
                 if board.is_valid_position(obstacle_pos) and obstacle_pos in board.obstacles:
 
@@ -713,9 +640,7 @@ class AIOptimalPlayer:
 
                     if adj_to_obstacle:
                         # Check if we can actually navigate to this obstacle
-                        best_adj = min(
-                            adj_to_obstacle, key=lambda p: robot_pos.manhattan_distance(p)
-                        )
+                        best_adj = min(adj_to_obstacle, key=lambda p: robot_pos.manhattan_distance(p))
                         if AIOptimalPlayer._find_path(board, robot_pos, best_adj):
                             reachable_obstacles.append(obstacle_pos)
                             break  # Found one in this direction, move to next direction
@@ -754,9 +679,7 @@ class AIOptimalPlayer:
                 # Score 2: Does it open path to princess?
                 princess_adj = AIOptimalPlayer._get_adjacent_positions(princess_pos, board)
                 if princess_adj:
-                    path_to_princess = any(
-                        AIOptimalPlayer._find_path(board, robot_pos, pa) for pa in princess_adj
-                    )
+                    path_to_princess = any(AIOptimalPlayer._find_path(board, robot_pos, pa) for pa in princess_adj)
                     if path_to_princess:
                         score += 50  # Big bonus for opening princess path
 
@@ -859,9 +782,7 @@ class AIOptimalPlayer:
                         adj_positions_2.append(adj_pos)
 
                 if adj_positions_2:
-                    best_adj_2 = min(
-                        adj_positions_2, key=lambda p: board.robot.position.manhattan_distance(p)
-                    )
+                    best_adj_2 = min(adj_positions_2, key=lambda p: board.robot.position.manhattan_distance(p))
                     path_2 = AIOptimalPlayer._find_path(board, board.robot.position, best_adj_2)
                     if path_2:
                         path = path_2
@@ -915,9 +836,7 @@ class AIOptimalPlayer:
             return False
 
         # Try to clean the closest obstacle
-        for obstacle_pos in sorted(
-            adjacent_obstacles, key=lambda p: board.robot.position.manhattan_distance(p)
-        ):
+        for obstacle_pos in sorted(adjacent_obstacles, key=lambda p: board.robot.position.manhattan_distance(p)):
             # Find a position adjacent to the obstacle we can reach
             for direction in Direction:
                 row_delta, col_delta = direction.get_delta()

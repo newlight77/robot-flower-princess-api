@@ -108,9 +108,7 @@ class TestAIOptimalPlayer:
 
         # The board passed to solve is modified (it's the working board)
         # This test verifies the solver works with the board it receives
-        assert (
-            board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
-        )
+        assert board.robot.position != initial_robot_pos or len(board.flowers) != initial_flower_count
 
     def test_solve_complex_board_with_multiple_flowers(self):
         """

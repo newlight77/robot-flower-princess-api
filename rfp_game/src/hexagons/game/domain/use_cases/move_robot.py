@@ -27,9 +27,7 @@ class MoveRobotUseCase:
 
     def execute(self, command: MoveRobotCommand) -> MoveRobotResult:
         """Move the robot in the direction it's facing."""
-        self.logger.info(
-            "execute: MoveRobotCommand game_id=%s direction=%s", command.game_id, command.direction
-        )
+        self.logger.info("execute: MoveRobotCommand game_id=%s direction=%s", command.game_id, command.direction)
         game = self.repository.get(command.game_id)
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")

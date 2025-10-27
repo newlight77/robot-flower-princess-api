@@ -55,9 +55,7 @@ async def autoplay(
 
     try:
         use_case = AutoplayUseCase(repository, ml_client)
-        result: AutoplayResult = await use_case.execute(
-            AutoplayCommand(game_id=game_id, strategy=strategy)
-        )
+        result: AutoplayResult = await use_case.execute(AutoplayCommand(game_id=game_id, strategy=strategy))
 
         return ActionResponse(
             success=result.success,

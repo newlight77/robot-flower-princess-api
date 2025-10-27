@@ -39,9 +39,7 @@ class Board:
         # Get all available positions (excluding robot and princess)
         # Flatten the 2D positions list
         all_positions = [pos for row in self.grid for pos in row]
-        available_positions = [
-            p for p in all_positions if p != robot_position and p != princess_position
-        ]
+        available_positions = [p for p in all_positions if p != robot_position and p != princess_position]
         random.shuffle(available_positions)
 
         # Place flowers (up to 10% of board)
@@ -93,9 +91,7 @@ class Board:
 
     def closest_empty_position(self, position: Position) -> Position:
         """Get the closest empty position to a given position."""
-        return min(
-            self.empty_adjacent_positions(position), key=lambda p: position.manhattan_distance(p)
-        )
+        return min(self.empty_adjacent_positions(position), key=lambda p: position.manhattan_distance(p))
 
     def closest_empty_position_to_princess(self, position: Position) -> Position:
         """Get the closest empty position to the princess."""

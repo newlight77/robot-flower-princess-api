@@ -56,30 +56,23 @@ class AIGreedyPlayer:
             # If holding flowers and need to deliver
             # Strategy: Deliver incrementally (every 2-3 flowers) to avoid getting stuck
             should_deliver = board.robot.flowers_held > 0 and (
-                board.robot.flowers_held
-                >= min(3, board.robot.max_flowers)  # Deliver after 3 flowers
+                board.robot.flowers_held >= min(3, board.robot.max_flowers)  # Deliver after 3 flowers
                 or board.robot.flowers_held == board.robot.max_flowers  # Or when at max capacity
                 or len(board.flowers) == 0  # Or when no more flowers left
             )
 
             if should_deliver:
                 # Navigate adjacent to princess (not TO princess)
-                adjacent_positions = AIGreedyPlayer._get_adjacent_positions(
-                    board.princess.position, board
-                )
+                adjacent_positions = AIGreedyPlayer._get_adjacent_positions(board.princess.position, board)
                 if not adjacent_positions:
                     # No empty adjacent positions near princess - need to clean obstacles
                     # But we can't clean while holding flowers, so drop them first
-                    drop_positions = AIGreedyPlayer._get_adjacent_positions(
-                        board.robot.position, board
-                    )
+                    drop_positions = AIGreedyPlayer._get_adjacent_positions(board.robot.position, board)
                     if drop_positions:
                         # Drop all flowers
                         while board.robot.flowers_held > 0:
                             drop_pos = drop_positions[0]
-                            direction = AIGreedyPlayer._get_direction(
-                                board.robot.position, drop_pos
-                            )
+                            direction = AIGreedyPlayer._get_direction(board.robot.position, drop_pos)
                             actions.append(("rotate", direction))
                             GameService.rotate_robot(board, direction)
 
@@ -87,18 +80,14 @@ class AIGreedyPlayer:
                             GameService.drop_flower(board)
 
                         # Now try to clean an obstacle near princess
-                        if AIGreedyPlayer._clean_obstacle_near_flower(
-                            board, board.princess.position, actions
-                        ):
+                        if AIGreedyPlayer._clean_obstacle_near_flower(board, board.princess.position, actions):
                             continue
 
                     # If we still can't proceed, give up
                     break
 
                 # Find closest adjacent position
-                target = min(
-                    adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p)
-                )
+                target = min(adjacent_positions, key=lambda p: board.robot.position.manhattan_distance(p))
 
                 path = AIGreedyPlayer._find_path(board, board.robot.position, target)
 
@@ -107,17 +96,13 @@ class AIGreedyPlayer:
                     # Strategy: Drop flowers, clean obstacles, pick flowers back up
 
                     # Find an empty adjacent cell to drop flowers
-                    drop_positions = AIGreedyPlayer._get_adjacent_positions(
-                        board.robot.position, board
-                    )
+                    drop_positions = AIGreedyPlayer._get_adjacent_positions(board.robot.position, board)
                     if drop_positions:
                         # Drop all flowers one by one
                         while board.robot.flowers_held > 0:
                             # Find direction to an empty adjacent cell
                             drop_pos = drop_positions[0]  # Just pick the first one
-                            direction = AIGreedyPlayer._get_direction(
-                                board.robot.position, drop_pos
-                            )
+                            direction = AIGreedyPlayer._get_direction(board.robot.position, drop_pos)
                             actions.append(("rotate", direction))
                             GameService.rotate_robot(board, direction)
 
@@ -140,9 +125,7 @@ class AIGreedyPlayer:
                     GameService.move_robot(board)
 
                 # Face princess and give flowers
-                direction = AIGreedyPlayer._get_direction(
-                    board.robot.position, board.princess.position
-                )
+                direction = AIGreedyPlayer._get_direction(board.robot.position, board.princess.position)
                 actions.append(("rotate", direction))
                 GameService.rotate_robot(board, direction)
 
@@ -155,17 +138,13 @@ class AIGreedyPlayer:
                 # This prevents getting stuck with flowers and no way to deliver them
 
                 # First, handle case where princess is surrounded by obstacles
-                princess_adjacent = AIGreedyPlayer._get_adjacent_positions(
-                    board.princess.position, board
-                )
+                princess_adjacent = AIGreedyPlayer._get_adjacent_positions(board.princess.position, board)
 
                 if not princess_adjacent:
                     # Princess is completely surrounded! Must clean obstacles around her
                     if board.robot.flowers_held == 0:  # Can only clean without flowers
                         # Try to clean an obstacle adjacent to princess
-                        cleaned = AIGreedyPlayer._clean_obstacle_near_flower(
-                            board, board.princess.position, actions
-                        )
+                        cleaned = AIGreedyPlayer._clean_obstacle_near_flower(board, board.princess.position, actions)
                         if cleaned:
                             continue  # Successfully cleaned, check again
 
@@ -182,32 +161,24 @@ class AIGreedyPlayer:
                             if board.is_valid_position(adj_pos) and adj_pos in board.obstacles:
                                 # Try to reach this obstacle
                                 # Find adjacent empty position to this obstacle
-                                obstacle_adjacent = AIGreedyPlayer._get_adjacent_positions(
-                                    adj_pos, board
-                                )
+                                obstacle_adjacent = AIGreedyPlayer._get_adjacent_positions(adj_pos, board)
                                 if obstacle_adjacent:
                                     target = min(
                                         obstacle_adjacent,
                                         key=lambda p: board.robot.position.manhattan_distance(p),
                                     )
-                                    path = AIGreedyPlayer._find_path(
-                                        board, board.robot.position, target
-                                    )
+                                    path = AIGreedyPlayer._find_path(board, board.robot.position, target)
                                     if path:
                                         # Navigate to obstacle and clean it
                                         for next_pos in path:
-                                            dir = AIGreedyPlayer._get_direction(
-                                                board.robot.position, next_pos
-                                            )
+                                            dir = AIGreedyPlayer._get_direction(board.robot.position, next_pos)
                                             actions.append(("rotate", dir))
                                             GameService.rotate_robot(board, dir)
                                             actions.append(("move", None))
                                             GameService.move_robot(board)
 
                                         # Clean the obstacle
-                                        clean_dir = AIGreedyPlayer._get_direction(
-                                            board.robot.position, adj_pos
-                                        )
+                                        clean_dir = AIGreedyPlayer._get_direction(board.robot.position, adj_pos)
                                         actions.append(("rotate", clean_dir))
                                         GameService.rotate_robot(board, clean_dir)
                                         actions.append(("clean", None))
@@ -224,15 +195,11 @@ class AIGreedyPlayer:
                         break
                     else:
                         # Holding flowers but princess is surrounded - must drop flowers first
-                        drop_positions = AIGreedyPlayer._get_adjacent_positions(
-                            board.robot.position, board
-                        )
+                        drop_positions = AIGreedyPlayer._get_adjacent_positions(board.robot.position, board)
                         if drop_positions:
                             while board.robot.flowers_held > 0:
                                 drop_pos = drop_positions[0]
-                                direction = AIGreedyPlayer._get_direction(
-                                    board.robot.position, drop_pos
-                                )
+                                direction = AIGreedyPlayer._get_direction(board.robot.position, drop_pos)
                                 actions.append(("rotate", direction))
                                 GameService.rotate_robot(board, direction)
                                 actions.append(("drop", None))
@@ -246,18 +213,14 @@ class AIGreedyPlayer:
                     princess_adjacent,
                     key=lambda p: board.robot.position.manhattan_distance(p),
                 )
-                path_to_princess = AIGreedyPlayer._find_path(
-                    board, board.robot.position, closest_to_princess
-                )
+                path_to_princess = AIGreedyPlayer._find_path(board, board.robot.position, closest_to_princess)
 
                 # No path to princess = must clean obstacles OR be very careful
                 if not path_to_princess:
                     if board.robot.flowers_held == 0:
                         # Not holding flowers yet - MUST clean obstacles before picking
                         # This prevents getting stuck after picking
-                        cleaned = AIGreedyPlayer._clean_blocking_obstacle(
-                            board, closest_to_princess, actions
-                        )
+                        cleaned = AIGreedyPlayer._clean_blocking_obstacle(board, closest_to_princess, actions)
                         if cleaned:
                             continue  # Successfully cleaned, check path again
 
@@ -265,18 +228,14 @@ class AIGreedyPlayer:
                         # As a last resort, try to find a different accessible flower
                         # that might give us a better position
                         accessible_flower_found = False
-                        for flower in sorted(
-                            board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)
-                        ):
+                        for flower in sorted(board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)):
                             adj_positions = AIGreedyPlayer._get_adjacent_positions(flower, board)
                             if adj_positions:
                                 target = min(
                                     adj_positions,
                                     key=lambda p: board.robot.position.manhattan_distance(p),
                                 )
-                                path = AIGreedyPlayer._find_path(
-                                    board, board.robot.position, target
-                                )
+                                path = AIGreedyPlayer._find_path(board, board.robot.position, target)
                                 if path:
                                     # Check if from this flower position, we could reach princess
                                     # (or at least clean obstacles toward princess)
@@ -297,20 +256,14 @@ class AIGreedyPlayer:
                 safe_flower = None
                 safe_flower_target = None
 
-                for flower in sorted(
-                    board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)
-                ):
+                for flower in sorted(board.flowers, key=lambda f: board.robot.position.manhattan_distance(f)):
                     # Check if we can reach adjacent to this flower
                     adj_to_flower = AIGreedyPlayer._get_adjacent_positions(flower, board)
                     if not adj_to_flower:
                         continue  # Flower surrounded, skip
 
-                    target_near_flower = min(
-                        adj_to_flower, key=lambda p: board.robot.position.manhattan_distance(p)
-                    )
-                    path_to_flower = AIGreedyPlayer._find_path(
-                        board, board.robot.position, target_near_flower
-                    )
+                    target_near_flower = min(adj_to_flower, key=lambda p: board.robot.position.manhattan_distance(p))
+                    path_to_flower = AIGreedyPlayer._find_path(board, board.robot.position, target_near_flower)
 
                     if not path_to_flower:
                         continue  # Can't reach this flower, skip
@@ -354,31 +307,23 @@ class AIGreedyPlayer:
                             continue
                         else:
                             # Can't deliver - try drop-clean-repick
-                            drop_positions = AIGreedyPlayer._get_adjacent_positions(
-                                board.robot.position, board
-                            )
+                            drop_positions = AIGreedyPlayer._get_adjacent_positions(board.robot.position, board)
                             if drop_positions:
                                 # Drop all flowers
                                 while board.robot.flowers_held > 0:
                                     drop_pos = drop_positions[0]
-                                    direction = AIGreedyPlayer._get_direction(
-                                        board.robot.position, drop_pos
-                                    )
+                                    direction = AIGreedyPlayer._get_direction(board.robot.position, drop_pos)
                                     actions.append(("rotate", direction))
                                     GameService.rotate_robot(board, direction)
                                     actions.append(("drop", None))
                                     GameService.drop_flower(board)
 
                                 # Now try to clean obstacles
-                                if AIGreedyPlayer._clean_blocking_obstacle(
-                                    board, closest_to_princess, actions
-                                ):
+                                if AIGreedyPlayer._clean_blocking_obstacle(board, closest_to_princess, actions):
                                     continue
                     else:
                         # No flowers held - try cleaning obstacles to open up paths
-                        if AIGreedyPlayer._clean_blocking_obstacle(
-                            board, closest_to_princess, actions
-                        ):
+                        if AIGreedyPlayer._clean_blocking_obstacle(board, closest_to_princess, actions):
                             continue
 
                     # No safe moves, give up
@@ -388,9 +333,7 @@ class AIGreedyPlayer:
                 path = AIGreedyPlayer._find_path(board, board.robot.position, safe_flower_target)
                 if not path:
                     # Shouldn't happen since we verified above, but be safe
-                    if not AIGreedyPlayer._clean_blocking_obstacle(
-                        board, safe_flower_target, actions
-                    ):
+                    if not AIGreedyPlayer._clean_blocking_obstacle(board, safe_flower_target, actions):
                         break
                     continue
 
@@ -415,17 +358,13 @@ class AIGreedyPlayer:
                 # This is especially important when obstacles were cleaned or robot moved
                 if board.robot.flowers_held >= min(3, board.robot.max_flowers):
                     # We have enough flowers to deliver, check if path exists NOW
-                    princess_adjacent_now = AIGreedyPlayer._get_adjacent_positions(
-                        board.princess.position, board
-                    )
+                    princess_adjacent_now = AIGreedyPlayer._get_adjacent_positions(board.princess.position, board)
                     if princess_adjacent_now:
                         closest_now = min(
                             princess_adjacent_now,
                             key=lambda p: board.robot.position.manhattan_distance(p),
                         )
-                        path_now = AIGreedyPlayer._find_path(
-                            board, board.robot.position, closest_now
-                        )
+                        path_now = AIGreedyPlayer._find_path(board, board.robot.position, closest_now)
                         # If path exists now, continue to delivery phase on next iteration
                         # The main loop will handle delivery
                         if path_now:
@@ -477,11 +416,7 @@ class AIGreedyPlayer:
                     return path + [next_pos]
 
                 # Check if next position is valid and not yet processed
-                if (
-                    board.is_valid_position(next_pos)
-                    and board.is_empty(next_pos)
-                    and next_pos not in visited
-                ):
+                if board.is_valid_position(next_pos) and board.is_empty(next_pos) and next_pos not in visited:
                     new_g_score = g_score + 1
 
                     # Only add if we haven't seen this position or found a better path
@@ -608,9 +543,7 @@ class AIGreedyPlayer:
             return False
 
         # Try to clean the closest obstacle
-        for obstacle_pos in sorted(
-            adjacent_obstacles, key=lambda p: board.robot.position.manhattan_distance(p)
-        ):
+        for obstacle_pos in sorted(adjacent_obstacles, key=lambda p: board.robot.position.manhattan_distance(p)):
             # Find a position adjacent to the obstacle we can reach
             for direction in Direction:
                 row_delta, col_delta = direction.get_delta()

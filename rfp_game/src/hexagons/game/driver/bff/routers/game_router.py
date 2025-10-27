@@ -198,9 +198,7 @@ def perform_action(
         return ActionResponse(
             success=result.success,
             game=result.game.to_dict(),
-            message=(
-                "action performed successfully" if result.success else "failed to perform action"
-            ),
+            message=("action performed successfully" if result.success else "failed to perform action"),
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

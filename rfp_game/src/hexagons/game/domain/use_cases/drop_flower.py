@@ -27,9 +27,7 @@ class DropFlowerUseCase:
 
     def execute(self, command: DropFlowerCommand) -> DropFlowerResult:
         """Drop a flower on an adjacent empty cell."""
-        self.logger.info(
-            "execute: DropFlowerCommand game_id=%s direction=%s", command.game_id, command.direction
-        )
+        self.logger.info("execute: DropFlowerCommand game_id=%s direction=%s", command.game_id, command.direction)
         game = self.repository.get(command.game_id)
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")

@@ -32,11 +32,7 @@ class AIPlayerTester:
             actions = self.player.solve(board)
 
             # Check if solved
-            success = (
-                len(board.flowers) == 0
-                and board.robot.flowers_held == 0
-                and board.flowers_delivered > 0
-            )
+            success = len(board.flowers) == 0 and board.robot.flowers_held == 0 and board.flowers_delivered > 0
 
             result = {
                 "board_id": board_id,
@@ -91,17 +87,13 @@ class AIPlayerTester:
             # Robot has flowers but didn't deliver
             self.failure_patterns["stuck_with_flowers"] += 1
             result["failure_reason"] = "stuck_with_flowers"
-            result["failure_detail"] = (
-                f"Holding {board.robot.flowers_held} flowers, can't reach princess"
-            )
+            result["failure_detail"] = f"Holding {board.robot.flowers_held} flowers, can't reach princess"
         elif len(board.flowers) > 0:
             # Couldn't pick all flowers
             flowers_picked = initial_flowers - len(board.flowers)
             self.failure_patterns["no_path_to_flower"] += 1
             result["failure_reason"] = "no_path_to_flower"
-            result["failure_detail"] = (
-                f"Picked {flowers_picked}/{initial_flowers}, can't reach remaining"
-            )
+            result["failure_detail"] = f"Picked {flowers_picked}/{initial_flowers}, can't reach remaining"
         elif board.flowers_delivered == 0:
             # No flowers picked or delivered - complete failure
             self.failure_patterns["robot_blocked"] += 1
@@ -132,12 +124,8 @@ class AIPlayerTester:
         if self.results:
             successful_results = [r for r in self.results if r.get("success")]
             if successful_results:
-                avg_actions = sum(r["actions_taken"] for r in successful_results) / len(
-                    successful_results
-                )
-                avg_cleaned = sum(r["obstacles_cleaned"] for r in successful_results) / len(
-                    successful_results
-                )
+                avg_actions = sum(r["actions_taken"] for r in successful_results) / len(successful_results)
+                avg_cleaned = sum(r["obstacles_cleaned"] for r in successful_results) / len(successful_results)
                 print("\nSuccessful Runs Stats:")
                 print(f"  - Avg actions: {avg_actions:.1f}")
                 print(f"  - Avg obstacles cleaned: {avg_cleaned:.1f}")

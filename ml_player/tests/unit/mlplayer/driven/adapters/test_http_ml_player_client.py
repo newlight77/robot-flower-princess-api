@@ -50,9 +50,7 @@ async def test_predict_action_success(ml_player_client, sample_game_state):
         mock_post_response.raise_for_status = MagicMock()
         mock_post_response.json = MagicMock(return_value=mock_response)
 
-        mock_client.return_value.__aenter__.return_value.post = AsyncMock(
-            return_value=mock_post_response
-        )
+        mock_client.return_value.__aenter__.return_value.post = AsyncMock(return_value=mock_post_response)
 
         result = await ml_player_client.predict_action(
             game_id="test-game-123", strategy="default", game_state=sample_game_state
@@ -81,9 +79,7 @@ async def test_predict_action_with_different_strategy(ml_player_client, sample_g
         mock_post_response.raise_for_status = MagicMock()
         mock_post_response.json = MagicMock(return_value=mock_response)
 
-        mock_client.return_value.__aenter__.return_value.post = AsyncMock(
-            return_value=mock_post_response
-        )
+        mock_client.return_value.__aenter__.return_value.post = AsyncMock(return_value=mock_post_response)
 
         result = await ml_player_client.predict_action(
             game_id="test-game-123", strategy="aggressive", game_state=sample_game_state
@@ -113,9 +109,7 @@ async def test_get_strategies_success(ml_player_client):
         mock_get_response.raise_for_status = MagicMock()
         mock_get_response.json = MagicMock(return_value=mock_response)
 
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(
-            return_value=mock_get_response
-        )
+        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_get_response)
 
         result = await ml_player_client.get_strategies()
 
@@ -143,9 +137,7 @@ async def test_get_strategy_success(ml_player_client):
         mock_get_response.raise_for_status = MagicMock()
         mock_get_response.json = MagicMock(return_value=mock_response)
 
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(
-            return_value=mock_get_response
-        )
+        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_get_response)
 
         result = await ml_player_client.get_strategy("default")
 
@@ -169,9 +161,7 @@ async def test_health_check_success(ml_player_client):
         mock_get_response.raise_for_status = MagicMock()
         mock_get_response.json = MagicMock(return_value=mock_response)
 
-        mock_client.return_value.__aenter__.return_value.get = AsyncMock(
-            return_value=mock_get_response
-        )
+        mock_client.return_value.__aenter__.return_value.get = AsyncMock(return_value=mock_get_response)
 
         result = await ml_player_client.health_check()
 
@@ -203,9 +193,7 @@ async def test_predict_action_constructs_correct_payload(ml_player_client, sampl
 
     with patch("httpx.AsyncClient") as mock_client:
         mock_post = AsyncMock(
-            return_value=AsyncMock(
-                raise_for_status=AsyncMock(), json=AsyncMock(return_value=mock_response)
-            )
+            return_value=AsyncMock(raise_for_status=AsyncMock(), json=AsyncMock(return_value=mock_response))
         )
         mock_client.return_value.__aenter__.return_value.post = mock_post
 

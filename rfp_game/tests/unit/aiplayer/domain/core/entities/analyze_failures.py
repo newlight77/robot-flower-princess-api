@@ -86,18 +86,12 @@ def save_failing_boards():
     print(f"{'='*60}")
     print(f"Total Tested: {len(test_configs)}")
     print(f"Failed: {len(failing_boards)}")
-    print(
-        f"Success Rate: {(len(test_configs) - len(failing_boards)) / len(test_configs) * 100:.1f}%"
-    )
+    print(f"Success Rate: {(len(test_configs) - len(failing_boards)) / len(test_configs) * 100:.1f}%")
 
     if failing_boards:
         print("\nCommon Patterns in Failing Boards:")
-        stuck_count = sum(
-            1 for _, r in failing_boards if r.get("failure_reason") == "stuck_with_flowers"
-        )
-        no_path_count = sum(
-            1 for _, r in failing_boards if r.get("failure_reason") == "no_path_to_flower"
-        )
+        stuck_count = sum(1 for _, r in failing_boards if r.get("failure_reason") == "stuck_with_flowers")
+        no_path_count = sum(1 for _, r in failing_boards if r.get("failure_reason") == "no_path_to_flower")
         print(f"  - stuck_with_flowers: {stuck_count}")
         print(f"  - no_path_to_flower: {no_path_count}")
 

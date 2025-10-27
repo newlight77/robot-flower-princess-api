@@ -38,9 +38,7 @@ class GameState:
         Future: This will be input to ML model.
         Current: Used for weighted scoring.
         """
-        logger.info(
-            f"GameState.to_feature_vector: Converting board state to feature vector={self.to_dict()}"
-        )
+        logger.info(f"GameState.to_feature_vector: Converting board state to feature vector={self.to_dict()}")
         features = [
             float(self.board["rows"]),  # rows
             float(self.board["cols"]),  # cols
@@ -52,12 +50,8 @@ class GameState:
             float(len(self.robot["obstacles_cleaned"])),  # obstacles_cleaned_count
             float(len(self.board["flowers_positions"])),  # flowers_positions_count
             float(len(self.board["obstacles_positions"])),  # obstacles_positions_count
-            float(
-                self.board["initial_flowers_count"] - len(self.robot["flowers_collected"])
-            ),  # flowers_remaining
-            float(
-                self.board["initial_obstacles_count"] - len(self.robot["obstacles_cleaned"])
-            ),  # obstacles_remaining
+            float(self.board["initial_flowers_count"] - len(self.robot["flowers_collected"])),  # flowers_remaining
+            float(self.board["initial_obstacles_count"] - len(self.robot["obstacles_cleaned"])),  # obstacles_remaining
             float(len(self.robot["executed_actions"])),  # executed_actions_count
             # Derived features
             self._distance_to_princess(),  # distance_to_princess
@@ -82,17 +76,14 @@ class GameState:
             f"GameState._closest_flower_distance: Distance to closest flower={len(self.board['flowers_positions'])}"
         )
         distances = [
-            abs(self.robot["position"]["row"] - f["row"])
-            + abs(self.robot["position"]["col"] - f["col"])
+            abs(self.robot["position"]["row"] - f["row"]) + abs(self.robot["position"]["col"] - f["col"])
             for f in self.board["flowers_positions"]
         ]
         return float(min(distances))
 
     def _obstacle_density(self) -> float:
         """Obstacle density around robot."""
-        logger.info(
-            f"GameState._obstacle_density: Obstacle density={len(self.board['obstacles_positions'])}"
-        )
+        logger.info(f"GameState._obstacle_density: Obstacle density={len(self.board['obstacles_positions'])}")
         obstacle_count = len(self.board["obstacles_positions"])
         return obstacle_count / (self.board["rows"] * self.board["cols"])  # Normalize to [0, 1]
 
@@ -113,12 +104,8 @@ class GameState:
                     "row": self.princess["position"]["row"],
                     "col": self.princess["position"]["col"],
                 },
-                "flowers_positions": [
-                    {"row": f["row"], "col": f["col"]} for f in self.board["flowers_positions"]
-                ],
-                "obstacles_positions": [
-                    {"row": o["row"], "col": o["col"]} for o in self.board["obstacles_positions"]
-                ],
+                "flowers_positions": [{"row": f["row"], "col": f["col"]} for f in self.board["flowers_positions"]],
+                "obstacles_positions": [{"row": o["row"], "col": o["col"]} for o in self.board["obstacles_positions"]],
                 "initial_flowers_count": self.board["initial_flowers_count"],
                 "initial_obstacles_count": self.board["initial_obstacles_count"],
             },
@@ -128,16 +115,10 @@ class GameState:
                     "col": self.robot["position"]["col"],
                 },
                 "orientation": self.robot["orientation"],
-                "flowers_collected": [
-                    {"row": f["row"], "col": f["col"]} for f in self.robot["flowers_collected"]
-                ],
-                "flowers_delivered": [
-                    {"row": f["row"], "col": f["col"]} for f in self.robot["flowers_delivered"]
-                ],
+                "flowers_collected": [{"row": f["row"], "col": f["col"]} for f in self.robot["flowers_collected"]],
+                "flowers_delivered": [{"row": f["row"], "col": f["col"]} for f in self.robot["flowers_delivered"]],
                 "flowers_collection_capacity": self.robot["flowers_collection_capacity"],
-                "obstacles_cleaned": [
-                    {"row": o["row"], "col": o["col"]} for o in self.robot["obstacles_cleaned"]
-                ],
+                "obstacles_cleaned": [{"row": o["row"], "col": o["col"]} for o in self.robot["obstacles_cleaned"]],
                 "executed_actions": [
                     {
                         "type": a["type"],
@@ -153,9 +134,7 @@ class GameState:
                     "row": self.princess["position"]["row"],
                     "col": self.princess["position"]["col"],
                 },
-                "flowers_received": [
-                    {"row": f["row"], "col": f["col"]} for f in self.princess["flowers_received"]
-                ],
+                "flowers_received": [{"row": f["row"], "col": f["col"]} for f in self.princess["flowers_received"]],
                 "mood": self.princess["mood"],
             },
         }

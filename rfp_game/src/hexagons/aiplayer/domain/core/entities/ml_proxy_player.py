@@ -58,9 +58,7 @@ class MLProxyPlayer:
         """
         # This is a placeholder - the actual implementation will be async
         # The solve method will be called from an async use case context
-        raise NotImplementedError(
-            "MLProxyPlayer.solve() should be called via async solve_async() method"
-        )
+        raise NotImplementedError("MLProxyPlayer.solve() should be called via async solve_async() method")
 
     async def solve_async(self, game: Game, game_id: str) -> List[Tuple[str, Direction]]:
         """
@@ -97,9 +95,7 @@ class MLProxyPlayer:
             direction: Optional[Direction] = Direction(direction_str) if direction_str else None
 
             # Return single action (ML Player returns one action at a time)
-            logger.info(
-                f"MLProxyPlayer.solve_async: Returning action={action} and direction={direction}"
-            )
+            logger.info(f"MLProxyPlayer.solve_async: Returning action={action} and direction={direction}")
             return [(action, direction)]
 
         except Exception as e:
@@ -119,9 +115,7 @@ class MLProxyPlayer:
             Dictionary with game state
         """
         # Determine game status
-        logger.info(
-            f"MLProxyPlayer._convert_game_to_state: Determining game status={game.get_status()}"
-        )
+        logger.info(f"MLProxyPlayer._convert_game_to_state: Determining game status={game.get_status()}")
 
         game_status = game.get_status()
         if game_status == GameStatus.VICTORY:

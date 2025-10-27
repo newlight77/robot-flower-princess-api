@@ -7,7 +7,6 @@ The architecture supports:
 - Future: Replace heuristics with trained ML models (sklearn, pytorch, etc.)
 """
 
-
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
 from shared.logging import logger
 
@@ -67,8 +66,7 @@ class AIMLPlayer:
             and len(state.robot["flowers_delivered"]) < state.robot["flowers_collection_capacity"]
         ):
             min_flower_dist = min(
-                abs(state.robot["position"]["row"] - f["row"])
-                + abs(state.robot["position"]["col"] - f["col"])
+                abs(state.robot["position"]["row"] - f["row"]) + abs(state.robot["position"]["col"] - f["col"])
                 for f in state.board["flowers_positions"]
             )
             logger.info(f"AIMLPlayer.evaluate_board: Distance to nearest flower={min_flower_dist}")
@@ -76,9 +74,7 @@ class AIMLPlayer:
 
         # Distance to princess (when holding flowers)
         if len(state.robot["flowers_delivered"]) > 0:
-            princess_dist = state._distance_to_princess(
-                state.robot["position"], state.princess["position"]
-            )
+            princess_dist = state._distance_to_princess(state.robot["position"], state.princess["position"])
             logger.info(f"AIMLPlayer.evaluate_board: Distance to princess={princess_dist}")
             score += self.config.distance_to_princess_weight * princess_dist
 
@@ -142,9 +138,7 @@ class AIMLPlayer:
 
         # If holding flowers → move toward princess
         if len(state.robot["flowers_delivered"]) > 0:
-            direction = self._get_direction_to_target(
-                state.robot["position"], state.princess["position"]
-            )
+            direction = self._get_direction_to_target(state.robot["position"], state.princess["position"])
             return ("move", direction)
 
         # Otherwise → move toward nearest flower
@@ -162,9 +156,7 @@ class AIMLPlayer:
 
     def _get_direction_to_target(self, current: tuple[int, int], target: tuple[int, int]) -> str:
         """Get direction to move toward target."""
-        logger.info(
-            f"AIMLPlayer._get_direction_to_target: Getting direction to target={current} -> {target}"
-        )
+        logger.info(f"AIMLPlayer._get_direction_to_target: Getting direction to target={current} -> {target}")
 
         dr = target["row"] - current["row"]
         dc = target["col"] - current["col"]
@@ -175,9 +167,7 @@ class AIMLPlayer:
         else:
             return "EAST" if dc > 0 else "WEST"
 
-    def plan_sequence(
-        self, state: GameState, horizon: int | None = None
-    ) -> list[tuple[str, str | None]]:
+    def plan_sequence(self, state: GameState, horizon: int | None = None) -> list[tuple[str, str | None]]:
         """
         Plan a sequence of actions.
 
@@ -191,9 +181,7 @@ class AIMLPlayer:
         Returns:
             List of actions
         """
-        logger.info(
-            f"AIMLPlayer.plan_sequence: Planning sequence for state={state.to_dict()} with horizon={horizon}"
-        )
+        logger.info(f"AIMLPlayer.plan_sequence: Planning sequence for state={state.to_dict()} with horizon={horizon}")
 
         horizon = horizon or self.config.lookahead_depth
         actions = []

@@ -75,9 +75,7 @@ def test_ai_ml_player_with_custom_config():
 
 def test_evaluate_board_returns_score():
     """Test that evaluate_board returns a numeric score."""
-    game_state = _create_game_state(
-        flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)]
-    )
+    game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     player = AIMLPlayer()
     score = player.evaluate_board(game_state)
 
@@ -86,9 +84,7 @@ def test_evaluate_board_returns_score():
 
 def test_select_action_returns_valid_action():
     """Test that select_action returns a valid action tuple."""
-    game_state = _create_game_state(
-        flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)]
-    )
+    game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     player = AIMLPlayer()
     action, direction = player.select_action(game_state)
 
@@ -132,9 +128,7 @@ def test_select_action_give_when_at_princess():
 
 def test_plan_sequence_returns_action_list():
     """Test that plan_sequence returns a list of actions."""
-    game_state = _create_game_state(
-        flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)]
-    )
+    game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     player = AIMLPlayer()
     actions = player.plan_sequence(game_state)
 
@@ -173,9 +167,7 @@ def test_save_model_not_implemented():
 
 def test_game_state_to_feature_vector():
     """Test that GameState can convert to feature vector."""
-    game_state = _create_game_state(
-        flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)]
-    )
+    game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     features = game_state.to_feature_vector()
 
     assert isinstance(features, list)
@@ -185,9 +177,7 @@ def test_game_state_to_feature_vector():
 
 def test_game_state_distance_calculations():
     """Test GameState distance calculation methods."""
-    game_state = _create_game_state(
-        flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)]
-    )
+    game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     princess_dist = game_state._distance_to_princess()
     flower_dist = game_state._closest_flower_distance()
     obstacle_density = game_state._obstacle_density()

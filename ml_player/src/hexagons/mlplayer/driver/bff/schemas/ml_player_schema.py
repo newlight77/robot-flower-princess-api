@@ -1,6 +1,5 @@
 """Pydantic schemas for ML Player API."""
 
-
 from pydantic import BaseModel, Field
 
 

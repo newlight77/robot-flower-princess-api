@@ -223,10 +223,10 @@ cat ml_player/data/training/samples_$(date +%Y-%m-%d).jsonl | tail -1 | jq .
 ### Automated Test Script
 
 ```bash
-./test_data_collection.sh
+python testing/data_collection/test_data_collection.py
 ```
 
-This script verifies:
+This Python script verifies:
 - ✅ Both services are running
 - ✅ Game creation works
 - ✅ Actions are performed
@@ -425,7 +425,7 @@ cat ml_player/data/training/samples_$(date +%Y-%m-%d).jsonl | wc -l
 cd ml_player && make ml-train
 
 # Run tests
-./test_data_collection.sh
+python testing/data_collection/test_data_collection.py
 ```
 
 ### Environment Variables

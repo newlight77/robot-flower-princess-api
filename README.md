@@ -95,8 +95,17 @@ This project uses **separate GitHub Actions workflows** for each service:
 │   ├── ARCHITECTURE.md
 │   ├── API.md
 │   ├── CI_CD.md          # CI/CD workflow documentation
+│   ├── DATA_COLLECTION.md
 │   ├── TESTING_GUIDE.md
+│   ├── machine_learning/
+│   │   ├── ML_GUIDE.md
+│   │   └── ML_IMPLEMENTATION.md
 │   └── ...
+│
+├── testing/               # E2E test scripts
+│   ├── README.md
+│   ├── test_data_collection.py
+│   └── test_data_collection.sh
 │
 └── .github/
     └── workflows/

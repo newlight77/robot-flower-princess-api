@@ -204,7 +204,7 @@ class AIMLPlayer:
 
         # If next to princess with flowers → give
         if (
-            state.robot["position"] in self._get_adjacent_positions(state.princess["position"])
+            state.robot["position"] in self._get_adjacent_positions(state.princess["position"], state)
             and len(state.robot["flowers_collected"]) > 0
         ):
             return ("give", None)

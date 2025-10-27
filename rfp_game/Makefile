@@ -48,13 +48,13 @@ test-cov:
 	poetry run pytest --cov=src/hexagons/game --cov-report=html --cov-report=term
 
 test-unit:
-	poetry run pytest tests/unit
+	poetry run pytest tests/unit -v
 
 test-integration:
-	poetry run pytest tests/integration
+	poetry run pytest tests/integration -v
 
 test-feature-component:
-	poetry run pytest tests/feature-component
+	poetry run pytest tests/feature-component -v
 
 coverage: coverage-unit coverage-integration coverage-feature-component coverage-combine
 
@@ -106,10 +106,10 @@ docker-stop: ## Stop Docker container
 	docker stop $(docker ps -q --filter ancestor=robot-flower-princess:latest)
 
 docker-up:
-	docker-compose up --build
+	docker compose up --build
 
 docker-down:
-	docker-compose down
+	docker compose down
 
 
 clean-poetry:

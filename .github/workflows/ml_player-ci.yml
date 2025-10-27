@@ -57,6 +57,7 @@ jobs:
             ml_player/coverage/unit/coverage-unit.lcov
             ml_player/coverage/unit/coverage-unit.xml
             ml_player/coverage/unit/coverage-unit.html
+            ml_player/coverage/unit/coverage-unit.html
 
   code-coverage:
     name: Coverage quality check
@@ -94,11 +95,16 @@ jobs:
           mkdir -p coverage || true
           mv coverage-artifacts/coverage-unit coverage/unit || true
           test -d coverage/unit/ && echo "✓ Coverage unit directory found" || echo "✗ WARNING: Coverage unit directory not found!"
+          ls -laR coverage/unit/ || true
 
+          coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
+          coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov
+          coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml
+          coverage html --data-file=coverage/coverage.combined --directory=coverage/coverage-combined.html
       - name: Extract coverage percentage
         id: coverage
         run: |
-          COVERAGE=$(coverage report --data-file=coverage/unit/coverage-unit.cov | grep TOTAL | awk '{print $4}' | sed 's/%//')
+          COVERAGE=$(coverage report --data-file=coverage/coverage.combined | grep TOTAL | awk '{print $4}' | sed 's/%//')
           echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "Coverage: $COVERAGE%"
 
@@ -163,7 +169,7 @@ jobs:
 
       - name: Coverage quality check
         run: |
-          coverage report --data-file=coverage/unit/coverage-unit.cov --fail-under=80
+          coverage report --data-file=coverage/coverage.combined --fail-under=80
 
       - name: Comment coverage on PR
         if: github.event_name == 'pull_request'

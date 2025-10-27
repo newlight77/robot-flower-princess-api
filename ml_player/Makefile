@@ -4,7 +4,21 @@
 
 SHELL := /bin/sh
 
-.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage clean
+.PHONY: help install setup test test-cov lint format run docker-up docker-down coverage clean \
+	ml-generate-data ml-train ml-train-gb ml-stats ml-list-models
+
+# Prefer `.venv/bin/python -m` if a local venv exists; otherwise prefer `poetry run` when poetry is installed
+VENV_PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || true)
+POETRY_EXISTS := $(shell command -v poetry 2>/dev/null || true)
+ifeq ($(strip $(VENV_PY)),)
+ifeq ($(strip $(POETRY_EXISTS)),)
+RUN := .venv/bin/python -m
+else
+RUN := poetry run
+endif
+else
+RUN := .venv/bin/python -m
+endif
 
 help:
 	@echo "ML Player - Available commands:"
@@ -17,8 +31,16 @@ help:
 	@echo "  make docker-up    - Start with Docker"
 	@echo "  make docker-down  - Stop Docker containers"
 	@echo "  make clean        - Clean cache files"
+	@echo ""
+	@echo "ML Commands:"
+	@echo "  make ml-generate-data  - Generate synthetic training data"
+	@echo "  make ml-train          - Train Random Forest model"
+	@echo "  make ml-train-gb       - Train Gradient Boosting model"
+	@echo "  make ml-stats          - Show training data statistics"
+	@echo "  make ml-list-models    - List all trained models"
 
 install:
+	brew install
 	poetry install
 
 setup:
@@ -42,17 +64,38 @@ test-integration:
 test-feature-component:
 	poetry run pytest tests/feature-component -v
 
-coverage:
-	@mkdir -p coverage/unit coverage/integration coverage/feature-component
-	poetry run pytest --cov=src --cov-report=xml:coverage/unit/coverage-unit.xml --cov-report=html:coverage/unit/coverage-unit.html tests/unit
+
+coverage: coverage-unit coverage-integration coverage-feature-component coverage-combine
+
+coverage-unit:
+	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
+	@test -d coverage/unit || mkdir -p coverage/unit
+	${RUN} pytest --cov=src --cov-report=xml:coverage/unit/coverage-unit.xml --cov-report=html:coverage/unit/coverage-unit.html --cov-report=lcov:coverage/unit/coverage-unit.lcov tests/unit
 	@mv .coverage coverage/unit/coverage-unit.cov
-	poetry run pytest --cov=src --cov-report=xml:coverage/integration/coverage-integration.xml --cov-report=html:coverage/integration/coverage-integration.html tests/integration
+
+coverage-integration:
+	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
+	@test -d coverage/integration || mkdir -p coverage/integration
+	${RUN} pytest --cov=src --cov-report=xml:coverage/integration/coverage-integration.xml --cov-report=html:coverage/integration/coverage-integration.html --cov-report=lcov:coverage/integration/coverage-integration.lcov tests/integration
 	@mv .coverage coverage/integration/coverage-integration.cov
-	poetry run pytest --cov=src --cov-report=xml:coverage/feature-component/coverage-feature-component.xml --cov-report=html:coverage/feature-component/coverage-feature-component.html tests/feature-component
+
+coverage-feature-component:
+	@# If a regular file named .coverage exists, move it out of the way; then ensure directory exists
+	@test -d coverage/feature-component || mkdir -p coverage/feature-component
+	${RUN} pytest --cov=src --cov-report=xml:coverage/feature-component/coverage-feature-component.xml --cov-report=html:coverage/feature-component/coverage-feature-component.html --cov-report=lcov:coverage/feature-component/coverage-feature-component.lcov tests/feature-component
 	@mv .coverage coverage/feature-component/coverage-feature-component.cov
+
+coverage-combine:
+	@echo "combine all coverage.* files into one and create XML + HTML"
+	${RUN} coverage combine --keep --data-file=coverage/coverage.combined coverage/*/coverage-*.cov || true
+	${RUN} coverage lcov --data-file=coverage/coverage.combined -o coverage/coverage-combined.lcov || true
+	${RUN} coverage xml --data-file=coverage/coverage.combined -o coverage/coverage-combined.xml || true
+	${RUN} coverage html --data-file=coverage/coverage.combined --directory=coverage/coverage-combined.html || true
+	${RUN} coverage report --data-file=coverage/coverage.combined --fail-under=80 || true
 
 lint:
 	poetry run ruff check src/ tests/
+	# poetry run mypy src/
 
 format:
 	poetry run black src/ tests/
@@ -67,11 +110,20 @@ docker-build:
 docker-run:
 	docker run -p 8001:8001 ml-player-api:latest
 
+docker-stop:
+	docker stop $(docker ps -q --filter ancestor=ml-player-api:latest)
+
 docker-up:
-	docker-compose up --build
+	docker compose up --build
 
 docker-down:
-	docker-compose down
+	docker compose down
+
+clean-poetry:
+	POETRY_LOCATION=`poetry env info -p` || true
+	echo "Poetry is $$POETRY_LOCATION"
+	rm -rf "$$POETRY_LOCATION" || true
+	poetry env remove --all || true
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -81,3 +133,29 @@ clean:
 	find . -type d -name "htmlcov" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name ".coverage" -delete 2>/dev/null || true
 	rm -rf coverage || true
+
+# Machine Learning commands
+ml-generate-data:
+	@echo "Generating synthetic training data..."
+	poetry run python scripts/generate_training_data.py --num-samples 1000
+
+ml-train:
+	@echo "Training Random Forest model..."
+	poetry run python scripts/train_model.py --model-type random_forest
+
+ml-train-gb:
+	@echo "Training Gradient Boosting model..."
+	poetry run python scripts/train_model.py --model-type gradient_boosting
+
+ml-stats:
+	@echo "Training data statistics:"
+	@poetry run python -c "import sys; sys.path.insert(0, 'src'); \
+	from hexagons.mlplayer.domain.ml import GameDataCollector; \
+	import json; \
+	c = GameDataCollector(); \
+	stats = c.get_statistics(); \
+	print(json.dumps(stats, indent=2))"
+
+ml-list-models:
+	@echo "Registered models:"
+	@poetry run python -c "import sys; sys.path.insert(0, 'src'); from hexagons.mlplayer.domain.ml import ModelRegistry; r = ModelRegistry(); models = r.list_models(); [print(f'{m.name:50s} | accuracy={m.test_accuracy:.4f} | type={m.model_type}') for m in models]"

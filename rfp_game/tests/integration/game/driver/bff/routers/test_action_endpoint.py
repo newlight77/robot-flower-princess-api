@@ -2,7 +2,7 @@ from hexagons.game.domain.core.value_objects.direction import Direction
 
 
 def test_rotate_changes_orientation(client, create_game):
-    game_id, board = create_game()
+    game_id = create_game()
 
     resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
     assert resp.status_code == 200
@@ -28,7 +28,7 @@ def test_robot_move(client, save_board, make_empty_board):
 
 
 def test_invalid_direction_payload(client, seeded_board):
-    game_id, board = seeded_board("invalid-dir")
+    game_id, _ = seeded_board("invalid-dir")
 
     # Send an invalid direction value
     resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "upwards"})

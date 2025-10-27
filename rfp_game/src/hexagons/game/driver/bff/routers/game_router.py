@@ -218,7 +218,10 @@ def perform_action(
             game_state=game_state_before,
             action=action_name_map[action],
             direction=direction.value,
-            outcome={"success": result.success, "message": "action performed successfully" if result.success else "failed"},
+            outcome={
+                "success": result.success,
+                "message": "action performed successfully" if result.success else "failed",
+            },
         )
 
         return ActionResponse(

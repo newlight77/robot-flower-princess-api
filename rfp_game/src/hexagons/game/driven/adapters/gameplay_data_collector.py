@@ -4,13 +4,11 @@ Gameplay data collector adapter.
 Collects gameplay data for ML training by delegating to ML Player service.
 """
 
-import os
 from datetime import datetime
 from typing import Any
 
 import httpx
 from shared.logging import get_logger
-from configurator.settings import settings
 
 logger = get_logger("gameplay_data_collector")
 
@@ -18,7 +16,8 @@ logger = get_logger("gameplay_data_collector")
 class GameplayDataCollector:
     """Collects gameplay data by sending it to ML Player service for storage."""
 
-    def __init__(self,
+    def __init__(
+        self,
         ml_player_url: str,
         timeout: float,
         data_collection_enabled: bool,

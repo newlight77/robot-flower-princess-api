@@ -20,11 +20,17 @@ def get_ml_player_client() -> MLPlayerClientPort:
     return HttpMLPlayerClient(
         base_url=settings.ml_player_service_url or os.getenv("ML_PLAYER_SERVICE_URL", "http://localhost:8001"),
         timeout=settings.ml_player_service_timeout or 5.0,
-        data_collection_enabled=settings.ml_player_service_data_collection_enabled or os.getenv("ML_PLAYER_SERVICE_DATA_COLLECTION_ENABLED", "true").lower() == "true" or True,
     )
 
 
 @lru_cache()
 def get_gameplay_data_collector() -> GameplayDataCollector:
     """Dependency injection for gameplay data collector."""
-    return GameplayDataCollector()
+    # Check ENABLE_DATA_COLLECTION environment variable
+    enabled = os.getenv("ENABLE_DATA_COLLECTION", "false").lower() == "true"
+
+    return GameplayDataCollector(
+        ml_player_url=os.getenv("ML_PLAYER_SERVICE_URL", "http://localhost:8001"),
+        timeout=5.0,
+        data_collection_enabled=enabled,
+    )

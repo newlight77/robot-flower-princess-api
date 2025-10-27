@@ -39,7 +39,7 @@ def create_game(client):
         assert resp.status_code == 201
         data = resp.json()
         game = data["game"]
-        return game["id"], game
+        return game["id"]
 
     return _create
 

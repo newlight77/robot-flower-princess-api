@@ -87,20 +87,24 @@ class MLProxyPlayer:
 
             logger.info(f"MLProxyPlayer.solve_async: Iteration={iteration}")
 
-            action, direction = await self.get_prediction(game_id, game_state)
+            action, direction = await self._get_prediction(game_id, game_state)
             logger.info(f"MLProxyPlayer.solve_async: Prediction action={action} and direction={direction}")
 
             if action is None:
                 break
 
-            action, direction = self.execute_action(action=action, direction=direction, game=game)
-
-            actions.append((action, direction))
+            try:
+                action, direction = self._execute_action(action=action, direction=direction, game=game)
+                actions.append((action, direction))
+            except Exception as e:
+                # If action fails (invalid move, etc.), log and break
+                logger.warning(f"MLProxyPlayer.solve_async: Action failed: {e}")
+                break
 
         logger.info(f"MLProxyPlayer.solve_async: Actions={actions}")
-        return actions, game
+        return actions
 
-    def execute_action(self, action: str, direction: Direction, game: Game) -> Tuple[str, Direction]:
+    def _execute_action(self, action: str, direction: Direction, game: Game) -> Tuple[str, Direction]:
         """
         Execute action.
 
@@ -139,7 +143,7 @@ class MLProxyPlayer:
         logger.info(f"MLProxyPlayer.execute_action: Executed action={action} and direction={direction}")
         return action, direction
 
-    async def get_prediction(self, game_id: str, game_state: dict) -> Optional[Tuple[str, Direction]]:
+    async def _get_prediction(self, game_id: str, game_state: dict) -> Optional[Tuple[str, Direction]]:
         """
         Get prediction from ML Player service.
 
@@ -172,10 +176,10 @@ class MLProxyPlayer:
             return action, direction
 
         except Exception as e:
-            # If ML Player service fails, return empty list
+            # If ML Player service fails, return None tuple
             # The autoplay will stop gracefully
             logger.error(f"MLProxyPlayer.get_prediction: ML Player service error: {e}")
-            return None
+            return (None, None)
 
     def _convert_game_to_state(self, game: Game) -> dict:
         """

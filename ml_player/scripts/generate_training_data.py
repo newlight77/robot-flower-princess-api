@@ -14,7 +14,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from hexagons.mltraining.domain.ml import GameDataCollector
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("generate_training_data")
 
 
 def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str | None]:

@@ -15,7 +15,9 @@ from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("ModelTrainer")
 
 from .data_collector import GameDataCollector
 from .feature_engineer import FeatureEngineer

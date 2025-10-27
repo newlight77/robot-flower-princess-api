@@ -9,7 +9,9 @@ from configurator.settings import settings
 from hexagons.health.driver.bff.routers import health_router
 from hexagons.mlplayer.driver.bff.routers import ml_player_router
 from hexagons.mltraining.driver.bff.routers import ml_training_router
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("main")
 
 
 @asynccontextmanager

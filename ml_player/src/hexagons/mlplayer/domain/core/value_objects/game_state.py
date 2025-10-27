@@ -4,7 +4,9 @@ Game State - Simplified board state representation for ML player.
 
 from typing import Any
 
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("GameState")
 
 
 class GameState:

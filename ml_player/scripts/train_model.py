@@ -20,7 +20,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from hexagons.mltraining.domain.ml import GameDataCollector, ModelTrainer
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("train_model")
 
 
 def main() -> None:

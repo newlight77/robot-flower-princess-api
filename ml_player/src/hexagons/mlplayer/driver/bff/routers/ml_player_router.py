@@ -12,7 +12,9 @@ from hexagons.mlplayer.driver.bff.schemas.ml_player_schema import (
     PredictActionResponse,
     StrategyConfigResponse,
 )
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("ml_player_router")
 
 router = APIRouter(prefix="/api/ml-player", tags=["ML Player"])
 

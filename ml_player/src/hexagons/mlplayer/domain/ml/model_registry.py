@@ -11,7 +11,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("ModelRegistry")
 
 
 @dataclass

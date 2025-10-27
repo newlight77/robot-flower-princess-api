@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 from hexagons.mlplayer.domain.core.entities import AIMLPlayer
 from hexagons.mlplayer.domain.core.value_objects import GameState, StrategyConfig
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("PredictActionUseCase")
 
 
 @dataclass

@@ -4,7 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from hexagons.mltraining.domain.ml import GameDataCollector
 from hexagons.mltraining.driver.bff.schemas.data_collection_schema import CollectDataRequest, CollectDataResponse
-from shared.logging import logger
+from shared.logging import get_logger
+
+logger = get_logger("ml_training_router")
 from configurator.dependencies import get_data_collector
 
 router = APIRouter(prefix="/api/ml-training", tags=["ml-training"])

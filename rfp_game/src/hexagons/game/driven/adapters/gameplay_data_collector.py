@@ -56,10 +56,13 @@ class GameplayDataCollector:
             direction: Direction for the action (if applicable)
             outcome: Result of the action (success, message, etc.)
         """
+        logger.info(f"Collecting gameplay data: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
         if not self.enabled:
+            logger.info(f"Data collection is disabled, skipping collection: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
             return
 
         try:
+            logger.info(f"Sending gameplay data to ML Training service: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
             # Prepare payload
             payload = {
                 "game_id": game_id,
@@ -70,15 +73,19 @@ class GameplayDataCollector:
                 "outcome": outcome,
             }
 
+            logger.info(f"Payload: {payload}")
+
             # Send to ML Training service
             url = f"{self.ml_training_url}/api/ml-training/collect"
+            logger.info(f"Sending gameplay data to ML Training service: url={url}")
 
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.post(url, json=payload)
+                logger.info(f"Response: {response.status_code}")
                 response.raise_for_status()
 
                 result = response.json()
-                logger.debug(
+                logger.info(
                     f"Data collected successfully: game_id={game_id}, action={action}, "
                     f"total_samples={result.get('samples_collected', 'unknown')}"
                 )

@@ -151,7 +151,7 @@ ml-collect-quality-data: # step 1
 
 ml-collect-data-ai-games: # step 1
 	@echo "Collecting data from AI-solved games..."
-	poetry run python scripts/collect_from_ai_solved_games.py --num-games 1000 --output-dir data/training
+	poetry run python scripts/collect_from_ai_solved_games.py --num-games 2000 --output-dir data/training
 
 ml-generate-data: # step 1
 	@echo "Generating synthetic training data..."

@@ -71,7 +71,8 @@ def create_game(
             message=result.message,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Failed to create game: {e} for request={request}")
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/", response_model=GamesResponse)
@@ -95,7 +96,8 @@ def get_games(
             message=result.message,
         )
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.error(f"Failed to get games: {e} for limit={limit}, status={status}")
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/{game_id}", response_model=GetGameResponse)
@@ -117,7 +119,8 @@ def get_game_state(
         )
 
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.error(f"Failed to get game state: {e} for game_id={game_id}")
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.post("/{game_id}/action", response_model=ActionResponse)
@@ -172,9 +175,14 @@ def perform_action(
 
     try:
         # Get game state BEFORE action for data collection
-        get_state_use_case = GetGameStateUseCase(repository)
-        state_before = get_state_use_case.execute(GetGameStateQuery(game_id=game_id))
-        game_state_before = state_before.game.to_dict()
+        logger.info(f"Getting game state before action for game_id={game_id}")
+        try:
+            get_state_use_case = GetGameStateUseCase(repository)
+            state_before = get_state_use_case.execute(GetGameStateQuery(game_id=game_id))
+            game_state_before = state_before.game.to_dict()
+        except Exception as e:
+            logger.error(f"Failed to get game state before action: {e} for game_id={game_id}")
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
         action = request.action
 
@@ -190,6 +198,9 @@ def perform_action(
             ActionType.giveFlower: "give",
             ActionType.clean: "clean",
         }
+
+        logger.info(f"Action: {action}, Direction: {direction}")
+        logger.info(f"Game state before: {game_state_before}")
 
         if action == ActionType.rotate:
             use_case = RotateRobotUseCase(repository)
@@ -213,16 +224,21 @@ def perform_action(
             raise ValueError(f"Unknown action: {action}")
 
         # Collect gameplay data for ML training
-        data_collector.collect_action(
-            game_id=game_id,
-            game_state=game_state_before,
-            action=action_name_map[action],
-            direction=direction.value,
-            outcome={
-                "success": result.success,
-                "message": "action performed successfully" if result.success else "failed",
-            },
-        )
+        logger.info(f"Collecting gameplay data: game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}")
+        try:
+            data_collector.collect_action(
+                game_id=game_id,
+                game_state=game_state_before,
+                action=action_name_map[action],
+                direction=direction.value,
+                outcome={
+                    "success": result.success,
+                    "message": "action performed successfully" if result.success else "failed",
+                },
+            )
+        except Exception as e:
+            logger.error(f"Failed to collect gameplay data: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}")
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
         return ActionResponse(
             success=result.success,
@@ -230,4 +246,5 @@ def perform_action(
             message=("action performed successfully" if result.success else "failed to perform action"),
         )
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.error(f"Failed to perform action: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

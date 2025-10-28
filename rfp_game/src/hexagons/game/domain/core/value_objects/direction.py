@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class Direction(str, Enum):
-    NORTH = "north"
-    SOUTH = "south"
-    EAST = "east"
-    WEST = "west"
+    NORTH = "NORTH"
+    SOUTH = "SOUTH"
+    EAST = "EAST"
+    WEST = "WEST"
 
     def get_delta(self) -> tuple[int, int]:
         """Returns (row_delta, col_delta) for this direction."""

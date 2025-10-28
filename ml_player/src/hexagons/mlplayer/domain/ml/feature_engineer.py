@@ -198,7 +198,7 @@ class FeatureEngineer:
         # ============================================================
         # ORIENTATION (4 features - one-hot)
         # ============================================================
-        orientation = robot.get("orientation", "NORTH")
+        orientation = robot.get("orientation", "NORTH").upper()  # Normalize to uppercase
         features.append(1.0 if orientation == "NORTH" else 0.0)
         features.append(1.0 if orientation == "SOUTH" else 0.0)
         features.append(1.0 if orientation == "EAST" else 0.0)
@@ -247,6 +247,7 @@ class FeatureEngineer:
     def _get_adjacent_position(pos: tuple[int, int], direction: str) -> tuple[int, int]:
         """Get position adjacent to current position in given direction."""
         row, col = pos
+        direction = direction.upper()  # Normalize to uppercase
         if direction == "NORTH":
             return (row - 1, col)
         elif direction == "SOUTH":

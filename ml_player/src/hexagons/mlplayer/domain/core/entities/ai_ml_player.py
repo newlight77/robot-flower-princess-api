@@ -184,15 +184,31 @@ class AIMLPlayer:
             Tuple of (action, direction)
         """
         # Extract features
-        features = self.feature_engineer.extract_features(state.to_dict())
+        state_dict = state.to_dict()
+        features = self.feature_engineer.extract_features(state_dict)
+
+        # Log key state info for debugging
+        robot_pos = state_dict["robot"]["position"]
+        robot_orient = state_dict["robot"]["orientation"]
+        obstacles = state_dict["board"].get("obstacles_positions", [])
+        logger.info(f"🤖 ML Prediction - Robot at ({robot_pos['row']},{robot_pos['col']}) facing {robot_orient}")
+        logger.info(f"🚧 ML Prediction - Obstacles: {obstacles}")
+
+        # Log action validity features (last 6 features)
+        action_validity_start = len(features) - 6
+        logger.info(f"🎯 ML Prediction - Action Validity: "
+                   f"can_move={features[action_validity_start]:.1f}, "
+                   f"can_clean={features[action_validity_start+3]:.1f}, "
+                   f"should_rotate={features[action_validity_start+5]:.1f}")
 
         # Predict action label
         label = self.model.predict([features])[0]
+        logger.info(f"📊 ML Prediction - Model output label: {label}")
 
         # Decode action
         action, direction = self.feature_engineer.decode_action(int(label))
 
-        logger.info(f"AIMLPlayer._predict_with_ml: Predicted action={action} and direction={direction}")
+        logger.info(f"✅ AIMLPlayer._predict_with_ml: Predicted action={action} and direction={direction}")
         return (action, direction)
 
     def _select_action_heuristic(self, state: GameState) -> tuple[str, str | None]:
@@ -227,7 +243,7 @@ class AIMLPlayer:
                 return ("pick", None)
 
         # Check if current orientation is blocked by obstacle
-        current_orientation = state.robot.get("orientation", "NORTH")
+        current_orientation = state.robot.get("orientation", "NORTH").upper()  # Normalize to uppercase
         if self._is_path_blocked(state.robot["position"], current_orientation, state):
             logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked in orientation {current_orientation}, rotating")
             # Try to find a clear direction
@@ -271,7 +287,7 @@ class AIMLPlayer:
 
         Args:
             position: Current position
-            direction: Direction to check
+            direction: Direction to check (case-insensitive)
             state: Game state
 
         Returns:
@@ -280,6 +296,8 @@ class AIMLPlayer:
         # Calculate target position based on direction
         target_row = position["row"]
         target_col = position["col"]
+
+        direction = direction.upper()  # Normalize to uppercase
 
         if direction == "NORTH":
             target_row -= 1

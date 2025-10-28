@@ -62,7 +62,7 @@ class PredictActionCommand:
                 "executed_actions": [
                     {
                         "type": a.get("type", "unknown"),
-                        "direction": a.get("direction", "north"),  # Default direction
+                        "direction": a.get("direction", "NORTH"),  # Default direction
                         "success": a.get("success", True),  # Default to True if not present
                         "message": a.get("message", ""),  # Default to empty string if not present
                     }

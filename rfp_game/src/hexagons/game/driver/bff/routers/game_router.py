@@ -130,27 +130,27 @@ def perform_action(
             {
                 "rotate": {
                     "summary": "Rotate robot",
-                    "value": {"action": "rotate", "direction": "south"},
+                    "value": {"action": "rotate", "direction": "SOUTH"},
                 },
                 "move": {
                     "summary": "Move robot",
-                    "value": {"action": "move", "direction": "south"},
+                    "value": {"action": "move", "direction": "SOUTH"},
                 },
                 "pickFlower": {
                     "summary": "Pick a flower",
-                    "value": {"action": "pickFlower", "direction": "south"},
+                    "value": {"action": "pickFlower", "direction": "SOUTH"},
                 },
                 "dropFlower": {
                     "summary": "Drop a flower",
-                    "value": {"action": "dropFlower", "direction": "south"},
+                    "value": {"action": "dropFlower", "direction": "SOUTH"},
                 },
                 "giveFlower": {
                     "summary": "Give flowers",
-                    "value": {"action": "giveFlower", "direction": "south"},
+                    "value": {"action": "giveFlower", "direction": "SOUTH"},
                 },
                 "clean": {
                     "summary": "Clean obstacle",
-                    "value": {"action": "clean", "direction": "south"},
+                    "value": {"action": "clean", "direction": "SOUTH"},
                 },
             },
         ),

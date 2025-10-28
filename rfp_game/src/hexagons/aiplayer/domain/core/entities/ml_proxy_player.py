@@ -177,7 +177,7 @@ class MLProxyPlayer:
             # Convert prediction to action tuple
             action: str = prediction["action"]
             direction_str: str = prediction.get("direction")
-            direction: Optional[Direction] = Direction(direction_str.lower()) if direction_str else None
+            direction: Optional[Direction] = Direction(direction_str.upper()) if direction_str else None
 
             # Return single action (ML Player returns one action at a time)
             logger.info(f"MLProxyPlayer.get_prediction: Returning action={action} and direction={direction}")

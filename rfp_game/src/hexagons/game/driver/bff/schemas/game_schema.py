@@ -37,7 +37,7 @@ class ActionType(str, Enum):
 class ActionRequest(BaseModel):
     action: ActionType
     # Direction is now required for all actions (frontend always provides direction)
-    direction: Literal["north", "south", "east", "west"]
+    direction: Literal["NORTH", "SOUTH", "EAST", "WEST"]
 
 
 class ActionResponse(BaseModel):

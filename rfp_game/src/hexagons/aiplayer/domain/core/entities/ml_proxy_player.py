@@ -125,23 +125,23 @@ class MLProxyPlayer:
             GameService.rotate_robot(game, direction)
             self.repository.save(game_id=game.game_id, game=game)
         elif action == "move":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.move_robot(game)
             self.repository.save(game_id=game.game_id, game=game)
         elif action == "pick":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.pick_flower(game)
             self.repository.save(game_id=game.game_id, game=game)
         elif action == "drop":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.drop_flower(game)
             self.repository.save(game_id=game.game_id, game=game)
         elif action == "give":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.give_flowers(game)
             self.repository.save(game_id=game.game_id, game=game)
         elif action == "clean":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.clean_obstacle(game)
             self.repository.save(game_id=game.game_id, game=game)
         else:

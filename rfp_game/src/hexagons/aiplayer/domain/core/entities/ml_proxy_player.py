@@ -79,15 +79,15 @@ class MLProxyPlayer:
 
         logger.info(f"MLProxyPlayer.solve_async: Game={game.to_dict()}")
 
-        # Convert game state to format expected by ML Player
-        game_state = self._convert_game_to_state(game)
-        logger.info(f"MLProxyPlayer.solve_async: Game state={game_state}")
-
         iteration = 0
         while (game.flowers or game.robot.flowers_held > 0) and iteration < max_iterations:
             iteration += 1
 
             logger.info(f"MLProxyPlayer.solve_async: Iteration={iteration}")
+
+            # Convert game state to format expected by ML Player (FRESH state each iteration!)
+            game_state = self._convert_game_to_state(game)
+            logger.info(f"MLProxyPlayer.solve_async: Game state status={game_state.get('status')}")
 
             action, direction = await self._get_prediction(game_id, game_state)
             logger.info(f"MLProxyPlayer.solve_async: Prediction action={action} and direction={direction}")
@@ -98,6 +98,7 @@ class MLProxyPlayer:
             try:
                 action, direction = self._execute_action(action=action, direction=direction, game=game)
                 actions.append((action, direction))
+                logger.info(f"MLProxyPlayer.solve_async: Action {iteration} executed successfully: {action} {direction}")
             except Exception as e:
                 # If action fails (invalid move, etc.), log and break
                 logger.warning(f"MLProxyPlayer.solve_async: Action failed: {e}")

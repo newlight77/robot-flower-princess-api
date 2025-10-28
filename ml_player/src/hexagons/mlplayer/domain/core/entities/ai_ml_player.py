@@ -77,7 +77,7 @@ class AIMLPlayer:
             self.model = None
             self.use_ml = False
 
-    def evaluate_board(self, state: GameState) -> float:
+    def _evaluate_game(self, state: GameState) -> float:
         """
         Evaluate board state and return a score.
 
@@ -90,7 +90,7 @@ class AIMLPlayer:
         Returns:
             Score (higher is better)
         """
-        logger.info(f"AIMLPlayer.evaluate_board: Evaluating board={state.to_dict()}")
+        logger.info(f"AIMLPlayer.evaluate_board: Evaluating game={state.to_dict()}")
 
         if self.model is not None:
             # Future: Use ML model
@@ -253,7 +253,7 @@ class AIMLPlayer:
         else:
             return "EAST" if dc > 0 else "WEST"
 
-    def plan_sequence(self, state: GameState, horizon: int | None = None) -> list[tuple[str, str | None]]:
+    def _plan_sequence(self, state: GameState, horizon: int | None = None) -> list[tuple[str, str | None]]:
         """
         Plan a sequence of actions.
 
@@ -283,11 +283,11 @@ class AIMLPlayer:
 
         return actions
 
-    def get_config(self) -> dict:
+    def _get_config(self) -> dict:
         """Get current configuration."""
         return self.config.to_dict()
 
-    def get_model_info(self) -> dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         """
         Get information about the loaded model.
 

@@ -129,7 +129,7 @@ class PredictActionUseCase:
 
         # Evaluate board
         logger.info("PredictActionUseCase.execute: Evaluating board")
-        score: float = player.evaluate_board(game_state)
+        score: float = player._evaluate_game(game_state)
 
         # Predict action
         logger.info("PredictActionUseCase.execute: Predicting action")
@@ -173,9 +173,9 @@ class PredictActionUseCase:
             confidence += 0.2
 
         # Higher confidence if close to target
-        if action == "pick" and game_state.robot_position in game_state.flowers:
+        if action == "pick" and game_state.robot["position"] in game_state.board["flowers_positions"]:
             confidence += 0.3
-        elif action == "give" and game_state.robot.position == game_state.princess.position:
+        elif action == "give" and game_state.robot["position"] == game_state.princess["position"]:
             confidence += 0.3
 
         return min(1.0, confidence)

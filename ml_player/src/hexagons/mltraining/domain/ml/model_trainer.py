@@ -17,10 +17,10 @@ from sklearn.model_selection import train_test_split
 
 from shared.logging import get_logger
 
-logger = get_logger("ModelTrainer")
-
 from .data_collector import GameDataCollector
 from .feature_engineer import FeatureEngineer
+
+logger = get_logger("ModelTrainer")
 
 
 class ModelTrainer:

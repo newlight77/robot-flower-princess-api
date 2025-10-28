@@ -11,8 +11,8 @@ To use: Replace src/hexagons/mlplayer/domain/ml/feature_engineer.py
 """
 
 from typing import Any
+
 import numpy as np
-from collections import defaultdict
 
 
 class FeatureEngineer:
@@ -72,34 +72,21 @@ class FeatureEngineer:
             # 1. Adjacent cell type (5 features - one-hot)
             adjacent_pos = FeatureEngineer._get_adjacent_position(robot_pos, direction)
             cell_type = FeatureEngineer._get_cell_type(
-                adjacent_pos, flowers_positions, obstacles_positions,
-                princess["position"], board
+                adjacent_pos, flowers_positions, obstacles_positions, princess["position"], board
             )
             features.extend(FeatureEngineer._one_hot_cell_type(cell_type))
 
             # 2. Distance to nearest flower in this direction (1 feature)
-            features.append(
-                FeatureEngineer._nearest_in_direction(
-                    robot_pos, direction, flowers_positions
-                )
-            )
+            features.append(FeatureEngineer._nearest_in_direction(robot_pos, direction, flowers_positions))
 
             # 3. Distance to nearest obstacle in this direction (1 feature)
-            features.append(
-                FeatureEngineer._nearest_in_direction(
-                    robot_pos, direction, obstacles_positions
-                )
-            )
+            features.append(FeatureEngineer._nearest_in_direction(robot_pos, direction, obstacles_positions))
 
             # 4. Is this direction towards nearest flower? (1 feature)
             if flowers_positions:
-                nearest_flower = FeatureEngineer._find_nearest(
-                    robot_pos, flowers_positions
-                )
+                nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
                 features.append(
-                    1.0 if FeatureEngineer._is_direction_towards(
-                        robot_pos, direction, nearest_flower
-                    ) else 0.0
+                    1.0 if FeatureEngineer._is_direction_towards(robot_pos, direction, nearest_flower) else 0.0
                 )
             else:
                 features.append(0.0)
@@ -129,36 +116,22 @@ class FeatureEngineer:
 
         if flowers_positions:
             nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
-            features.append(
-                FeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
-            )
+            features.append(FeatureEngineer._manhattan_distance(robot_pos, nearest_flower))
         else:
             features.append(0.0)
 
-        features.append(
-            FeatureEngineer._manhattan_distance(robot_pos, princess_pos)
-        )
+        features.append(FeatureEngineer._manhattan_distance(robot_pos, princess_pos))
 
         # Obstacles blocking path to nearest target
         if flowers_positions:
             nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
-            features.append(
-                float(FeatureEngineer._obstacles_in_line(
-                    robot_pos, nearest_flower, obstacles_positions
-                ))
-            )
+            features.append(float(FeatureEngineer._obstacles_in_line(robot_pos, nearest_flower, obstacles_positions)))
         else:
-            features.append(
-                float(FeatureEngineer._obstacles_in_line(
-                    robot_pos, princess_pos, obstacles_positions
-                ))
-            )
+            features.append(float(FeatureEngineer._obstacles_in_line(robot_pos, princess_pos, obstacles_positions)))
 
         # Capacity utilization
         if robot["flowers_collection_capacity"] > 0:
-            features.append(
-                len(robot["flowers_collected"]) / robot["flowers_collection_capacity"]
-            )
+            features.append(len(robot["flowers_collected"]) / robot["flowers_collection_capacity"])
         else:
             features.append(0.0)
 
@@ -172,9 +145,7 @@ class FeatureEngineer:
         if flowers_positions:
             nearest_flower = FeatureEngineer._find_nearest(robot_pos, flowers_positions)
             manhattan = FeatureEngineer._manhattan_distance(robot_pos, nearest_flower)
-            obstacles_count = FeatureEngineer._obstacles_in_line(
-                robot_pos, nearest_flower, obstacles_positions
-            )
+            obstacles_count = FeatureEngineer._obstacles_in_line(robot_pos, nearest_flower, obstacles_positions)
             features.append(manhattan)
             features.append(float(obstacles_count))
             features.append(manhattan + obstacles_count * 2.0)  # Estimated path length
@@ -183,9 +154,7 @@ class FeatureEngineer:
 
         # To princess
         manhattan_princess = FeatureEngineer._manhattan_distance(robot_pos, princess_pos)
-        obstacles_to_princess = FeatureEngineer._obstacles_in_line(
-            robot_pos, princess_pos, obstacles_positions
-        )
+        obstacles_to_princess = FeatureEngineer._obstacles_in_line(robot_pos, princess_pos, obstacles_positions)
         features.append(manhattan_princess)
         features.append(float(obstacles_to_princess))
         features.append(manhattan_princess + obstacles_to_princess * 2.0)
@@ -203,11 +172,9 @@ class FeatureEngineer:
         # ============================================================
         if flowers_positions:
             # Distances to nearest 3 flowers
-            distances = sorted([
-                FeatureEngineer._manhattan_distance(robot_pos,
-                    (f["row"], f["col"]))
-                for f in flowers_positions
-            ])
+            distances = sorted(
+                [FeatureEngineer._manhattan_distance(robot_pos, (f["row"], f["col"])) for f in flowers_positions]
+            )
 
             features.append(distances[0] if len(distances) > 0 else 0.0)
             features.append(distances[1] if len(distances) > 1 else 0.0)
@@ -258,11 +225,7 @@ class FeatureEngineer:
 
     @staticmethod
     def _get_cell_type(
-        pos: tuple[int, int],
-        flowers: list[dict],
-        obstacles: list[dict],
-        princess_pos: dict,
-        board: dict
+        pos: tuple[int, int], flowers: list[dict], obstacles: list[dict], princess_pos: dict, board: dict
     ) -> str:
         """Determine what's at a given position."""
         row, col = pos
@@ -299,15 +262,12 @@ class FeatureEngineer:
         return float(abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1]))
 
     @staticmethod
-    def _find_nearest(
-        robot_pos: tuple[int, int],
-        targets: list[dict]
-    ) -> tuple[int, int]:
+    def _find_nearest(robot_pos: tuple[int, int], targets: list[dict]) -> tuple[int, int]:
         """Find nearest target position."""
         if not targets:
             return robot_pos
 
-        min_dist = float('inf')
+        min_dist = float("inf")
         nearest = None
 
         for target in targets:
@@ -320,16 +280,12 @@ class FeatureEngineer:
         return nearest if nearest else robot_pos
 
     @staticmethod
-    def _nearest_in_direction(
-        robot_pos: tuple[int, int],
-        direction: str,
-        targets: list[dict]
-    ) -> float:
+    def _nearest_in_direction(robot_pos: tuple[int, int], direction: str, targets: list[dict]) -> float:
         """Find distance to nearest target in given direction."""
         if not targets:
             return 0.0
 
-        min_dist = float('inf')
+        min_dist = float("inf")
 
         for target in targets:
             target_pos = (target["row"], target["col"])
@@ -348,14 +304,10 @@ class FeatureEngineer:
                 dist = FeatureEngineer._manhattan_distance(robot_pos, target_pos)
                 min_dist = min(min_dist, dist)
 
-        return float(min_dist) if min_dist != float('inf') else 0.0
+        return float(min_dist) if min_dist != float("inf") else 0.0
 
     @staticmethod
-    def _is_direction_towards(
-        robot_pos: tuple[int, int],
-        direction: str,
-        target_pos: tuple[int, int]
-    ) -> bool:
+    def _is_direction_towards(robot_pos: tuple[int, int], direction: str, target_pos: tuple[int, int]) -> bool:
         """Check if moving in direction brings robot closer to target."""
         dr = target_pos[0] - robot_pos[0]
         dc = target_pos[1] - robot_pos[1]
@@ -372,11 +324,7 @@ class FeatureEngineer:
         return False
 
     @staticmethod
-    def _obstacles_in_line(
-        pos1: tuple[int, int],
-        pos2: tuple[int, int],
-        obstacles: list[dict]
-    ) -> int:
+    def _obstacles_in_line(pos1: tuple[int, int], pos2: tuple[int, int], obstacles: list[dict]) -> int:
         """Count obstacles in the bounding box between two positions."""
         min_row = min(pos1[0], pos2[0])
         max_row = max(pos1[0], pos2[0])
@@ -385,8 +333,7 @@ class FeatureEngineer:
 
         count = 0
         for obs in obstacles:
-            if (min_row <= obs["row"] <= max_row and
-                min_col <= obs["col"] <= max_col):
+            if min_row <= obs["row"] <= max_row and min_col <= obs["col"] <= max_col:
                 count += 1
 
         return count
@@ -396,70 +343,86 @@ class FeatureEngineer:
         """Get human-readable feature names (72 total)."""
         names = [
             # Basic (12)
-            "board_rows", "board_cols",
-            "robot_row", "robot_col",
-            "flowers_collected", "flowers_delivered",
-            "flowers_capacity", "obstacles_cleaned",
-            "princess_row", "princess_col",
-            "flowers_remaining", "obstacles_remaining",
+            "board_rows",
+            "board_cols",
+            "robot_row",
+            "robot_col",
+            "flowers_collected",
+            "flowers_delivered",
+            "flowers_capacity",
+            "obstacles_cleaned",
+            "princess_row",
+            "princess_col",
+            "flowers_remaining",
+            "obstacles_remaining",
         ]
 
         # Directional awareness (32 = 8 × 4)
         for direction in ["north", "south", "east", "west"]:
-            names.extend([
-                f"{direction}_cell_empty",
-                f"{direction}_cell_flower",
-                f"{direction}_cell_obstacle",
-                f"{direction}_cell_princess",
-                f"{direction}_cell_oob",
-                f"{direction}_nearest_flower",
-                f"{direction}_nearest_obstacle",
-                f"{direction}_towards_target",
-            ])
+            names.extend(
+                [
+                    f"{direction}_cell_empty",
+                    f"{direction}_cell_flower",
+                    f"{direction}_cell_obstacle",
+                    f"{direction}_cell_princess",
+                    f"{direction}_cell_oob",
+                    f"{direction}_nearest_flower",
+                    f"{direction}_nearest_obstacle",
+                    f"{direction}_towards_target",
+                ]
+            )
 
         # Task context (10)
-        names.extend([
-            "phase_collection",
-            "phase_delivery",
-            "at_capacity",
-            "progress_ratio",
-            "moves_to_nearest_flower",
-            "moves_to_princess",
-            "obstacles_blocking_path",
-            "capacity_utilization",
-            "can_pick_more",
-            "should_deliver",
-        ])
+        names.extend(
+            [
+                "phase_collection",
+                "phase_delivery",
+                "at_capacity",
+                "progress_ratio",
+                "moves_to_nearest_flower",
+                "moves_to_princess",
+                "obstacles_blocking_path",
+                "capacity_utilization",
+                "can_pick_more",
+                "should_deliver",
+            ]
+        )
 
         # Path quality (8)
-        names.extend([
-            "path_to_flower_manhattan",
-            "path_to_flower_obstacles",
-            "path_to_flower_estimated",
-            "path_to_princess_manhattan",
-            "path_to_princess_obstacles",
-            "path_to_princess_estimated",
-            "path_clearance",
-            "has_clear_path",
-        ])
+        names.extend(
+            [
+                "path_to_flower_manhattan",
+                "path_to_flower_obstacles",
+                "path_to_flower_estimated",
+                "path_to_princess_manhattan",
+                "path_to_princess_obstacles",
+                "path_to_princess_estimated",
+                "path_clearance",
+                "has_clear_path",
+            ]
+        )
 
         # Multi-flower strategy (6)
-        names.extend([
-            "nearest_flower_dist",
-            "second_nearest_flower_dist",
-            "third_nearest_flower_dist",
-            "avg_flower_dist",
-            "total_collection_path",
-            "flower_spread",
-        ])
+        names.extend(
+            [
+                "nearest_flower_dist",
+                "second_nearest_flower_dist",
+                "third_nearest_flower_dist",
+                "avg_flower_dist",
+                "total_collection_path",
+                "flower_spread",
+            ]
+        )
 
         # Orientation (4)
-        names.extend([
-            "orientation_north",
-            "orientation_south",
-            "orientation_east",
-            "orientation_west",
-        ])
+        names.extend(
+            [
+                "orientation_north",
+                "orientation_south",
+                "orientation_east",
+                "orientation_west",
+            ]
+        )
 
         return names
 

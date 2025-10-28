@@ -1,7 +1,5 @@
 """Pytest configuration and fixtures for ML Player tests."""
 
-from unittest.mock import AsyncMock
-
 import pytest
 
 from hexagons.mlplayer.domain.core.value_objects import StrategyConfig

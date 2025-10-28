@@ -1,4 +1,3 @@
-from hmac import new
 from ..core.entities.game import Game
 from ..core.value_objects.direction import Direction
 from ..core.value_objects.game_status import GameStatus
@@ -42,7 +41,9 @@ class GameService:
 
         if game.get_status() != GameStatus.IN_PROGRESS:
             logger.info("GameService.move_robot: Game is already over")
-            raise GameOverException("Game is already over in direction=%r position=%r", game.robot.orientation, game.robot.position)
+            raise GameOverException(
+                "Game is already over in direction=%r position=%r", game.robot.orientation, game.robot.position
+            )
 
         # Calculate new position based on orientation
         row_delta, col_delta = game.robot.orientation.get_delta()
@@ -53,12 +54,18 @@ class GameService:
         # Validate move
         if not game.is_valid_position(new_position):
             logger.info("GameService.move_robot: new_position=%r is not valid", new_position)
-            raise InvalidMoveException("Move would go outside the board in direction=%r position=%r", game.robot.orientation, new_position)
+            raise InvalidMoveException(
+                "Move would go outside the board in direction=%r position=%r", game.robot.orientation, new_position
+            )
 
         if not game.is_empty(new_position):
             logger.info("GameService.move_robot: new_position=%r is not empty", new_position)
             cell_type = game.get_cell_type(new_position)
-            raise InvalidMoveException(f"Target cell is blocked by {cell_type.value} in direction=%r position=%r", game.robot.orientation, new_position)
+            raise InvalidMoveException(
+                f"Target cell is blocked by {cell_type.value} in direction=%r position=%r",
+                game.robot.orientation,
+                new_position,
+            )
 
         # Execute move
         action = game.robot.move_to(new_position)
@@ -85,14 +92,18 @@ class GameService:
             raise GameOverException("Game is already over in direction=%r", game.robot.orientation)
 
         if not game.robot.can_pick():
-            raise InvalidPickException(f"Robot cannot hold more than {game.robot.max_flowers} flowers in direction=%r", game.robot.orientation)
+            raise InvalidPickException(
+                f"Robot cannot hold more than {game.robot.max_flowers} flowers in direction=%r", game.robot.orientation
+            )
 
         # Get position in front of robot
         row_delta, col_delta = game.robot.orientation.get_delta()
         target_position = game.robot.position.move(row_delta, col_delta)
 
         if not game.is_valid_position(target_position):
-            raise InvalidPickException("No flower to pick in that direction=%r position=%r", game.robot.orientation, target_position)
+            raise InvalidPickException(
+                "No flower to pick in that direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         if target_position not in game.flowers:
             raise InvalidPickException("No flower in direction=%r position=%r", game.robot.orientation, target_position)
@@ -108,7 +119,6 @@ class GameService:
         logger.info("GameService.pick_flower: game_id=%r", game.game_id)
         logger.info("GameService.pick_flower: action=%r", action)
         logger.info("GameService.pick_flower: game.robot.flowers_collected=%r", game.robot.flowers_collected)
-
 
     @staticmethod
     def drop_flower(game: Game) -> None:
@@ -126,10 +136,16 @@ class GameService:
         target_position = game.robot.position.move(row_delta, col_delta)
 
         if not game.is_valid_position(target_position):
-            raise InvalidDropException("Cannot drop flower outside the board in direction=%r position=%r", game.robot.orientation, target_position)
+            raise InvalidDropException(
+                "Cannot drop flower outside the board in direction=%r position=%r",
+                game.robot.orientation,
+                target_position,
+            )
 
         if not game.is_empty(target_position):
-            raise InvalidDropException("Target cell is not empty in direction=%r position=%r", game.robot.orientation, target_position)
+            raise InvalidDropException(
+                "Target cell is not empty in direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         # Drop the flower
         action = game.robot.drop_flower(target_position)
@@ -158,10 +174,14 @@ class GameService:
         target_position = game.robot.position.move(row_delta, col_delta)
 
         if not game.is_valid_position(target_position):
-            raise InvalidGiveException("No princess in that direction=%r position=%r", game.robot.orientation, target_position)
+            raise InvalidGiveException(
+                "No princess in that direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         if target_position != game.princess.position:
-            raise InvalidGiveException("Princess is not at target direction=%r position=%r", game.robot.orientation, target_position)
+            raise InvalidGiveException(
+                "Princess is not at target direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         # Count flowers before giving
         flowers_count = len(game.robot.flowers_collected)
@@ -191,19 +211,33 @@ class GameService:
 
         if not game.robot.can_clean():
             logger.info("GameService.clean_obstacle: Cannot clean while holding flowers=%r", game.robot.flowers_held)
-            raise InvalidCleanException(f"Cannot clean while holding flowers={game.robot.flowers_held} in direction=%r", game.robot.orientation)
+            raise InvalidCleanException(
+                f"Cannot clean while holding flowers={game.robot.flowers_held} in direction=%r", game.robot.orientation
+            )
 
         # Get position in front of robot
         row_delta, col_delta = game.robot.orientation.get_delta()
         target_position = game.robot.position.move(row_delta, col_delta)
 
         if not game.is_valid_position(target_position):
-            logger.info("GameService.clean_obstacle: No obstacle to clean in that direction=%r position=%r", game.robot.orientation, target_position)
-            raise InvalidCleanException("No obstacle to clean in that direction=%r position=%r", game.robot.orientation, target_position)
+            logger.info(
+                "GameService.clean_obstacle: No obstacle to clean in that direction=%r position=%r",
+                game.robot.orientation,
+                target_position,
+            )
+            raise InvalidCleanException(
+                "No obstacle to clean in that direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         if target_position not in game.obstacles:
-            logger.info("GameService.clean_obstacle: No obstacle in direction=%r position=%r", game.robot.orientation, target_position)
-            raise InvalidCleanException("No obstacle in direction=%r position=%r", game.robot.orientation, target_position)
+            logger.info(
+                "GameService.clean_obstacle: No obstacle in direction=%r position=%r",
+                game.robot.orientation,
+                target_position,
+            )
+            raise InvalidCleanException(
+                "No obstacle in direction=%r position=%r", game.robot.orientation, target_position
+            )
 
         # Remove obstacle
         action = game.robot.clean_obstacle(target_position)

@@ -13,9 +13,9 @@ from hexagons.mlplayer.domain.core.value_objects import StrategyConfig
 from hexagons.mlplayer.domain.ml import FeatureEngineer, ModelRegistry
 from shared.logging import get_logger
 
-logger = get_logger("AIMLPlayer")
-
 from ..value_objects.game_state import GameState
+
+logger = get_logger("AIMLPlayer")
 
 
 class AIMLPlayer:

@@ -154,7 +154,7 @@ class TestMLProxyPlayerSolve:
         """Test solve_async when direction is not provided."""
         mock_ml_client.predict_action.side_effect = [
             {"action": "rotate", "confidence": 0.88},
-            Exception("Stop after first action")
+            Exception("Stop after first action"),
         ]
 
         player = MLProxyPlayer(mock_repository, mock_ml_client)
@@ -189,7 +189,7 @@ class TestMLProxyPlayerGameStateConversion:
 
         mock_ml_client.predict_action.side_effect = [
             {"action": "move", "direction": "north"},
-            Exception("Stop after first action")
+            Exception("Stop after first action"),
         ]
 
         player = MLProxyPlayer(mock_repository, mock_ml_client)
@@ -223,7 +223,7 @@ class TestMLProxyPlayerGameStateConversion:
 
         mock_ml_client.predict_action.side_effect = [
             {"action": "clean", "direction": "south"},
-            Exception("Stop after first action")
+            Exception("Stop after first action"),
         ]
 
         player = MLProxyPlayer(mock_repository, mock_ml_client)
@@ -623,9 +623,7 @@ class TestMLProxyPlayerErrorHandling:
         game.flowers = {Position(2, 2)}
 
         # Mock returns move north which would go off the board
-        mock_ml_client.predict_action.side_effect = [
-            {"action": "move", "direction": "north", "confidence": 0.9}
-        ]
+        mock_ml_client.predict_action.side_effect = [{"action": "move", "direction": "north", "confidence": 0.9}]
 
         player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")

@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass, field
 from typing import List
 from .position import Position
@@ -24,7 +25,7 @@ class Robot:
     def rotate(self, direction: Direction) -> Action:
         action = Action(action_type=ActionType.ROTATE, direction=direction)
         self.add_executed_action(action)
-        self.orientation = direction
+        self.orientation = copy.deepcopy(direction)
         return action
 
     def pick_flower(self, flower_position: Position = None) -> Action:

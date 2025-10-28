@@ -75,7 +75,12 @@ class MLProxyPlayer:
             List of action tuples (action_type, direction)
         """
         actions = []
-        max_iterations = 100  # Prevent infinite loops
+        max_iterations = 50  # Prevent infinite loops
+
+        # Loop detection: track recent positions to detect oscillation
+        position_history: list[tuple[int, int]] = []
+        loop_detection_window = 10  # Check last 10 positions
+        max_same_position_visits = 3  # If we visit same position 3+ times in window, we're stuck
 
         logger.info(f"MLProxyPlayer.solve_async: Game={game.to_dict()}")
 
@@ -84,6 +89,22 @@ class MLProxyPlayer:
             iteration += 1
 
             logger.info(f"MLProxyPlayer.solve_async: Iteration={iteration}")
+
+            # Check for position loop (oscillation)
+            current_pos = (game.robot.position.row, game.robot.position.col)
+            position_history.append(current_pos)
+
+            if len(position_history) >= loop_detection_window:
+                # Count how many times we've visited the current position in recent history
+                recent_positions = position_history[-loop_detection_window:]
+                same_position_count = recent_positions.count(current_pos)
+
+                if same_position_count >= max_same_position_visits:
+                    logger.warning(
+                        f"MLProxyPlayer.solve_async: Loop detected! Position {current_pos} visited "
+                        f"{same_position_count} times in last {loop_detection_window} moves. Breaking out."
+                    )
+                    break
 
             # Convert game state to format expected by ML Player (FRESH state each iteration!)
             game_state = self._convert_game_to_state(game)
@@ -104,7 +125,7 @@ class MLProxyPlayer:
                 logger.warning(f"MLProxyPlayer.solve_async: Action failed: {e}")
                 break
 
-        logger.info(f"MLProxyPlayer.solve_async: Actions={actions}")
+        logger.info(f"MLProxyPlayer.solve_async: Actions={actions} (total: {len(actions)})")
         return actions
 
     def _execute_action(self, action: str, direction: Direction, game: Game) -> Tuple[str, Direction]:

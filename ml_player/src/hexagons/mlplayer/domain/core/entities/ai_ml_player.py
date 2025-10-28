@@ -207,8 +207,71 @@ class AIMLPlayer:
 
         # Decode action
         action, direction = self.feature_engineer.decode_action(int(label))
+        logger.info(f"🔮 ML Prediction - Decoded: action={action}, direction={direction}")
 
-        logger.info(f"✅ AIMLPlayer._predict_with_ml: Predicted action={action} and direction={direction}")
+        # CRITICAL: Validate prediction against action validity features
+        # Extract action validity flags
+        can_move = features[action_validity_start]
+        can_pick = features[action_validity_start + 1]
+        can_give = features[action_validity_start + 2]
+        can_clean = features[action_validity_start + 3]
+        can_drop = features[action_validity_start + 4]
+        should_rotate = features[action_validity_start + 5]
+
+        # Override invalid predictions
+        if action == "rotate" and direction == robot_orient:
+            # Don't rotate to the same direction we're already facing!
+            logger.warning(f"⚠️  Model predicted 'rotate {direction}' but already facing {robot_orient}! Overriding...")
+            # Find a different direction
+            direction = self._find_best_rotation_direction(state_dict, robot_orient)
+            logger.info(f"🔧 Override: Choosing 'rotate' to {direction} instead")
+
+        elif action == "move" and can_move == 0.0:
+            logger.warning(f"⚠️  Model predicted 'move' but can_move=0.0! Overriding...")
+            # Prefer clean if obstacle ahead, otherwise rotate to a DIFFERENT direction
+            if can_clean == 1.0:
+                action = "clean"
+                logger.info(f"🔧 Override: Choosing 'clean' (obstacle ahead)")
+            else:
+                action = "rotate"
+                # Find a different direction to rotate to (not current orientation)
+                direction = self._find_best_rotation_direction(state_dict, robot_orient)
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+
+        elif action == "pick" and can_pick == 0.0:
+            logger.warning(f"⚠️  Model predicted 'pick' but can_pick=0.0! Overriding...")
+            if can_move == 1.0:
+                action = "move"
+                direction = None
+                logger.info(f"🔧 Override: Choosing 'move' instead")
+            else:
+                action = "rotate"
+                direction = self._find_best_rotation_direction(state_dict, robot_orient)
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+
+        elif action == "give" and can_give == 0.0:
+            logger.warning(f"⚠️  Model predicted 'give' but can_give=0.0! Overriding...")
+            if can_move == 1.0:
+                action = "move"
+                direction = None
+                logger.info(f"🔧 Override: Choosing 'move' toward princess")
+            else:
+                action = "rotate"
+                direction = self._find_best_rotation_direction(state_dict, robot_orient)
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+
+        elif action == "clean" and can_clean == 0.0:
+            logger.warning(f"⚠️  Model predicted 'clean' but can_clean=0.0! Overriding...")
+            if can_move == 1.0:
+                action = "move"
+                direction = None
+                logger.info(f"🔧 Override: Choosing 'move' (no obstacle)")
+            else:
+                action = "rotate"
+                direction = self._find_best_rotation_direction(state_dict, robot_orient)
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+
+        logger.info(f"✅ AIMLPlayer._predict_with_ml: Final action={action} and direction={direction}")
         return (action, direction)
 
     def _select_action_heuristic(self, state: GameState) -> tuple[str, str | None]:
@@ -280,6 +343,134 @@ class AIMLPlayer:
 
         # Default: rotate to find a clear path
         return ("rotate", "NORTH")
+
+    def _find_best_rotation_direction(self, state_dict: dict, current_orientation: str) -> str:
+        """
+        Find the best direction to rotate to when the current path is blocked.
+        Prefers directions that are clear and move toward the goal.
+
+        Args:
+            state_dict: Game state dictionary
+            current_orientation: Current robot orientation
+
+        Returns:
+            Direction string (NORTH, SOUTH, EAST, WEST)
+        """
+        robot_pos = state_dict["robot"]["position"]
+        flowers_positions = state_dict["board"].get("flowers_positions", [])
+        obstacles_positions = state_dict["board"].get("obstacles_positions", [])
+        princess_pos = state_dict["princess"]["position"]
+        board = state_dict["board"]
+        has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
+
+        # All possible directions
+        all_directions = ["NORTH", "SOUTH", "EAST", "WEST"]
+
+        # Score each direction
+        direction_scores = {}
+        for direction in all_directions:
+            if direction == current_orientation.upper():
+                continue  # Don't rotate to the same direction
+
+            score = 0.0
+
+            # Check if path is clear in this direction
+            forward_pos = self._get_adjacent_position(
+                (robot_pos["row"], robot_pos["col"]), direction
+            )
+            cell_type = self._get_cell_type(
+                forward_pos, flowers_positions, obstacles_positions, princess_pos, board
+            )
+
+            # Heavily prefer clear paths
+            if cell_type in ["empty", "flower"]:
+                score += 10.0
+
+            # If has flowers, prefer directions toward princess
+            if has_flowers:
+                target = princess_pos
+            else:
+                # Prefer directions toward nearest flower
+                if flowers_positions:
+                    nearest_flower = min(
+                        flowers_positions,
+                        key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"])
+                    )
+                    target = nearest_flower
+                else:
+                    target = princess_pos
+
+            # Calculate if this direction moves toward target
+            # Weight score by the actual distance in that axis
+            dx = target["col"] - robot_pos["col"]
+            dy = target["row"] - robot_pos["row"]
+
+            # Score proportional to distance (prioritize the primary direction)
+            if direction == "NORTH" and dy < 0:
+                score += abs(dy) * 2.0  # Weight by vertical distance
+            elif direction == "SOUTH" and dy > 0:
+                score += abs(dy) * 2.0
+            elif direction == "EAST" and dx > 0:
+                score += abs(dx) * 2.0  # Weight by horizontal distance
+            elif direction == "WEST" and dx < 0:
+                score += abs(dx) * 2.0
+
+            direction_scores[direction] = score
+
+        # Pick the best direction, or fallback to any direction different from current
+        if direction_scores:
+            best_direction = max(direction_scores, key=direction_scores.get)
+            logger.info(f"🧭 Best rotation direction: {best_direction} (score={direction_scores[best_direction]:.1f})")
+            return best_direction
+        else:
+            # Fallback: just pick any direction different from current
+            for direction in all_directions:
+                if direction != current_orientation.upper():
+                    logger.info(f"🧭 Fallback rotation direction: {direction}")
+                    return direction
+            return "NORTH"  # Ultimate fallback
+
+    @staticmethod
+    def _get_adjacent_position(pos: tuple[int, int], direction: str) -> tuple[int, int]:
+        """Get position adjacent to current position in given direction."""
+        row, col = pos
+        direction = direction.upper()
+        if direction == "NORTH":
+            return (row - 1, col)
+        elif direction == "SOUTH":
+            return (row + 1, col)
+        elif direction == "EAST":
+            return (row, col + 1)
+        elif direction == "WEST":
+            return (row, col - 1)
+        return pos
+
+    @staticmethod
+    def _get_cell_type(
+        pos: tuple[int, int], flowers: list[dict], obstacles: list[dict], princess_pos: dict, board: dict
+    ) -> str:
+        """Determine what type of cell is at the given position."""
+        row, col = pos
+
+        # Check bounds
+        if row < 0 or row >= board["rows"] or col < 0 or col >= board["cols"]:
+            return "boundary"
+
+        # Check princess
+        if princess_pos["row"] == row and princess_pos["col"] == col:
+            return "princess"
+
+        # Check obstacles
+        for obstacle in obstacles:
+            if obstacle["row"] == row and obstacle["col"] == col:
+                return "obstacle"
+
+        # Check flowers
+        for flower in flowers:
+            if flower["row"] == row and flower["col"] == col:
+                return "flower"
+
+        return "empty"
 
     def _is_path_blocked(self, position: dict, direction: str, state: GameState) -> bool:
         """

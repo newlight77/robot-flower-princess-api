@@ -5,7 +5,7 @@
 SHELL := /bin/sh
 
 .PHONY: help install setup test test-cov lint format run docker-up docker-down coverage clean \
-	ml-generate-data ml-train ml-train-gb ml-stats ml-list-models
+	ml-generate-data ml-train ml-train-gb ml-stats ml-list-models ml-collect-quality-data
 
 # Prefer `.venv/bin/python -m` if a local venv exists; otherwise prefer `poetry run` when poetry is installed
 VENV_PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || true)
@@ -33,16 +33,17 @@ help:
 	@echo "  make clean        - Clean cache files"
 	@echo ""
 	@echo "ML Commands:"
-	@echo "  make ml-generate-data       - Generate synthetic training data"
+	@echo "  make ml-collect-quality-data        - 🎯 Collect quality training data (RECOMMENDED)"
+	@echo "  make ml-generate-data               - Generate synthetic training data"
 	@echo "  make ml-generate-balanced-training-data - Generate balanced training data"
-	@echo "  make ml-collect-data-ai-games  - Collect data from AI-solved games"
+	@echo "  make ml-collect-data-ai-games       - Collect data from AI-solved games"
 	@echo "  make ml-train                       - Train Random Forest model"
 	@echo "  make ml-train-gb                    - Train Gradient Boosting model"
 	@echo "  make ml-stats                       - Show training data statistics"
 	@echo "  make ml-list-models                 - List all trained models"
 	@echo "  make ml-test-model                  - Test model prediction"
-	@echo "  make ml-test-feature-extraction      - Test feature extraction"
-	@echo "  make ml-test-exact-scenario          - Test exact scenario"
+	@echo "  make ml-test-feature-extraction     - Test feature extraction"
+	@echo "  make ml-test-exact-scenario         - Test exact scenario"
 
 install:
 	brew install
@@ -140,13 +141,25 @@ clean:
 	rm -rf coverage || true
 
 # Machine Learning commands
-ml-generate-data: # step 1
-	@echo "Generating synthetic training data..."
-	poetry run python scripts/generate_training_data.py --num-samples 1000
+
+# Quality data collection (RECOMMENDED for training)
+ml-collect-quality-data:
+	@echo "🎯 Collecting quality training data from AI-solved games..."
+	@echo "This will backup old data and collect fresh samples from 1000 games"
+	@echo ""
+	poetry run python scripts/collect_quality_training_data.py --num-games 1000 --strategy heuristic
 
 ml-collect-data-ai-games:
 	@echo "Collecting data from AI-solved games..."
 	poetry run python scripts/collect_from_ai_solved_games.py --num-games 500 --output-dir data/training
+
+ml-generate-data: # step 1
+	@echo "Generating synthetic training data..."
+	poetry run python scripts/generate_training_data.py --num-samples 1000
+
+ml-generate-balanced-training-data:
+	@echo "Generating balanced training data..."
+	poetry run python scripts/generate_balanced_training_data.py
 
 ml-train: # step 2
 	@echo "Training Random Forest model..."
@@ -180,7 +193,3 @@ ml-test-feature-extraction:
 ml-test-exact-scenario:
 	@echo "Testing exact scenario..."
 	poetry run python scripts/test_exact_scenario.py
-
-ml-generate-balanced-training-data:
-	@echo "Generating balanced training data..."
-	poetry run python scripts/generate_balanced_training_data.py

@@ -470,6 +470,19 @@ def _main() -> None:
         help="Use optimal AI (25%% faster but 13%% lower success)"
     )
     parser.add_argument(
+        "--strategy",
+        type=str,
+        default="greedy",
+        choices=["greedy", "optimal", "heuristic"],
+        help="AI strategy to use (heuristic=greedy)"
+    )
+    parser.add_argument(
+        "--min-success-rate",
+        type=float,
+        default=0.0,
+        help="Minimum required success rate (0.0-1.0, ignored for now)"
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         default=42,
@@ -477,6 +490,12 @@ def _main() -> None:
     )
 
     args = parser.parse_args()
+
+    # Map strategy to use_optimal flag
+    if args.strategy == "optimal":
+        args.use_optimal = True
+    elif args.strategy in ["greedy", "heuristic"]:
+        args.use_optimal = False
 
     random.seed(args.seed)
 

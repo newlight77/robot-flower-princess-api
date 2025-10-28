@@ -16,6 +16,12 @@ def mock_ml_client():
 
 
 @pytest.fixture
+def mock_repository():
+    """Create mock game repository."""
+    return AsyncMock()
+
+
+@pytest.fixture
 def sample_game():
     """Create a sample game for testing - robot next to princess with flowers to give."""
     game = Game(game_id="test-game-123", rows=5, cols=5)
@@ -34,22 +40,22 @@ def sample_game():
 class TestMLProxyPlayerInitialization:
     """Test MLProxyPlayer initialization."""
 
-    def test_initialization_with_default_strategy(self, mock_ml_client):
+    def test_initialization_with_default_strategy(self, mock_repository, mock_ml_client):
         """Test initialization with default strategy."""
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         assert player.ml_client == mock_ml_client
         assert player.strategy == "default"
         assert player.name == "ML Proxy Player (default strategy)"
 
-    def test_initialization_with_aggressive_strategy(self, mock_ml_client):
+    def test_initialization_with_aggressive_strategy(self, mock_repository, mock_ml_client):
         """Test initialization with aggressive strategy."""
-        player = MLProxyPlayer(mock_ml_client, strategy="aggressive")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="aggressive")
         assert player.strategy == "aggressive"
         assert player.name == "ML Proxy Player (aggressive strategy)"
 
-    def test_initialization_with_conservative_strategy(self, mock_ml_client):
+    def test_initialization_with_conservative_strategy(self, mock_repository, mock_ml_client):
         """Test initialization with conservative strategy."""
-        player = MLProxyPlayer(mock_ml_client, strategy="conservative")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="conservative")
         assert player.strategy == "conservative"
         assert player.name == "ML Proxy Player (conservative strategy)"
 
@@ -57,14 +63,14 @@ class TestMLProxyPlayerInitialization:
 class TestMLProxyPlayerSolve:
     """Test MLProxyPlayer solve methods."""
 
-    def test_solve_raises_not_implemented(self, mock_ml_client, sample_game):
+    def test_solve_raises_not_implemented(self, mock_repository, mock_ml_client, sample_game):
         """Test that synchronous solve raises NotImplementedError."""
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         with pytest.raises(NotImplementedError, match="should be called via async solve_async"):
             player.solve(sample_game)
 
     @pytest.mark.asyncio
-    async def test_solve_async_calls_ml_client(self, mock_ml_client, sample_game):
+    async def test_solve_async_calls_ml_client(self, mock_repository, mock_ml_client, sample_game):
         """Test that solve_async calls ML client with correct parameters."""
         # Setup mock to return "give" action which will succeed (robot is next to princess)
         mock_ml_client.predict_action.side_effect = [
@@ -76,7 +82,7 @@ class TestMLProxyPlayerSolve:
             }
         ]
 
-        player = MLProxyPlayer(mock_ml_client, strategy="default")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="default")
         result = await player.solve_async(sample_game, "test-game-123")
 
         # Verify ML client was called at least once
@@ -90,7 +96,7 @@ class TestMLProxyPlayerSolve:
         assert result[0] == ("give", Direction.SOUTH)
 
     @pytest.mark.asyncio
-    async def test_solve_async_returns_pick_action(self, mock_ml_client, sample_game):
+    async def test_solve_async_returns_pick_action(self, mock_repository, mock_ml_client, sample_game):
         """Test solve_async with pick action - robot gives flowers first."""
         # Test that we can handle pick action (though give will execute successfully)
         mock_ml_client.predict_action.side_effect = [
@@ -101,14 +107,14 @@ class TestMLProxyPlayerSolve:
             }
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
 
         assert len(result) >= 1
         assert result[0] == ("give", Direction.SOUTH)
 
     @pytest.mark.asyncio
-    async def test_solve_async_returns_give_action(self, mock_ml_client, sample_game):
+    async def test_solve_async_returns_give_action(self, mock_repository, mock_ml_client, sample_game):
         """Test solve_async with give action."""
         mock_ml_client.predict_action.side_effect = [
             {
@@ -119,14 +125,14 @@ class TestMLProxyPlayerSolve:
             # Give action will deliver flowers, ending the loop naturally
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
 
         assert len(result) == 1
         assert result[0] == ("give", Direction.SOUTH)
 
     @pytest.mark.asyncio
-    async def test_solve_async_returns_clean_action(self, mock_ml_client, sample_game):
+    async def test_solve_async_returns_clean_action(self, mock_repository, mock_ml_client, sample_game):
         """Test solve_async with clean action - robot gives flowers first."""
         # Test that we can handle clean action (though give will execute successfully)
         mock_ml_client.predict_action.side_effect = [
@@ -137,32 +143,32 @@ class TestMLProxyPlayerSolve:
             }
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
 
         assert len(result) >= 1
         assert result[0] == ("give", Direction.SOUTH)
 
     @pytest.mark.asyncio
-    async def test_solve_async_without_direction(self, mock_ml_client, sample_game):
+    async def test_solve_async_without_direction(self, mock_repository, mock_ml_client, sample_game):
         """Test solve_async when direction is not provided."""
         mock_ml_client.predict_action.side_effect = [
             {"action": "rotate", "confidence": 0.88},
             Exception("Stop after first action")
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
 
         assert len(result) >= 1
         assert result[0] == ("rotate", None)
 
     @pytest.mark.asyncio
-    async def test_solve_async_handles_ml_service_error(self, mock_ml_client, sample_game):
+    async def test_solve_async_handles_ml_service_error(self, mock_repository, mock_ml_client, sample_game):
         """Test that solve_async handles ML service errors gracefully."""
         mock_ml_client.predict_action.side_effect = Exception("ML service unavailable")
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(sample_game, "test-game-123")
 
         # Should return empty list on error
@@ -173,7 +179,7 @@ class TestMLProxyPlayerGameStateConversion:
     """Test game state conversion."""
 
     @pytest.mark.asyncio
-    async def test_game_state_conversion_in_progress(self, mock_ml_client, sample_game):
+    async def test_game_state_conversion_in_progress(self, mock_repository, mock_ml_client, sample_game):
         """Test game state conversion for in-progress game."""
         # Add some flowers to the board for this test
         sample_game.flowers = {Position(2, 2), Position(3, 3)}
@@ -186,7 +192,7 @@ class TestMLProxyPlayerGameStateConversion:
             Exception("Stop after first action")
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
 
         # Check the game state passed to ML client (first call)
@@ -205,7 +211,7 @@ class TestMLProxyPlayerGameStateConversion:
         assert game_state["princess"]["position"]["col"] == 4
 
     @pytest.mark.asyncio
-    async def test_game_state_conversion_with_obstacles(self, mock_ml_client, sample_game):
+    async def test_game_state_conversion_with_obstacles(self, mock_repository, mock_ml_client, sample_game):
         """Test game state conversion with obstacles."""
         sample_game.board.obstacles_positions.add(Position(1, 1))
         sample_game.board.obstacles_positions.add(Position(2, 1))
@@ -220,7 +226,7 @@ class TestMLProxyPlayerGameStateConversion:
             Exception("Stop after first action")
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
 
         # Check obstacles in game state (first call)
@@ -232,7 +238,7 @@ class TestMLProxyPlayerGameStateConversion:
         assert Position(2, 1) in obstacle_positions
 
     @pytest.mark.asyncio
-    async def test_game_state_conversion_with_robot_flowers(self, mock_ml_client, sample_game):
+    async def test_game_state_conversion_with_robot_flowers(self, mock_repository, mock_ml_client, sample_game):
         """Test game state conversion with robot holding flowers."""
         sample_game.robot.flowers_collected = [Position(1, 1), Position(2, 2), Position(3, 3)]
         # No flowers on board
@@ -242,7 +248,7 @@ class TestMLProxyPlayerGameStateConversion:
             {"action": "give", "direction": "south"},  # Give to princess, loop ends naturally
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         await player.solve_async(sample_game, "test-game-123")
 
         # Check robot flowers in game state (first call)
@@ -260,26 +266,26 @@ class TestMLProxyPlayerWithDifferentStrategies:
     """Test MLProxyPlayer with different strategies."""
 
     @pytest.mark.asyncio
-    async def test_aggressive_strategy_parameter(self, mock_ml_client, sample_game):
+    async def test_aggressive_strategy_parameter(self, mock_repository, mock_ml_client, sample_game):
         """Test that aggressive strategy is passed to ML client."""
         mock_ml_client.predict_action.side_effect = [
             {"action": "give", "direction": "south"},  # Give to princess, loop ends
         ]
 
-        player = MLProxyPlayer(mock_ml_client, strategy="aggressive")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="aggressive")
         await player.solve_async(sample_game, "test-game-123")
 
         call_args = mock_ml_client.predict_action.call_args_list[0]
         assert call_args.kwargs["strategy"] == "aggressive"
 
     @pytest.mark.asyncio
-    async def test_conservative_strategy_parameter(self, mock_ml_client, sample_game):
+    async def test_conservative_strategy_parameter(self, mock_repository, mock_ml_client, sample_game):
         """Test that conservative strategy is passed to ML client."""
         mock_ml_client.predict_action.side_effect = [
             {"action": "give", "direction": "south"},  # Give to princess, loop ends
         ]
 
-        player = MLProxyPlayer(mock_ml_client, strategy="conservative")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="conservative")
         await player.solve_async(sample_game, "test-game-123")
 
         call_args = mock_ml_client.predict_action.call_args_list[0]
@@ -290,7 +296,7 @@ class TestMLProxyPlayerEdgeCases:
     """Test edge cases and boundary conditions."""
 
     @pytest.mark.asyncio
-    async def test_solve_async_with_no_flowers_exits_immediately(self, mock_ml_client):
+    async def test_solve_async_with_no_flowers_exits_immediately(self, mock_repository, mock_ml_client):
         """Test that solve_async exits immediately when no flowers to collect or deliver."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(0, 0)
@@ -299,7 +305,7 @@ class TestMLProxyPlayerEdgeCases:
         game.flowers = set()  # No flowers on board
         game.robot.flowers_collected = []  # No flowers held
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should return empty list without calling ML client
@@ -307,7 +313,7 @@ class TestMLProxyPlayerEdgeCases:
         assert mock_ml_client.predict_action.call_count == 0
 
     @pytest.mark.asyncio
-    async def test_solve_async_respects_max_iterations(self, mock_ml_client):
+    async def test_solve_async_respects_max_iterations(self, mock_repository, mock_ml_client):
         """Test that solve_async stops after max_iterations (100)."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(0, 0)
@@ -320,7 +326,7 @@ class TestMLProxyPlayerEdgeCases:
         # Mock always returns "rotate" which doesn't progress the game
         mock_ml_client.predict_action.return_value = {"action": "rotate", "confidence": 0.9}
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should have exactly 100 actions (max_iterations limit)
@@ -328,7 +334,7 @@ class TestMLProxyPlayerEdgeCases:
         assert mock_ml_client.predict_action.call_count == 100
 
     @pytest.mark.asyncio
-    async def test_solve_async_stops_when_prediction_is_none(self, mock_ml_client):
+    async def test_solve_async_stops_when_prediction_is_none(self, mock_repository, mock_ml_client):
         """Test that solve_async stops when ML client returns None action."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -340,14 +346,14 @@ class TestMLProxyPlayerEdgeCases:
         # Mock returns None on first call (simulating ML service error)
         mock_ml_client.predict_action.side_effect = Exception("ML service down")
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should return empty list
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_solve_async_with_multiple_actions(self, mock_ml_client):
+    async def test_solve_async_with_multiple_actions(self, mock_repository, mock_ml_client):
         """Test solve_async executes multiple actions in sequence."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -362,7 +368,7 @@ class TestMLProxyPlayerEdgeCases:
             {"action": "give", "direction": "south", "confidence": 0.95},
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should have 2 actions
@@ -374,20 +380,20 @@ class TestMLProxyPlayerEdgeCases:
 class TestMLProxyPlayerActionExecution:
     """Test individual action execution."""
 
-    def test_execute_action_rotate(self, mock_ml_client):
+    def test_execute_action_rotate(self, mock_repository, mock_ml_client):
         """Test rotate action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(0, 0)
         game.robot.orientation = Direction.NORTH
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("rotate", Direction.EAST, game)
 
         assert action == "rotate"
         assert direction == Direction.EAST
         assert game.robot.orientation == Direction.EAST
 
-    def test_execute_action_move(self, mock_ml_client):
+    def test_execute_action_move(self, mock_repository, mock_ml_client):
         """Test move action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(2, 2)  # Position in center of board
@@ -397,21 +403,21 @@ class TestMLProxyPlayerActionExecution:
         game.board.obstacles_positions = {pos for pos in game.board.obstacles_positions if pos != target_position}
         game.flowers = {pos for pos in game.flowers if pos != target_position}
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("move", Direction.NORTH, game)
 
         assert action == "move"
         assert direction == Direction.NORTH
         assert game.robot.position == Position(1, 2)  # Moved north
 
-    def test_execute_action_pick(self, mock_ml_client):
+    def test_execute_action_pick(self, mock_repository, mock_ml_client):
         """Test pick action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(1, 1)
         game.robot.orientation = Direction.NORTH
         game.flowers.add(Position(0, 1))  # Flower in front of robot
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("pick", Direction.NORTH, game)
 
         assert action == "pick"
@@ -419,7 +425,7 @@ class TestMLProxyPlayerActionExecution:
         assert len(game.robot.flowers_collected) == 1
         assert Position(0, 1) not in game.flowers
 
-    def test_execute_action_give(self, mock_ml_client):
+    def test_execute_action_give(self, mock_repository, mock_ml_client):
         """Test give action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -427,7 +433,7 @@ class TestMLProxyPlayerActionExecution:
         game.robot.flowers_collected = [Position(1, 1)]
         game.princess.position = Position(4, 4)
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("give", Direction.SOUTH, game)
 
         assert action == "give"
@@ -435,14 +441,14 @@ class TestMLProxyPlayerActionExecution:
         assert len(game.robot.flowers_collected) == 0
         assert len(game.princess.flowers_received) == 1
 
-    def test_execute_action_clean(self, mock_ml_client):
+    def test_execute_action_clean(self, mock_repository, mock_ml_client):
         """Test clean action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(1, 1)
         game.robot.orientation = Direction.NORTH
         game.board.obstacles_positions.add(Position(0, 1))
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("clean", Direction.NORTH, game)
 
         assert action == "clean"
@@ -450,7 +456,7 @@ class TestMLProxyPlayerActionExecution:
         assert len(game.robot.obstacles_cleaned) == 1
         assert Position(0, 1) not in game.board.obstacles_positions
 
-    def test_execute_action_drop(self, mock_ml_client):
+    def test_execute_action_drop(self, mock_repository, mock_ml_client):
         """Test drop action execution."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(2, 2)  # Position in middle of board
@@ -460,17 +466,17 @@ class TestMLProxyPlayerActionExecution:
         game.board.obstacles_positions = {pos for pos in game.board.obstacles_positions if pos != Position(1, 2)}
         game.flowers = {pos for pos in game.flowers if pos != Position(1, 2)}
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         action, direction = player._execute_action("drop", Direction.NORTH, game)
 
         assert action == "drop"
         assert direction == Direction.NORTH
         assert len(game.robot.flowers_collected) == 0
 
-    def test_execute_action_unknown(self, mock_ml_client):
+    def test_execute_action_unknown(self, mock_repository, mock_ml_client):
         """Test unknown action returns None tuple."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
 
         action, direction = player._execute_action("invalid_action", Direction.NORTH, game)
 
@@ -481,7 +487,7 @@ class TestMLProxyPlayerActionExecution:
 class TestMLProxyPlayerGameStatusConversion:
     """Test game status conversion for different game states."""
 
-    def test_convert_game_to_state_victory(self, mock_ml_client):
+    def test_convert_game_to_state_victory(self, mock_repository, mock_ml_client):
         """Test game state conversion structure (victory state is complex to simulate)."""
         # Note: Creating a true Victory state requires the Game's internal logic
         # This test validates the conversion function structure
@@ -491,7 +497,7 @@ class TestMLProxyPlayerGameStatusConversion:
         game.flowers = set()
         game.robot.flowers_collected = []
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         state = player._convert_game_to_state(game)
 
         # Verify structure regardless of status
@@ -501,7 +507,7 @@ class TestMLProxyPlayerGameStatusConversion:
         assert "robot" in state
         assert "princess" in state
 
-    def test_convert_game_to_state_in_progress(self, mock_ml_client):
+    def test_convert_game_to_state_in_progress(self, mock_repository, mock_ml_client):
         """Test game state conversion for in-progress game."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(0, 0)
@@ -509,7 +515,7 @@ class TestMLProxyPlayerGameStatusConversion:
         game.flowers = {Position(2, 2)}
         game.robot.flowers_collected = []
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         state = player._convert_game_to_state(game)
 
         # Should be in progress with flowers on board
@@ -519,7 +525,7 @@ class TestMLProxyPlayerGameStatusConversion:
         assert "robot" in state
         assert "princess" in state
 
-    def test_convert_game_to_state_structure(self, mock_ml_client):
+    def test_convert_game_to_state_structure(self, mock_repository, mock_ml_client):
         """Test that converted state has correct structure."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(1, 2)
@@ -527,7 +533,7 @@ class TestMLProxyPlayerGameStatusConversion:
         game.princess.position = Position(4, 4)
         game.flowers = {Position(2, 2)}
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         state = player._convert_game_to_state(game)
 
         # Check structure
@@ -554,17 +560,17 @@ class TestMLProxyPlayerProperties:
 
     def test_name_property_default_strategy(self, mock_ml_client):
         """Test name property with default strategy."""
-        player = MLProxyPlayer(mock_ml_client, strategy="default")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="default")
         assert player.name == "ML Proxy Player (default strategy)"
 
-    def test_name_property_aggressive_strategy(self, mock_ml_client):
+    def test_name_property_aggressive_strategy(self, mock_repository, mock_ml_client):
         """Test name property with aggressive strategy."""
-        player = MLProxyPlayer(mock_ml_client, strategy="aggressive")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="aggressive")
         assert player.name == "ML Proxy Player (aggressive strategy)"
 
-    def test_name_property_conservative_strategy(self, mock_ml_client):
+    def test_name_property_conservative_strategy(self, mock_repository, mock_ml_client):
         """Test name property with conservative strategy."""
-        player = MLProxyPlayer(mock_ml_client, strategy="conservative")
+        player = MLProxyPlayer(mock_repository, mock_ml_client, strategy="conservative")
         assert player.name == "ML Proxy Player (conservative strategy)"
 
 
@@ -572,7 +578,7 @@ class TestMLProxyPlayerErrorHandling:
     """Test error handling in various scenarios."""
 
     @pytest.mark.asyncio
-    async def test_get_prediction_handles_network_error(self, mock_ml_client):
+    async def test_get_prediction_handles_network_error(self, mock_repository, mock_ml_client):
         """Test that prediction handles network errors gracefully."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -583,14 +589,14 @@ class TestMLProxyPlayerErrorHandling:
         # Simulate network error
         mock_ml_client.predict_action.side_effect = ConnectionError("Network unreachable")
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should return empty list without crashing
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_get_prediction_handles_malformed_response(self, mock_ml_client):
+    async def test_get_prediction_handles_malformed_response(self, mock_repository, mock_ml_client):
         """Test prediction handles malformed ML service response."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -601,14 +607,14 @@ class TestMLProxyPlayerErrorHandling:
         # Return malformed response (missing "action" key)
         mock_ml_client.predict_action.return_value = {"confidence": 0.9}
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should handle gracefully
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_execute_action_handles_invalid_move(self, mock_ml_client):
+    async def test_execute_action_handles_invalid_move(self, mock_repository, mock_ml_client):
         """Test that invalid moves are caught and handled."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(0, 0)
@@ -621,14 +627,14 @@ class TestMLProxyPlayerErrorHandling:
             {"action": "move", "direction": "north", "confidence": 0.9}
         ]
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should catch the exception and return empty list
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_solve_async_handles_invalid_direction_string(self, mock_ml_client):
+    async def test_solve_async_handles_invalid_direction_string(self, mock_repository, mock_ml_client):
         """Test handling of invalid direction string from ML service."""
         game = Game(game_id="test-game-123", rows=5, cols=5)
         game.robot.position = Position(3, 4)
@@ -643,7 +649,7 @@ class TestMLProxyPlayerErrorHandling:
             "confidence": 0.9,
         }
 
-        player = MLProxyPlayer(mock_ml_client)
+        player = MLProxyPlayer(mock_repository, mock_ml_client)
         result = await player.solve_async(game, "test-game-123")
 
         # Should handle invalid direction gracefully

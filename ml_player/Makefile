@@ -34,11 +34,15 @@ help:
 	@echo ""
 	@echo "ML Commands:"
 	@echo "  make ml-generate-data       - Generate synthetic training data"
+	@echo "  make ml-generate-balanced-training-data - Generate balanced training data"
 	@echo "  make ml-collect-data-ai-games  - Collect data from AI-solved games"
-	@echo "  make ml-train                - Train Random Forest model"
-	@echo "  make ml-train-gb             - Train Gradient Boosting model"
-	@echo "  make ml-stats                - Show training data statistics"
-	@echo "  make ml-list-models          - List all trained models"
+	@echo "  make ml-train                       - Train Random Forest model"
+	@echo "  make ml-train-gb                    - Train Gradient Boosting model"
+	@echo "  make ml-stats                       - Show training data statistics"
+	@echo "  make ml-list-models                 - List all trained models"
+	@echo "  make ml-test-model                  - Test model prediction"
+	@echo "  make ml-test-feature-extraction      - Test feature extraction"
+	@echo "  make ml-test-exact-scenario          - Test exact scenario"
 
 install:
 	brew install
@@ -164,3 +168,19 @@ ml-stats: # step 4
 ml-list-models:
 	@echo "Registered models:"
 	@poetry run python -c "import sys; sys.path.insert(0, 'src'); from hexagons.mlplayer.domain.ml import ModelRegistry; r = ModelRegistry(); models = r.list_models(); [print(f'{m.name:50s} | accuracy={m.test_accuracy:.4f} | type={m.model_type}') for m in models]"
+
+ml-test-model:
+	@echo "Testing model..."
+	poetry run python scripts/test_model_prediction.py
+
+ml-test-feature-extraction:
+	@echo "Testing feature extraction..."
+	poetry run python scripts/test_feature_extraction.py
+
+ml-test-exact-scenario:
+	@echo "Testing exact scenario..."
+	poetry run python scripts/test_exact_scenario.py
+
+ml-generate-balanced-training-data:
+	@echo "Generating balanced training data..."
+	poetry run python scripts/generate_balanced_training_data.py

@@ -40,7 +40,7 @@ from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPl
 logger = get_logger("collect_from_ai_solved_games")
 
 
-def execute_action_on_game(game: Game, action: str, direction: Any) -> bool:
+def _execute_action_on_game(game: Game, action: str, direction: Any) -> bool:
     """
     Execute an action on the game.
 
@@ -51,19 +51,19 @@ def execute_action_on_game(game: Game, action: str, direction: Any) -> bool:
         if action == "rotate":
             GameService.rotate_robot(game, direction)
         elif action == "move":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.move_robot(game)
         elif action == "pick":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.pick_flower(game)
         elif action == "give":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.give_flowers(game)
         elif action == "clean":
-            GameService.rotate_robot(game, direction)
+            # GameService.rotate_robot(game, direction)
             GameService.clean_obstacle(game)
         elif action == "drop":
-            GameService.rotate_robot(game, direction)
+            #   GameService.rotate_robot(game, direction)
             GameService.drop_flower(game)
         else:
             logger.warning(f"Unknown action: {action}")
@@ -74,7 +74,7 @@ def execute_action_on_game(game: Game, action: str, direction: Any) -> bool:
         return False
 
 
-def collect_from_ai_solved_game(
+def _collect_from_ai_solved_game(
     game_id: str,
     rows: int,
     cols: int,
@@ -154,7 +154,7 @@ def collect_from_ai_solved_game(
         samples_collected += 1
 
         # Execute action on replay game
-        if not execute_action_on_game(game_replay, action, direction):
+        if not _execute_action_on_game(game_replay, action, direction):
             logger.warning(f"Action execution failed during replay: {action} {direction}")
             break
 
@@ -166,7 +166,7 @@ def collect_from_ai_solved_game(
     }
 
 
-def collect_expert_heuristic_samples(
+def _collect_expert_heuristic_samples(
     collector: GameDataCollector,
     num_samples: int = 1000
 ) -> int:
@@ -441,7 +441,7 @@ def collect_expert_heuristic_samples(
     return samples_collected
 
 
-def main() -> None:
+def _main() -> None:
     """Main data collection function."""
     parser = argparse.ArgumentParser(
         description="Collect training data from AI-solved games"
@@ -505,7 +505,7 @@ def main() -> None:
     for i in range(args.num_games):
         rows, cols = random.choice(board_sizes)
 
-        result = collect_from_ai_solved_game(
+        result = _collect_from_ai_solved_game(
             game_id=f"ai_game_{i:05d}",
             rows=rows,
             cols=cols,
@@ -532,7 +532,7 @@ def main() -> None:
     logger.info("Phase 2: Collecting expert heuristic samples")
     logger.info("=" * 60)
 
-    expert_samples = collect_expert_heuristic_samples(
+    expert_samples = _collect_expert_heuristic_samples(
         collector=collector,
         num_samples=args.num_expert_samples
     )
@@ -561,4 +561,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    _main()

@@ -50,6 +50,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [robot_pos],
                 "obstacles_positions": [],
                 "initial_flowers_count": 1,
@@ -97,6 +99,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [],
                 "obstacles_positions": [],
                 "initial_flowers_count": random.randint(2, 5),
@@ -134,6 +138,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [flower_pos],
                 "obstacles_positions": [],
                 "initial_flowers_count": 1,
@@ -165,6 +171,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [],
                 "obstacles_positions": [],
                 "initial_flowers_count": random.randint(1, 3),
@@ -190,6 +198,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [{"row": random.randint(0, rows-1), "col": random.randint(0, cols-1)}],
                 "obstacles_positions": [obstacle_pos],
                 "initial_flowers_count": 1,
@@ -229,6 +239,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [target_pos],
                 "obstacles_positions": [],
                 "initial_flowers_count": 1,
@@ -252,6 +264,8 @@ def generate_sample_game_state(scenario: str = "random") -> tuple[dict, str, str
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [],
                 "obstacles_positions": [],
                 "initial_flowers_count": random.randint(2, 4),

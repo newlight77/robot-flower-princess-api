@@ -92,9 +92,9 @@ def test_select_action_returns_valid_action():
     assert isinstance(action, str)
     assert action in ["move", "pick", "drop", "give", "clean", "rotate"]
 
-    if action in ["move", "rotate"]:
+    if action == "rotate":
         assert direction in ["NORTH", "SOUTH", "EAST", "WEST"]
-    elif action in ["pick", "give", "drop"]:
+    elif action in ["move", "pick", "give", "drop"]:
         assert direction is None
 
 

@@ -132,9 +132,10 @@ def collect_from_ai_solved_game(
         # Get current state BEFORE action
         game_state = game_replay.to_dict()
 
-        # For move actions without direction, use robot's current orientation
-        if action == "move" and direction is None:
-            direction = game_replay.robot.orientation
+        # Only rotate actions should have a direction
+        # Move actions don't take direction - they move in current orientation
+        if action == "move":
+            direction = None
 
         # Collect sample
         collector.collect_sample(
@@ -197,6 +198,10 @@ def collect_expert_heuristic_samples(
             "row": random.randint(1, rows - 2),
             "col": random.randint(1, cols - 2)
         }
+        princess_pos = {
+            "row": random.randint(0, rows-1),
+            "col": random.randint(0, cols-1)
+        }
 
         # Place flower adjacent to robot
         direction = random.choice(["NORTH", "SOUTH", "EAST", "WEST"])
@@ -213,6 +218,8 @@ def collect_expert_heuristic_samples(
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [flower_pos],
                 "obstacles_positions": [],
                 "initial_flowers_count": 1,
@@ -237,7 +244,7 @@ def collect_expert_heuristic_samples(
             game_id=f"expert_pick_{i}",
             game_state=game_state,
             action="pick",
-            direction=direction,
+            direction=None,  # Pick doesn't take direction - uses robot's orientation
             outcome={"success": True, "strategy": "pick_nearest"}
         )
         samples_collected += 1
@@ -268,6 +275,8 @@ def collect_expert_heuristic_samples(
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [],  # All flowers picked
                 "obstacles_positions": [],
                 "initial_flowers_count": random.randint(3, 7),
@@ -295,7 +304,7 @@ def collect_expert_heuristic_samples(
             game_id=f"expert_give_{i}",
             game_state=game_state,
             action="give",
-            direction=direction,
+            direction=None,  # Give doesn't take direction - uses robot's orientation
             outcome={"success": True, "strategy": "deliver_all"}
         )
         samples_collected += 1
@@ -335,6 +344,8 @@ def collect_expert_heuristic_samples(
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [flower_pos],
                 "obstacles_positions": [],
                 "initial_flowers_count": 1,
@@ -349,7 +360,7 @@ def collect_expert_heuristic_samples(
                 "obstacles_cleaned": [],
             },
             "princess": {
-                "position": {"row": random.randint(0, rows-1), "col": random.randint(0, cols-1)},
+                "position": princess_pos,
                 "flowers_received": [],
                 "mood": "neutral"
             },
@@ -359,7 +370,7 @@ def collect_expert_heuristic_samples(
             game_id=f"expert_move_flower_{i}",
             game_state=game_state,
             action="move",
-            direction=direction,
+            direction=None,  # Move doesn't take direction - uses robot's orientation
             outcome={"success": True, "strategy": "move_to_nearest"}
         )
         samples_collected += 1
@@ -393,6 +404,8 @@ def collect_expert_heuristic_samples(
             "board": {
                 "rows": rows,
                 "cols": cols,
+                "robot_position": robot_pos,
+                "princess_position": princess_pos,
                 "flowers_positions": [],  # All picked
                 "obstacles_positions": [],
                 "initial_flowers_count": random.randint(3, 7),
@@ -420,7 +433,7 @@ def collect_expert_heuristic_samples(
             game_id=f"expert_move_princess_{i}",
             game_state=game_state,
             action="move",
-            direction=direction,
+            direction=None,  # Move doesn't take direction - uses robot's orientation
             outcome={"success": True, "strategy": "deliver_mode"}
         )
         samples_collected += 1

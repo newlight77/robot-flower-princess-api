@@ -58,7 +58,7 @@ class AutoplayUseCase:
 
                 # ML Player works iteratively (one action at a time)
                 # We'll execute actions as they come
-                ml_player = MLProxyPlayer(self.ml_client, strategy="default")
+                ml_player = MLProxyPlayer(repository=self.repository, ml_client=self.ml_client, strategy="default")
                 actions = await ml_player.solve_async(game_copy, command.game_id)
                 strategy_name = "ML Player (Hybrid)"
             else:  # "greedy" (default)

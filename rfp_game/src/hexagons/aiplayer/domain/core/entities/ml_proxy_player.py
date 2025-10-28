@@ -8,6 +8,7 @@ external ML Player service into the autoplay system.
 
 from typing import List, Optional, Tuple
 
+from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
 from hexagons.game.domain.core.entities.game import Game
 from hexagons.game.domain.core.value_objects.direction import Direction
@@ -32,7 +33,7 @@ class MLProxyPlayer:
     to be used as a strategy in the autoplay system.
     """
 
-    def __init__(self, ml_client: MLPlayerClientPort, strategy: str = "default"):
+    def __init__(self, repository: GameRepository, ml_client: MLPlayerClientPort, strategy: str = "default"):
         """
         Initialize ML Proxy Player.
 
@@ -40,6 +41,7 @@ class MLProxyPlayer:
             ml_client: Client for communicating with ML Player service
             strategy: Strategy to use ("default", "aggressive", "conservative")
         """
+        self.repository = repository
         self.ml_client = ml_client
         self.strategy = strategy
 
@@ -121,21 +123,27 @@ class MLProxyPlayer:
         # Execute action
         if action == "rotate":
             GameService.rotate_robot(game, direction)
+            self.repository.save(game_id=game.game_id, game=game)
         elif action == "move":
             GameService.rotate_robot(game, direction)
             GameService.move_robot(game)
+            self.repository.save(game_id=game.game_id, game=game)
         elif action == "pick":
             GameService.rotate_robot(game, direction)
             GameService.pick_flower(game)
+            self.repository.save(game_id=game.game_id, game=game)
         elif action == "drop":
             GameService.rotate_robot(game, direction)
             GameService.drop_flower(game)
+            self.repository.save(game_id=game.game_id, game=game)
         elif action == "give":
             GameService.rotate_robot(game, direction)
             GameService.give_flowers(game)
+            self.repository.save(game_id=game.game_id, game=game)
         elif action == "clean":
             GameService.rotate_robot(game, direction)
             GameService.clean_obstacle(game)
+            self.repository.save(game_id=game.game_id, game=game)
         else:
             logger.error(f"MLProxyPlayer.execute_action: Unknown action={action}")
             return None, None

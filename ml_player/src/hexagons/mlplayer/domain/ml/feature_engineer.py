@@ -472,25 +472,26 @@ class FeatureEngineer:
         Encode action as integer label for classification.
 
         Args:
-            action: Action type
-            direction: Direction for move/rotate actions
+            action: Action type (move, rotate, pick, drop, give, clean)
+            direction: Direction ONLY for rotate actions (NORTH/SOUTH/EAST/WEST).
+                      Move doesn't take direction - uses robot's current orientation.
 
         Returns:
-            Integer label
+            Integer label (0-8)
         """
         # Action encoding:
-        # 0-3: move (NORTH, SOUTH, EAST, WEST)
-        # 4-7: rotate (NORTH, SOUTH, EAST, WEST)
-        # 8: pick
-        # 9: drop
-        # 10: give
-        # 11: clean
+        # 0-3: rotate (NORTH, SOUTH, EAST, WEST) - only rotate takes direction
+        # 4: move (no direction - moves in current orientation)
+        # 5: pick
+        # 6: drop
+        # 7: give
+        # 8: clean
 
         # Normalize direction to uppercase if provided
         if direction:
             direction = direction.upper()
 
-        if action == "move":
+        if action == "rotate":
             if direction == "NORTH":
                 return 0
             elif direction == "SOUTH":
@@ -499,25 +500,20 @@ class FeatureEngineer:
                 return 2
             elif direction == "WEST":
                 return 3
-        elif action == "rotate":
-            if direction == "NORTH":
-                return 4
-            elif direction == "SOUTH":
-                return 5
-            elif direction == "EAST":
-                return 6
-            elif direction == "WEST":
-                return 7
+            else:
+                raise ValueError(f"Rotate action requires valid direction, got: {direction}")
+        elif action == "move":
+            return 4
         elif action == "pick":
-            return 8
+            return 5
         elif action == "drop":
-            return 9
+            return 6
         elif action == "give":
-            return 10
+            return 7
         elif action == "clean":
-            return 11
+            return 8
 
-        raise ValueError(f"Unknown action: {action} with direction: {direction}")
+        raise ValueError(f"Unknown action: {action}")
 
     @staticmethod
     def decode_action(label: int) -> tuple[str, str | None]:
@@ -531,18 +527,15 @@ class FeatureEngineer:
             Tuple of (action, direction)
         """
         action_map = {
-            0: ("move", "NORTH"),
-            1: ("move", "SOUTH"),
-            2: ("move", "EAST"),
-            3: ("move", "WEST"),
-            4: ("rotate", "NORTH"),
-            5: ("rotate", "SOUTH"),
-            6: ("rotate", "EAST"),
-            7: ("rotate", "WEST"),
-            8: ("pick", None),
-            9: ("drop", None),
-            10: ("give", None),
-            11: ("clean", None),
+            0: ("rotate", "NORTH"),
+            1: ("rotate", "SOUTH"),
+            2: ("rotate", "EAST"),
+            3: ("rotate", "WEST"),
+            4: ("move", None),
+            5: ("pick", None),
+            6: ("drop", None),
+            7: ("give", None),
+            8: ("clean", None),
         }
 
         if label not in action_map:

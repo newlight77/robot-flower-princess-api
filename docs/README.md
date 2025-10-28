@@ -6,6 +6,7 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 
 | Document | Description | Size |
 |----------|-------------|------|
+| [GAME_RULES.md](GAME_RULES.md) | Complete game rules, mechanics, and examples | 15KB |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, DDD patterns, design decisions | 38KB |
 | [API.md](API.md) | Complete API reference with examples | 24KB |
 | [TESTING_STRATEGY.md](TESTING_STRATEGY.md) | Testing best practices and examples | 28KB |
@@ -14,7 +15,7 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 | [CI_CD.md](CI_CD.md) | GitHub Actions workflow and pipeline | 27KB |
 | [COVERAGE.md](COVERAGE.md) | Code coverage strategy and tools | 19KB |
 
-**Total Documentation**: ~211KB of comprehensive guides
+**Total Documentation**: ~226KB of comprehensive guides
 
 ---
 
@@ -23,10 +24,11 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 ### For Developers
 
 **Getting Started**:
-1. [Architecture Overview](ARCHITECTURE.md#overview) - Understand the system design
-2. [Local Development](DEPLOYMENT.md#local-development) - Set up your dev environment
-3. [Testing Strategy](TESTING_STRATEGY.md#overview) - Learn how to write tests
-4. [API Reference](API.md#api-endpoints) - Explore available endpoints
+1. [Game Rules](GAME_RULES.md) - Understand the game mechanics and objectives
+2. [Architecture Overview](ARCHITECTURE.md#overview) - Understand the system design
+3. [Local Development](DEPLOYMENT.md#local-development) - Set up your dev environment
+4. [Testing Strategy](TESTING_STRATEGY.md#overview) - Learn how to write tests
+5. [API Reference](API.md#api-endpoints) - Explore available endpoints
 
 **Development Workflow**:
 1. [Running Tests](TESTING_STRATEGY.md#running-tests) - How to run tests locally
@@ -59,15 +61,27 @@ Welcome to the **Robot Flower Princess API** documentation! This comprehensive g
 ### For API Consumers
 
 **API Usage**:
-1. [API Overview](API.md#overview) - Getting started with the API
-2. [Endpoints](API.md#api-endpoints) - Available endpoints
-3. [Request/Response Schemas](API.md#requestresponse-schemas) - Data formats
-4. [Examples](API.md#examples) - Code examples (Python, JavaScript, cURL)
-5. [Error Handling](API.md#error-handling) - Error codes and messages
+1. [Game Rules](GAME_RULES.md) - Understand the game mechanics first
+2. [API Overview](API.md#overview) - Getting started with the API
+3. [Endpoints](API.md#api-endpoints) - Available endpoints
+4. [Request/Response Schemas](API.md#requestresponse-schemas) - Data formats
+5. [Examples](API.md#examples) - Code examples (Python, JavaScript, cURL)
+6. [Error Handling](API.md#error-handling) - Error codes and messages
 
 ---
 
 ## 📖 Documentation by Topic
+
+### Game Mechanics
+
+- [Game Overview](GAME_RULES.md#overview) - What is Robot Flower Princess?
+- [Game Objective](GAME_RULES.md#game-objective) - How to win
+- [Game Setup](GAME_RULES.md#game-setup) - Board and entities
+- [Actions & Mechanics](GAME_RULES.md#actions--mechanics) - All available actions
+- [Victory Conditions](GAME_RULES.md#victory-conditions) - Win conditions
+- [Game Rules](GAME_RULES.md#game-rules--constraints) - Rules and constraints
+- [Example Game Flow](GAME_RULES.md#example-game-flow) - Step-by-step example
+- [AI Players](GAME_RULES.md#ai-players) - Different AI strategies
 
 ### Architecture & Design
 
@@ -216,8 +230,8 @@ git push origin feature/my-feature
 
 | Metric | Value |
 |--------|-------|
-| **Documentation Files** | 7 |
-| **Total Doc Size** | ~211KB |
+| **Documentation Files** | 8 |
+| **Total Doc Size** | ~226KB |
 | **Services** | 2 (RFP Game, ML Player) |
 | **Total Tests** | 165 (146 unit, 6 integration, 13 feature-component) |
 | **Test Execution Time** | < 1 second |

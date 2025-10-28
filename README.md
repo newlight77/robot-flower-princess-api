@@ -15,7 +15,9 @@ The main game service implementing the Robot Flower Princess game logic.
 
 **Tech Stack**: Python 3.13, FastAPI, Poetry, Pytest
 
-**Documentation**: See [`rfp_game/README.md`](rfp_game/README.md)
+**Documentation**:
+- [Game Rules](docs/GAME_RULES.md) - Learn how to play
+- [Service README](rfp_game/README.md) - Technical details
 
 ### 2. ML Player (`ml_player/`)
 Machine learning-based player service that provides intelligent game-playing strategies.
@@ -179,6 +181,7 @@ make run
 
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
+- **[Game Rules](docs/GAME_RULES.md)** - Complete game mechanics, rules, and examples
 - **[Architecture](docs/ARCHITECTURE.md)** - System design and hexagonal architecture
 - **[API Documentation](docs/API.md)** - RESTful API endpoints
 - **[CI/CD Workflow](docs/CI_CD.md)** - GitHub Actions pipeline

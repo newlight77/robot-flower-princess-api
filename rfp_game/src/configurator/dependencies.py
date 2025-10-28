@@ -27,7 +27,9 @@ def get_ml_player_client() -> MLPlayerClientPort:
 def get_gameplay_data_collector() -> GameplayDataCollector:
     """Dependency injection for gameplay data collector."""
     # Use settings value (can be overridden by ENABLE_DATA_COLLECTION env var)
-    enabled = os.getenv("ENABLE_DATA_COLLECTION", str(settings.ml_player_service_data_collection_enabled)).lower() == "true"
+    enabled = (
+        os.getenv("ENABLE_DATA_COLLECTION", str(settings.ml_player_service_data_collection_enabled)).lower() == "true"
+    )
 
     return GameplayDataCollector(
         ml_training_url=settings.ml_player_service_url,

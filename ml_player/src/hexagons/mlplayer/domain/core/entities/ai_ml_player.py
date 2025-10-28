@@ -196,10 +196,12 @@ class AIMLPlayer:
 
         # Log action validity features (last 6 features)
         action_validity_start = len(features) - 6
-        logger.info(f"🎯 ML Prediction - Action Validity: "
-                   f"can_move={features[action_validity_start]:.1f}, "
-                   f"can_clean={features[action_validity_start+3]:.1f}, "
-                   f"should_rotate={features[action_validity_start+5]:.1f}")
+        logger.info(
+            f"🎯 ML Prediction - Action Validity: "
+            f"can_move={features[action_validity_start]:.1f}, "
+            f"can_clean={features[action_validity_start+3]:.1f}, "
+            f"should_rotate={features[action_validity_start+5]:.1f}"
+        )
 
         # Predict action label
         label = self.model.predict([features])[0]
@@ -215,8 +217,8 @@ class AIMLPlayer:
         can_pick = features[action_validity_start + 1]
         can_give = features[action_validity_start + 2]
         can_clean = features[action_validity_start + 3]
-        can_drop = features[action_validity_start + 4]
-        should_rotate = features[action_validity_start + 5]
+        # can_drop = features[action_validity_start + 4]
+        # should_rotate = features[action_validity_start + 5]
 
         # Override invalid predictions
         if action == "rotate" and direction == robot_orient:
@@ -227,11 +229,11 @@ class AIMLPlayer:
             logger.info(f"🔧 Override: Choosing 'rotate' to {direction} instead")
 
         elif action == "move" and can_move == 0.0:
-            logger.warning(f"⚠️  Model predicted 'move' but can_move=0.0! Overriding...")
+            logger.warning("⚠️  Model predicted 'move' but can_move=0.0! Overriding...")
             # Prefer clean if obstacle ahead, otherwise rotate to a DIFFERENT direction
             if can_clean == 1.0:
                 action = "clean"
-                logger.info(f"🔧 Override: Choosing 'clean' (obstacle ahead)")
+                logger.info("🔧 Override: Choosing 'clean' (obstacle ahead)")
             else:
                 action = "rotate"
                 # Find a different direction to rotate to (not current orientation)
@@ -239,33 +241,33 @@ class AIMLPlayer:
                 logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
 
         elif action == "pick" and can_pick == 0.0:
-            logger.warning(f"⚠️  Model predicted 'pick' but can_pick=0.0! Overriding...")
+            logger.warning("⚠️  Model predicted 'pick' but can_pick=0.0! Overriding...")
             if can_move == 1.0:
                 action = "move"
                 direction = None
-                logger.info(f"🔧 Override: Choosing 'move' instead")
+                logger.info("🔧 Override: Choosing 'move' instead")
             else:
                 action = "rotate"
                 direction = self._find_best_rotation_direction(state_dict, robot_orient)
                 logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
 
         elif action == "give" and can_give == 0.0:
-            logger.warning(f"⚠️  Model predicted 'give' but can_give=0.0! Overriding...")
+            logger.warning("⚠️  Model predicted 'give' but can_give=0.0! Overriding...")
             if can_move == 1.0:
                 action = "move"
                 direction = None
-                logger.info(f"🔧 Override: Choosing 'move' toward princess")
+                logger.info("🔧 Override: Choosing 'move' toward princess")
             else:
                 action = "rotate"
                 direction = self._find_best_rotation_direction(state_dict, robot_orient)
                 logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
 
         elif action == "clean" and can_clean == 0.0:
-            logger.warning(f"⚠️  Model predicted 'clean' but can_clean=0.0! Overriding...")
+            logger.warning("⚠️  Model predicted 'clean' but can_clean=0.0! Overriding...")
             if can_move == 1.0:
                 action = "move"
                 direction = None
-                logger.info(f"🔧 Override: Choosing 'move' (no obstacle)")
+                logger.info("🔧 Override: Choosing 'move' (no obstacle)")
             else:
                 action = "rotate"
                 direction = self._find_best_rotation_direction(state_dict, robot_orient)
@@ -291,7 +293,9 @@ class AIMLPlayer:
             state.robot["position"] in self._get_adjacent_positions(state.princess["position"], state)
             and len(state.robot["flowers_collected"]) > 0
         ):
-            logger.info(f"AIMLPlayer._select_action_heuristic: Giving flowers to princess at {state.princess['position']}")
+            logger.info(
+                f"AIMLPlayer._select_action_heuristic: Giving flowers to princess at {state.princess['position']}"
+            )
             return ("give", None)
 
         # If at flower and not full → pick
@@ -308,7 +312,9 @@ class AIMLPlayer:
         # Check if current orientation is blocked by obstacle
         current_orientation = state.robot.get("orientation", "NORTH").upper()  # Normalize to uppercase
         if self._is_path_blocked(state.robot["position"], current_orientation, state):
-            logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked in orientation {current_orientation}, rotating")
+            logger.info(
+                f"AIMLPlayer._select_action_heuristic: Path blocked in orientation {current_orientation}, rotating"
+            )
             # Try to find a clear direction
             for direction in ["NORTH", "SOUTH", "EAST", "WEST"]:
                 if not self._is_path_blocked(state.robot["position"], direction, state):
@@ -323,7 +329,9 @@ class AIMLPlayer:
             if not self._is_path_blocked(state.robot["position"], direction, state):
                 return ("move", direction)
             else:
-                logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked toward princess, rotating to {direction}")
+                logger.info(
+                    f"AIMLPlayer._select_action_heuristic: Path blocked toward princess, rotating to {direction}"
+                )
                 return ("rotate", direction)
 
         # Otherwise → move toward nearest flower
@@ -375,12 +383,8 @@ class AIMLPlayer:
             score = 0.0
 
             # Check if path is clear in this direction
-            forward_pos = self._get_adjacent_position(
-                (robot_pos["row"], robot_pos["col"]), direction
-            )
-            cell_type = self._get_cell_type(
-                forward_pos, flowers_positions, obstacles_positions, princess_pos, board
-            )
+            forward_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), direction)
+            cell_type = self._get_cell_type(forward_pos, flowers_positions, obstacles_positions, princess_pos, board)
 
             # Heavily prefer clear paths
             if cell_type in ["empty", "flower"]:
@@ -394,7 +398,7 @@ class AIMLPlayer:
                 if flowers_positions:
                     nearest_flower = min(
                         flowers_positions,
-                        key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"])
+                        key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
                     )
                     target = nearest_flower
                 else:
@@ -500,8 +504,7 @@ class AIMLPlayer:
             target_col -= 1
 
         # Check if out of bounds
-        if (target_row < 0 or target_row >= state.board["rows"] or
-            target_col < 0 or target_col >= state.board["cols"]):
+        if target_row < 0 or target_row >= state.board["rows"] or target_col < 0 or target_col >= state.board["cols"]:
             return True
 
         # Check if obstacle at target position

@@ -56,13 +56,19 @@ class GameplayDataCollector:
             direction: Direction for the action (if applicable)
             outcome: Result of the action (success, message, etc.)
         """
-        logger.info(f"Collecting gameplay data: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
+        logger.info(
+            f"Collecting gameplay data: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}"
+        )
         if not self.enabled:
-            logger.info(f"Data collection is disabled, skipping collection: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
+            logger.info(
+                f"Data collection is disabled, skipping collection: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}"
+            )
             return
 
         try:
-            logger.info(f"Sending gameplay data to ML Training service: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}")
+            logger.info(
+                f"Sending gameplay data to ML Training service: game_id={game_id}, action={action}, direction={direction}, outcome={outcome}"
+            )
             # Prepare payload
             payload = {
                 "game_id": game_id,

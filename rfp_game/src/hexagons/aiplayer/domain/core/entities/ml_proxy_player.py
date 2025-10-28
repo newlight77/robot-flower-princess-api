@@ -119,7 +119,9 @@ class MLProxyPlayer:
             try:
                 action, direction = self._execute_action(action=action, direction=direction, game=game)
                 actions.append((action, direction))
-                logger.info(f"MLProxyPlayer.solve_async: Action {iteration} executed successfully: {action} {direction}")
+                logger.info(
+                    f"MLProxyPlayer.solve_async: Action {iteration} executed successfully: {action} {direction}"
+                )
             except Exception as e:
                 # If action fails (invalid move, etc.), log and break
                 logger.warning(f"MLProxyPlayer.solve_async: Action failed: {e}")

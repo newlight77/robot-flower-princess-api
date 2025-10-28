@@ -23,7 +23,9 @@ class GameService:
         """Rotate the robot to face a direction."""
         logger.info("GameService.rotate_robot: game_id=%r direction=%r", game.game_id, direction)
         if game.get_status() != GameStatus.IN_PROGRESS:
-            raise GameOverException(f"GameService.rotate_robot: Game is already over in direction={game.robot.orientation}")
+            raise GameOverException(
+                f"GameService.rotate_robot: Game is already over in direction={game.robot.orientation}"
+            )
 
         if direction not in [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]:
             raise InvalidRotationException(f"GameService.rotate_robot: Invalid direction={direction}")
@@ -34,15 +36,24 @@ class GameService:
 
         game.update_timestamp()
         logger.info("GameService.rotate_robot: game_id=%r action=%r", game.game_id, action)
-        logger.info("GameService.rotate_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation)
+        logger.info(
+            "GameService.rotate_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation
+        )
 
     @staticmethod
     def move_robot(game: Game) -> None:
         """Move the robot in the direction it's facing."""
-        logger.info("GameService.move_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation)
+        logger.info(
+            "GameService.move_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation
+        )
 
         if game.get_status() != GameStatus.IN_PROGRESS:
-            logger.info("GameService.move_robot: game_id=%r game.robot.orientation=%r game.robot.position=%r Game is already over", game.game_id, game.robot.orientation, game.robot.position)
+            logger.info(
+                "GameService.move_robot: game_id=%r game.robot.orientation=%r game.robot.position=%r Game is already over",
+                game.game_id,
+                game.robot.orientation,
+                game.robot.position,
+            )
             raise GameOverException(
                 f"GameService.move_robot: Game is already over in direction={game.robot.orientation} position={game.robot.position}"
             )
@@ -81,7 +92,9 @@ class GameService:
         logger.info("GameService.move_robot: game_id=%r", game.game_id)
         logger.info("GameService.move_robot: game_id=%r action=%r", game.game_id, action)
         logger.info("GameService.move_robot: game_id=%r game.robot.position=%r", game.game_id, game.robot.position)
-        logger.info("GameService.move_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation)
+        logger.info(
+            "GameService.move_robot: game_id=%r game.robot.orientation=%r", game.game_id, game.robot.orientation
+        )
 
     @staticmethod
     def pick_flower(game: Game) -> None:
@@ -89,7 +102,9 @@ class GameService:
         logger.info("GameService.pick_flower: game_id=%r", game.game_id)
 
         if game.get_status() != GameStatus.IN_PROGRESS:
-            raise GameOverException(f"GameService.pick_flower: Game is already over in direction={game.robot.orientation}")
+            raise GameOverException(
+                f"GameService.pick_flower: Game is already over in direction={game.robot.orientation}"
+            )
 
         if not game.robot.can_pick():
             raise InvalidPickException(
@@ -106,7 +121,9 @@ class GameService:
             )
 
         if target_position not in game.flowers:
-            raise InvalidPickException(f"GameService.pick_flower: No flower in direction={game.robot.orientation} position={target_position}")
+            raise InvalidPickException(
+                f"GameService.pick_flower: No flower in direction={game.robot.orientation} position={target_position}"
+            )
 
         # Pick the flower
         action = game.robot.pick_flower(target_position)
@@ -117,7 +134,11 @@ class GameService:
         game.update_timestamp()
 
         logger.info("GameService.pick_flower: game_id=%r action=%r", game.game_id, action)
-        logger.info("GameService.pick_flower: game_id=%r game.robot.flowers_collected=%r", game.game_id, game.robot.flowers_collected)
+        logger.info(
+            "GameService.pick_flower: game_id=%r game.robot.flowers_collected=%r",
+            game.game_id,
+            game.robot.flowers_collected,
+        )
 
     @staticmethod
     def drop_flower(game: Game) -> None:
@@ -125,10 +146,14 @@ class GameService:
         logger.info("GameService.drop_flower: game_id=%r", game.game_id)
 
         if game.get_status() != GameStatus.IN_PROGRESS:
-            raise GameOverException(f"GameService.drop_flower: Game is already over in direction={game.robot.orientation}")
+            raise GameOverException(
+                f"GameService.drop_flower: Game is already over in direction={game.robot.orientation}"
+            )
 
         if game.robot.flowers_held == 0:
-            raise InvalidDropException(f"GameService.drop_flower: Robot has no flowers to drop in direction={game.robot.orientation}")
+            raise InvalidDropException(
+                f"GameService.drop_flower: Robot has no flowers to drop in direction={game.robot.orientation}"
+            )
 
         # Get position in front of robot
         row_delta, col_delta = game.robot.orientation.get_delta()
@@ -155,17 +180,25 @@ class GameService:
         game.update_timestamp()
 
         logger.info("GameService.drop_flower: game_id=%r action=%r", game.game_id, action)
-        logger.info("GameService.drop_flower: game_id=%r game.robot.flowers_collected=%r", game.game_id, game.robot.flowers_collected)
+        logger.info(
+            "GameService.drop_flower: game_id=%r game.robot.flowers_collected=%r",
+            game.game_id,
+            game.robot.flowers_collected,
+        )
 
     @staticmethod
     def give_flowers(game: Game) -> None:
         """Give flowers to the princess."""
         logger.info("GameService.give_flowers: game_id=%r", game.game_id)
         if game.get_status() != GameStatus.IN_PROGRESS:
-            raise GameOverException(f"GameService.give_flowers: Game is already over in direction={game.robot.orientation}")
+            raise GameOverException(
+                f"GameService.give_flowers: Game is already over in direction={game.robot.orientation}"
+            )
 
         if len(game.robot.flowers_collected) == 0:
-            raise InvalidGiveException(f"GameService.give_flowers: Robot has no flowers to give in direction={game.robot.orientation}")
+            raise InvalidGiveException(
+                f"GameService.give_flowers: Robot has no flowers to give in direction={game.robot.orientation}"
+            )
 
         # Get position in front of robot
         row_delta, col_delta = game.robot.orientation.get_delta()
@@ -194,8 +227,16 @@ class GameService:
         game.update_timestamp()
 
         logger.info("GameService.give_flowers: game_id=%r action=%r", game.game_id, action)
-        logger.info("GameService.give_flowers: game_id=%r game.robot.flowers_delivered=%r", game.game_id, game.robot.flowers_delivered)
-        logger.info("GameService.give_flowers: game_id=%r game.robot.flowers_collected=%r", game.game_id, game.robot.flowers_collected)
+        logger.info(
+            "GameService.give_flowers: game_id=%r game.robot.flowers_delivered=%r",
+            game.game_id,
+            game.robot.flowers_delivered,
+        )
+        logger.info(
+            "GameService.give_flowers: game_id=%r game.robot.flowers_collected=%r",
+            game.game_id,
+            game.robot.flowers_collected,
+        )
 
     @staticmethod
     def clean_obstacle(game: Game) -> None:
@@ -204,7 +245,9 @@ class GameService:
 
         if game.get_status() != GameStatus.IN_PROGRESS:
             logger.info("GameService.clean_obstacle: Game is already over=%r", game.get_status())
-            raise GameOverException(f"GameService.clean_obstacle: Game is already over in direction={game.robot.orientation}")
+            raise GameOverException(
+                f"GameService.clean_obstacle: Game is already over in direction={game.robot.orientation}"
+            )
 
         if not game.robot.can_clean():
             logger.info("GameService.clean_obstacle: Cannot clean while holding flowers=%r", game.robot.flowers_held)
@@ -248,5 +291,13 @@ class GameService:
         game.update_timestamp()
 
         logger.info("GameService.clean_obstacle: game_id=%r action=%r", game.game_id, action)
-        logger.info("GameService.clean_obstacle: game_id=%r game.robot.flowers_collected=%r", game.game_id, game.robot.flowers_collected)
-        logger.info("GameService.clean_obstacle: game_id=%r game.robot.obstacles_cleaned=%r", game.game_id, game.robot.obstacles_cleaned)
+        logger.info(
+            "GameService.clean_obstacle: game_id=%r game.robot.flowers_collected=%r",
+            game.game_id,
+            game.robot.flowers_collected,
+        )
+        logger.info(
+            "GameService.clean_obstacle: game_id=%r game.robot.obstacles_cleaned=%r",
+            game.game_id,
+            game.robot.obstacles_cleaned,
+        )

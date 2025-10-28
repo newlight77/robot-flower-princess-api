@@ -224,7 +224,9 @@ def perform_action(
             raise ValueError(f"Unknown action: {action}")
 
         # Collect gameplay data for ML training
-        logger.info(f"Collecting gameplay data: game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}")
+        logger.info(
+            f"Collecting gameplay data: game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}"
+        )
         try:
             data_collector.collect_action(
                 game_id=game_id,
@@ -237,7 +239,9 @@ def perform_action(
                 },
             )
         except Exception as e:
-            logger.error(f"Failed to collect gameplay data: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}")
+            logger.error(
+                f"Failed to collect gameplay data: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}"
+            )
             raise HTTPException(status_code=500, detail=str(e)) from e
 
         return ActionResponse(
@@ -246,5 +250,7 @@ def perform_action(
             message=("action performed successfully" if result.success else "failed to perform action"),
         )
     except ValueError as e:
-        logger.error(f"Failed to perform action: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}")
+        logger.error(
+            f"Failed to perform action: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}"
+        )
         raise HTTPException(status_code=500, detail=str(e)) from e

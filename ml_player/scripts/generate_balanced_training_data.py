@@ -77,10 +77,8 @@ def main():
     parser.add_argument(
         "--samples-per-class", type=int, default=500, help="Samples per action class"
     )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
 
     args = parser.parse_args()
-    random.seed(args.seed)
 
     logger.info("=" * 60)
     logger.info("Generating Balanced Training Data (ALL 9 Classes)")
@@ -88,7 +86,6 @@ def main():
     logger.info(f"Output directory: {args.output_dir}")
     logger.info(f"Samples per class: {args.samples_per_class}")
     logger.info(f"Total samples: {args.samples_per_class * 9}")
-    logger.info(f"Random seed: {args.seed}")
     logger.info("=" * 60)
 
     collector = GameDataCollector(data_dir=args.output_dir)

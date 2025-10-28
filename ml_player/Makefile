@@ -143,33 +143,37 @@ clean:
 # Machine Learning commands
 
 # Quality data collection (RECOMMENDED for training)
-ml-collect-quality-data:
+ml-collect-quality-data: # step 1
 	@echo "🎯 Collecting quality training data from AI-solved games..."
 	@echo "This will backup old data and collect fresh samples from 1000 games"
 	@echo ""
-	poetry run python scripts/collect_quality_training_data.py --num-games 1000 --strategy heuristic
+	poetry run python scripts/collect_quality_training_data.py --num-games 2000 --strategy heuristic
 
-ml-collect-data-ai-games:
+ml-collect-data-ai-games: # step 1
 	@echo "Collecting data from AI-solved games..."
-	poetry run python scripts/collect_from_ai_solved_games.py --num-games 500 --output-dir data/training
+	poetry run python scripts/collect_from_ai_solved_games.py --num-games 1000 --output-dir data/training
 
 ml-generate-data: # step 1
 	@echo "Generating synthetic training data..."
 	poetry run python scripts/generate_training_data.py --num-samples 1000
 
-ml-generate-balanced-training-data:
+ml-generate-balanced-training-data: # step 1
 	@echo "Generating balanced training data..."
-	poetry run python scripts/generate_balanced_training_data.py
+	poetry run python scripts/generate_balanced_training_data.py --samples-per-class 1000
 
-ml-train: # step 2
+ml-analyze-training-data: # step 2
+	@echo "Analyzing training data..."
+	poetry run python scripts/analyze_training_data.py
+
+ml-train: # step 3
 	@echo "Training Random Forest model..."
 	poetry run python scripts/train_model.py --model-type random_forest
 
-ml-train-gb: # step 3
+ml-train-gb: # step 4
 	@echo "Training Gradient Boosting model..."
 	poetry run python scripts/train_model.py --model-type gradient_boosting
 
-ml-stats: # step 4
+ml-stats: # step 5
 	@echo "Training data statistics:"
 	@poetry run python -c "import sys; sys.path.insert(0, 'src'); \
 	from hexagons.mltraining.domain.ml import GameDataCollector; \
@@ -178,18 +182,18 @@ ml-stats: # step 4
 	stats = c.get_statistics(); \
 	print(json.dumps(stats, indent=2))"
 
-ml-list-models:
+ml-list-models: # step 5
 	@echo "Registered models:"
 	@poetry run python -c "import sys; sys.path.insert(0, 'src'); from hexagons.mlplayer.domain.ml import ModelRegistry; r = ModelRegistry(); models = r.list_models(); [print(f'{m.name:50s} | accuracy={m.test_accuracy:.4f} | type={m.model_type}') for m in models]"
 
-ml-test-model:
+ml-test-model: # step 6
 	@echo "Testing model..."
 	poetry run python scripts/test_model_prediction.py
 
-ml-test-feature-extraction:
+ml-test-feature-extraction: # step 6
 	@echo "Testing feature extraction..."
 	poetry run python scripts/test_feature_extraction.py
 
-ml-test-exact-scenario:
+ml-test-exact-scenario: # step 6
 	@echo "Testing exact scenario..."
 	poetry run python scripts/test_exact_scenario.py

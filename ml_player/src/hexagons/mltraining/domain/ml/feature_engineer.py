@@ -23,19 +23,20 @@ class FeatureEngineer:
         """
         Extract enhanced feature vector from game state.
 
-        Total features: ~72
+        Total features: 78
         - Basic info: 12 features
         - Directional awareness: 32 features (8 per direction × 4 directions)
         - Task context: 10 features
         - Path quality: 8 features
         - Multi-flower strategy: 6 features
         - Orientation: 4 features (one-hot)
+        - Action validity: 6 features (can_move, can_pick, can_give, can_clean, can_drop, should_rotate)
 
         Args:
             game_state: Raw game state dictionary
 
         Returns:
-            NumPy array of 72 features
+            NumPy array of 78 features
         """
         board = game_state["board"]
         robot = game_state["robot"]
@@ -203,6 +204,39 @@ class FeatureEngineer:
         features.append(1.0 if orientation == "EAST" else 0.0)
         features.append(1.0 if orientation == "WEST" else 0.0)
 
+        # ============================================================
+        # ACTION VALIDITY (6 features) - CRITICAL for decision making
+        # ============================================================
+        # Can the robot execute each action from current state?
+
+        # 1. Can move forward? (no obstacle/boundary in facing direction)
+        forward_pos = FeatureEngineer._get_adjacent_position(robot_pos, orientation)
+        forward_cell = FeatureEngineer._get_cell_type(
+            forward_pos, flowers_positions, obstacles_positions, princess["position"], board
+        )
+        can_move = 1.0 if forward_cell in ["empty", "flower"] else 0.0
+        features.append(can_move)
+
+        # 2. Can pick? (flower directly ahead in facing direction)
+        can_pick = 1.0 if forward_cell == "flower" else 0.0
+        features.append(can_pick)
+
+        # 3. Can give? (princess directly ahead AND robot has flowers)
+        can_give = 1.0 if (forward_cell == "princess" and has_collected_flowers) else 0.0
+        features.append(can_give)
+
+        # 4. Can clean? (obstacle directly ahead in facing direction)
+        can_clean = 1.0 if forward_cell == "obstacle" else 0.0
+        features.append(can_clean)
+
+        # 5. Can drop? (empty cell ahead AND robot has flowers)
+        can_drop = 1.0 if (forward_cell == "empty" and has_collected_flowers) else 0.0
+        features.append(can_drop)
+
+        # 6. Should rotate? (blocked or not facing target)
+        should_rotate = 1.0 if can_move == 0.0 else 0.0
+        features.append(should_rotate)
+
         return np.array(features, dtype=np.float32)
 
     # ================================================================
@@ -340,7 +374,7 @@ class FeatureEngineer:
 
     @staticmethod
     def get_feature_names() -> list[str]:
-        """Get human-readable feature names (72 total)."""
+        """Get human-readable feature names (78 total)."""
         names = [
             # Basic (12)
             "board_rows",
@@ -421,6 +455,18 @@ class FeatureEngineer:
                 "orientation_south",
                 "orientation_east",
                 "orientation_west",
+            ]
+        )
+
+        # Action validity (6)
+        names.extend(
+            [
+                "can_move_forward",
+                "can_pick_forward",
+                "can_give_forward",
+                "can_clean_forward",
+                "can_drop_forward",
+                "should_rotate",
             ]
         )
 

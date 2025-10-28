@@ -26,7 +26,7 @@ class AIMLPlayer:
     Fallback: Uses weighted heuristics when no model available
 
     Architecture:
-    - evaluate_board(): Scores current state (ML model or heuristics)
+    - evaluate_game(): Scores current state (ML model or heuristics)
     - select_action(): Chooses best action (ML prediction or rule-based)
     - plan_sequence(): Plans ahead (ML-guided or search + heuristics)
     """
@@ -90,7 +90,7 @@ class AIMLPlayer:
         Returns:
             Score (higher is better)
         """
-        logger.info(f"AIMLPlayer.evaluate_board: Evaluating game={state.to_dict()}")
+        logger.info(f"AIMLPlayer.evaluate_game: Evaluating game={state.to_dict()}")
 
         if self.model is not None:
             # Future: Use ML model
@@ -110,18 +110,18 @@ class AIMLPlayer:
                 abs(state.robot["position"]["row"] - f["row"]) + abs(state.robot["position"]["col"] - f["col"])
                 for f in state.board["flowers_positions"]
             )
-            logger.info(f"AIMLPlayer.evaluate_board: Distance to nearest flower={min_flower_dist}")
+            logger.info(f"AIMLPlayer.evaluate_game: Distance to nearest flower={min_flower_dist}")
             score += self.config.distance_to_flower_weight * min_flower_dist
 
         # Distance to princess (when holding flowers)
         if len(state.robot["flowers_delivered"]) > 0:
             princess_dist = state._distance_to_princess(state.robot["position"], state.princess["position"])
-            logger.info(f"AIMLPlayer.evaluate_board: Distance to princess={princess_dist}")
+            logger.info(f"AIMLPlayer.evaluate_game: Distance to princess={princess_dist}")
             score += self.config.distance_to_princess_weight * princess_dist
 
         # Obstacle density penalty
         obstacle_density = state._obstacle_density()
-        logger.info(f"AIMLPlayer.evaluate_board: Obstacle density={obstacle_density}")
+        logger.info(f"AIMLPlayer.evaluate_game: Obstacle density={obstacle_density}")
         score += self.config.obstacle_density_weight * obstacle_density
 
         # Flower clustering bonus
@@ -138,10 +138,10 @@ class AIMLPlayer:
                 avg_dist = total_dist / count
                 # Lower average distance = more clustered = bonus
                 cluster_score = 1.0 / (1.0 + avg_dist)
-                logger.info(f"AIMLPlayer.evaluate_board: Flower clustering bonus={cluster_score}")
+                logger.info(f"AIMLPlayer.evaluate_game: Flower clustering bonus={cluster_score}")
                 score += self.config.flower_cluster_bonus * cluster_score
 
-        logger.info(f"AIMLPlayer.evaluate_board: Heuristic evaluation score={score}")
+        logger.info(f"AIMLPlayer.evaluate_game: Heuristic evaluation score={score}")
 
         return score
 
@@ -164,12 +164,13 @@ class AIMLPlayer:
         if self.use_ml and self.model is not None:
             try:
                 action, direction = self._predict_with_ml(state)
-                logger.info(f"ML prediction: {action} {direction or ''}")
+                logger.info(f"AIMLPlayer.select_action: ML prediction: {action} {direction or ''}")
                 return (action, direction)
             except Exception as e:
-                logger.warning(f"ML prediction failed: {e}, falling back to heuristics")
+                logger.warning(f"AIMLPlayer.select_action: ML prediction failed: {e}, falling back to heuristics")
 
         # Fallback to heuristics
+        logger.info("AIMLPlayer.select_action: Falling back to heuristics")
         return self._select_action_heuristic(state)
 
     def _predict_with_ml(self, state: GameState) -> tuple[str, str | None]:
@@ -191,6 +192,7 @@ class AIMLPlayer:
         # Decode action
         action, direction = self.feature_engineer.decode_action(int(label))
 
+        logger.info(f"AIMLPlayer._predict_with_ml: Predicted action={action} and direction={direction}")
         return (action, direction)
 
     def _select_action_heuristic(self, state: GameState) -> tuple[str, str | None]:
@@ -210,6 +212,7 @@ class AIMLPlayer:
             state.robot["position"] in self._get_adjacent_positions(state.princess["position"], state)
             and len(state.robot["flowers_collected"]) > 0
         ):
+            logger.info(f"AIMLPlayer._select_action_heuristic: Giving flowers to princess at {state.princess['position']}")
             return ("give", None)
 
         # If at flower and not full → pick
@@ -220,12 +223,29 @@ class AIMLPlayer:
                 and robot_pos["col"] == flower_pos["col"]
                 and len(state.robot["flowers_collected"]) < state.robot["flowers_collection_capacity"]
             ):
+                logger.info(f"AIMLPlayer._select_action_heuristic: Picking flower at {robot_pos}")
                 return ("pick", None)
+
+        # Check if current orientation is blocked by obstacle
+        current_orientation = state.robot.get("orientation", "NORTH")
+        if self._is_path_blocked(state.robot["position"], current_orientation, state):
+            logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked in orientation {current_orientation}, rotating")
+            # Try to find a clear direction
+            for direction in ["NORTH", "SOUTH", "EAST", "WEST"]:
+                if not self._is_path_blocked(state.robot["position"], direction, state):
+                    return ("rotate", direction)
+            # If all directions blocked, try to clean
+            return ("clean", None)
 
         # If holding flowers → move toward princess
         if len(state.robot["flowers_collected"]) > 0:
             direction = self._get_direction_to_target(state.robot["position"], state.princess["position"])
-            return ("move", direction)
+            # Check if path is clear before moving
+            if not self._is_path_blocked(state.robot["position"], direction, state):
+                return ("move", direction)
+            else:
+                logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked toward princess, rotating to {direction}")
+                return ("rotate", direction)
 
         # Otherwise → move toward nearest flower
         if state.board["flowers_positions"]:
@@ -235,10 +255,57 @@ class AIMLPlayer:
                 + abs(state.robot["position"]["col"] - f["col"]),
             )
             direction = self._get_direction_to_target(state.robot["position"], nearest_flower)
-            return ("move", direction)
+            # Check if path is clear before moving
+            if not self._is_path_blocked(state.robot["position"], direction, state):
+                return ("move", direction)
+            else:
+                logger.info(f"AIMLPlayer._select_action_heuristic: Path blocked toward flower, rotating to {direction}")
+                return ("rotate", direction)
 
-        # Default: do nothing (shouldn't reach here)
-        return ("move", state.robot["orientation"])
+        # Default: rotate to find a clear path
+        return ("rotate", "NORTH")
+
+    def _is_path_blocked(self, position: dict, direction: str, state: GameState) -> bool:
+        """
+        Check if the path in the given direction is blocked by an obstacle or boundary.
+
+        Args:
+            position: Current position
+            direction: Direction to check
+            state: Game state
+
+        Returns:
+            True if path is blocked, False otherwise
+        """
+        # Calculate target position based on direction
+        target_row = position["row"]
+        target_col = position["col"]
+
+        if direction == "NORTH":
+            target_row -= 1
+        elif direction == "SOUTH":
+            target_row += 1
+        elif direction == "EAST":
+            target_col += 1
+        elif direction == "WEST":
+            target_col -= 1
+
+        # Check if out of bounds
+        if (target_row < 0 or target_row >= state.board["rows"] or
+            target_col < 0 or target_col >= state.board["cols"]):
+            return True
+
+        # Check if obstacle at target position
+        for obstacle in state.board.get("obstacles_positions", []):
+            if obstacle["row"] == target_row and obstacle["col"] == target_col:
+                return True
+
+        # Check if princess at target position (can't move into princess)
+        princess_pos = state.princess["position"]
+        if princess_pos["row"] == target_row and princess_pos["col"] == target_col:
+            return True
+
+        return False
 
     def _get_direction_to_target(self, current: tuple[int, int], target: tuple[int, int]) -> str:
         """Get direction to move toward target."""
@@ -281,6 +348,7 @@ class AIMLPlayer:
             # For MVP, we just return the first action
             break
 
+        logger.info(f"AIMLPlayer.plan_sequence: Planned sequence={actions}")
         return actions
 
     def _get_config(self) -> dict:
@@ -336,4 +404,5 @@ class AIMLPlayer:
         # # filter out positions that are robot
         # adjacent_positions = [p for p in adjacent_positions if p not in state.robot["position"]]
 
+        logger.info(f"AIMLPlayer._get_adjacent_positions: Adjacent positions={adjacent_positions}")
         return adjacent_positions

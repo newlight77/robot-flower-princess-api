@@ -129,7 +129,7 @@ class PredictActionUseCase:
 
         # Evaluate board
         logger.info("PredictActionUseCase.execute: Evaluating board")
-        score: float = player._evaluate_game(game_state)
+        score: float = player.evaluate_game(game_state)
 
         # Predict action
         logger.info("PredictActionUseCase.execute: Predicting action")

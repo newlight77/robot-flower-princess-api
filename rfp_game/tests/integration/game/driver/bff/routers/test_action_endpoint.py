@@ -4,11 +4,11 @@ from hexagons.game.domain.core.value_objects.direction import Direction
 def test_rotate_changes_orientation(client, create_game):
     game_id = create_game()
 
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "SOUTH"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
-    assert data["game"]["robot"]["orientation"] == "south"
+    assert data["game"]["robot"]["orientation"] == "SOUTH"
 
 
 def test_robot_move(client, save_board, make_empty_board):
@@ -18,7 +18,7 @@ def test_robot_move(client, save_board, make_empty_board):
     board.robot.orientation = Direction.NORTH
     save_board(game_id, board)
 
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "NORTH"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True or data["success"] is False
@@ -52,7 +52,7 @@ def test_move_with_helpers(client, make_empty_board, save_board):
     # place robot at center facing north
     save_board(game_id, board)
 
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "move", "direction": "NORTH"})
     assert resp.status_code == 200
     data = resp.json()
     # if move succeeded, robot moved to row 0, col 1

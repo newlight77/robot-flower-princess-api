@@ -74,11 +74,11 @@ def test_ai_ml_player_with_custom_config():
     assert player.config.risk_aversion == 0.3
 
 
-def test_evaluate_board_returns_score():
-    """Test that evaluate_board returns a numeric score."""
+def test_evaluate_game_returns_score():
+    """Test that evaluate_game returns a numeric score."""
     game_state = _create_game_state(flowers_positions=[(1, 1), (2, 2)], obstacles_positions=[(1, 2)])
     player = AIMLPlayer()
-    score = player.evaluate_board(game_state)
+    score = player.evaluate_game(game_state)
 
     assert isinstance(score, float)
 

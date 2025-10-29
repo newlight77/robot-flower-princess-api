@@ -10,7 +10,7 @@ def should_clean_removes_obstacle_successfully(client, make_empty_board, save_bo
     save_board(game_id, board)
 
     # clean the north obstacle
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "NORTH"})
     assert resp.status_code == 200
     data = resp.json()
     print(f"should_clean_removes_obstacle_successfully Data: {data}")
@@ -20,7 +20,7 @@ def should_clean_removes_obstacle_successfully(client, make_empty_board, save_bo
     # clean the south obstacle
     obstacle_south_pos = Position(0, 1)
     place_obstacle(board, obstacle_south_pos)
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "SOUTH"})
     assert resp.status_code == 200
     data = resp.json()
     print(f"should_clean_removes_obstacle_successfully Data: {data}")

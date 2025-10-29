@@ -9,16 +9,16 @@ def should_pick_drop_give_with_helpers_successfully(client, make_empty_board, sa
     save_board(game_id, board)
 
     # pick
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "pickFlower", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "pickFlower", "direction": "NORTH"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
     assert len(data["game"]["robot"]["flowers_collected"]) > 0
 
     # rotate to south and drop
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "SOUTH"})
     assert resp.status_code == 200
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "dropFlower", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "dropFlower", "direction": "SOUTH"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True
@@ -36,7 +36,7 @@ def should_pick_drop_give_with_helpers_successfully(client, make_empty_board, sa
     b.robot.flowers_collected.append(Position(1, 1))  # Add a flower to give
     repo.save(game_id, b)
 
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "giveFlower", "direction": "south"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "giveFlower", "direction": "SOUTH"})
     assert resp.status_code == 200
     data = resp.json()
     print(f"should_pick_drop_give_with_helpers_successfully Data: {data}")
@@ -57,9 +57,9 @@ def should_clean_with_helpers_successfully(client, make_empty_board, save_board,
     save_board(game_id, board)
 
     # rotate to north and clean
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "rotate", "direction": "NORTH"})
     assert resp.status_code == 200
-    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "north"})
+    resp = client.post(f"/api/games/{game_id}/action", json={"action": "clean", "direction": "NORTH"})
     assert resp.status_code == 200
     data = resp.json()
     assert data["success"] is True

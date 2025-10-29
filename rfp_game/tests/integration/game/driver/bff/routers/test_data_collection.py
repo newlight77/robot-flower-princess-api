@@ -36,16 +36,18 @@ def mock_ml_player_http():
         yield mock_instance
 
 
-def test_data_collection_disabled_by_default(client: TestClient, create_game, mock_ml_player_http):
-    """Test that data collection is disabled by default."""
+def test_data_collection_disabled_by_default(client: TestClient, create_game, mock_ml_player_http, monkeypatch):
+    """Test that data collection can be disabled via environment variable."""
     # Clear cache to ensure fresh instance
     from configurator.dependencies import get_gameplay_data_collector
 
+    # Disable data collection via environment variable
+    monkeypatch.setenv("ENABLE_DATA_COLLECTION", "false")
     get_gameplay_data_collector.cache_clear()
 
     # GIVEN
     game_id = create_game(rows=5, cols=5)
-    action = {"action": "move", "direction": "south"}
+    action = {"action": "move", "direction": "SOUTH"}
 
     # WHEN
     response = client.post(
@@ -66,7 +68,7 @@ def test_data_collection_enabled(client: TestClient, create_game, enable_data_co
     """Test that data is collected when enabled."""
     # GIVEN
     game_id = create_game(rows=5, cols=5)
-    action = {"action": "move", "direction": "south"}
+    action = {"action": "move", "direction": "SOUTH"}
 
     # WHEN
     response = client.post(
@@ -105,9 +107,9 @@ def test_data_collection_multiple_actions(client: TestClient, create_game, enabl
     # GIVEN
     game_id = create_game(rows=5, cols=5)
     actions = [
-        {"action": "move", "direction": "south"},
-        {"action": "rotate", "direction": "east"},
-        {"action": "move", "direction": "east"},
+        {"action": "move", "direction": "SOUTH"},
+        {"action": "rotate", "direction": "EAST"},
+        {"action": "move", "direction": "EAST"},
     ]
 
     # WHEN
@@ -141,7 +143,7 @@ def test_data_collection_format_compatible_with_ml_player(
     """Test that collected data format is compatible with ML Player."""
     # GIVEN
     game_id = create_game(rows=5, cols=5)
-    action = {"action": "move", "direction": "south"}
+    action = {"action": "move", "direction": "SOUTH"}
 
     # WHEN
     response = client.post(

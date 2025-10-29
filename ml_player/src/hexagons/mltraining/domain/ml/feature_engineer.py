@@ -31,7 +31,11 @@ class FeatureEngineer:
         - Multi-flower strategy: 6 features
         - Orientation: 4 features (one-hot)
         - Action validity: 6 features (can_move, can_pick, can_give, can_clean, can_drop, should_rotate)
-        - Strategic planning: 4 features (blocked_with_flowers, nearby_empty_cells, obstacles_ahead, can_pick_and_continue)
+        - Strategic planning: 4 features (
+            blocked_with_flowers,
+            nearby_empty_cells,
+            obstacles_ahead,
+            can_pick_and_continue)
 
         Args:
             game_state: Raw game state dictionary

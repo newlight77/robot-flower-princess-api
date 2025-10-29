@@ -23,7 +23,7 @@ class FeatureEngineer:
         """
         Extract enhanced feature vector from game state.
 
-        Total features: 78
+        Total features: 82
         - Basic info: 12 features
         - Directional awareness: 32 features (8 per direction × 4 directions)
         - Task context: 10 features
@@ -31,12 +31,13 @@ class FeatureEngineer:
         - Multi-flower strategy: 6 features
         - Orientation: 4 features (one-hot)
         - Action validity: 6 features (can_move, can_pick, can_give, can_clean, can_drop, should_rotate)
+        - Strategic planning: 4 features (blocked_with_flowers, nearby_empty_cells, obstacles_ahead, can_pick_and_continue)
 
         Args:
             game_state: Raw game state dictionary
 
         Returns:
-            NumPy array of 78 features
+            NumPy array of 82 features
         """
         board = game_state["board"]
         robot = game_state["robot"]
@@ -214,7 +215,8 @@ class FeatureEngineer:
         forward_cell = FeatureEngineer._get_cell_type(
             forward_pos, flowers_positions, obstacles_positions, princess["position"], board
         )
-        can_move = 1.0 if forward_cell in ["empty", "flower"] else 0.0
+
+        can_move = 1.0 if forward_cell in ["empty"] else 0.0
         features.append(can_move)
 
         # 2. Can pick? (flower directly ahead in facing direction)
@@ -226,7 +228,7 @@ class FeatureEngineer:
         features.append(can_give)
 
         # 4. Can clean? (obstacle directly ahead in facing direction)
-        can_clean = 1.0 if forward_cell == "obstacle" else 0.0
+        can_clean = 1.0 if (forward_cell == "obstacle" and not has_collected_flowers) else 0.0
         features.append(can_clean)
 
         # 5. Can drop? (empty cell ahead AND robot has flowers)
@@ -236,6 +238,51 @@ class FeatureEngineer:
         # 6. Should rotate? (blocked or not facing target)
         should_rotate = 1.0 if can_move == 0.0 else 0.0
         features.append(should_rotate)
+
+        # ============================================================
+        # STRATEGIC PLANNING (4 additional features) - NEW!
+        # ============================================================
+        # Help model learn: "If I have flowers AND blocked → drop first!"
+
+        # 7. Blocked by obstacle while holding flowers? (need to drop & clean)
+        blocked_with_flowers = 1.0 if (forward_cell == "obstacle" and has_collected_flowers) else 0.0
+        features.append(blocked_with_flowers)
+
+        # 8. Has nearby empty cells to drop flowers? (look around for drop zones)
+        nearby_empty_cells = 0.0
+        for check_dir in ["NORTH", "SOUTH", "EAST", "WEST"]:
+            check_pos = FeatureEngineer._get_adjacent_position(robot_pos, check_dir)
+            check_cell = FeatureEngineer._get_cell_type(
+                check_pos, flowers_positions, obstacles_positions, princess["position"], board
+            )
+            if check_cell == "empty":
+                nearby_empty_cells += 1.0
+        features.append(nearby_empty_cells / 4.0)  # Normalize to 0-1
+
+        # 9. Path ahead has obstacles? (look 2 steps ahead)
+        obstacles_ahead_count = 0.0
+        current_pos = robot_pos
+        for step in range(2):
+            next_pos = FeatureEngineer._get_adjacent_position(current_pos, orientation)
+            next_cell = FeatureEngineer._get_cell_type(
+                next_pos, flowers_positions, obstacles_positions, princess["position"], board
+            )
+            if next_cell == "obstacle":
+                obstacles_ahead_count += 1.0
+            current_pos = next_pos
+        features.append(obstacles_ahead_count / 2.0)  # Normalize to 0-1
+
+        # 10. Can pick flower AND continue forward? (pick only if path is viable)
+        can_pick_and_continue = 0.0
+        if can_pick == 1.0:
+            # Check if we can move forward after picking
+            beyond_flower_pos = FeatureEngineer._get_adjacent_position(forward_pos, orientation)
+            beyond_flower_cell = FeatureEngineer._get_cell_type(
+                beyond_flower_pos, flowers_positions, obstacles_positions, princess["position"], board
+            )
+            if beyond_flower_cell in ["empty", "flower", "princess"]:  # Path continues
+                can_pick_and_continue = 1.0
+        features.append(can_pick_and_continue)
 
         return np.array(features, dtype=np.float32)
 
@@ -375,7 +422,7 @@ class FeatureEngineer:
 
     @staticmethod
     def get_feature_names() -> list[str]:
-        """Get human-readable feature names (78 total)."""
+        """Get human-readable feature names (82 total)."""
         names = [
             # Basic (12)
             "board_rows",
@@ -468,6 +515,16 @@ class FeatureEngineer:
                 "can_clean_forward",
                 "can_drop_forward",
                 "should_rotate",
+            ]
+        )
+
+        # Strategic planning (4)
+        names.extend(
+            [
+                "blocked_with_flowers",
+                "nearby_empty_cells_ratio",
+                "obstacles_ahead_2steps",
+                "can_pick_and_continue",
             ]
         )
 

@@ -191,16 +191,21 @@ class AIMLPlayer:
         robot_pos = state_dict["robot"]["position"]
         robot_orient = state_dict["robot"]["orientation"]
         obstacles = state_dict["board"].get("obstacles_positions", [])
+        flowers = state_dict["board"].get("flowers_positions", [])
         logger.info(f"🤖 ML Prediction - Robot at ({robot_pos['row']},{robot_pos['col']}) facing {robot_orient}")
         logger.info(f"🚧 ML Prediction - Obstacles: {obstacles}")
+        logger.info(f"🌺 ML Prediction - Flowers: {flowers}")
 
-        # Log action validity features (last 6 features)
-        action_validity_start = len(features) - 6
+        # Log action validity features (features 72-77, always at these indices)
+        action_validity_start = 72  # Fixed index - action validity always starts at feature 72
         logger.info(
             f"🎯 ML Prediction - Action Validity: "
             f"can_move={features[action_validity_start]:.1f}, "
+            f"can_pick={features[action_validity_start+1]:.1f}, "
+            f"can_give={features[action_validity_start+2]:.1f}, "
             f"can_clean={features[action_validity_start+3]:.1f}, "
-            f"should_rotate={features[action_validity_start+5]:.1f}"
+            f"can_drop={features[action_validity_start+4]:.1f}, "
+            f"should_rotate={features[action_validity_start+5]:.1f}, "
         )
 
         # Predict action label
@@ -217,7 +222,7 @@ class AIMLPlayer:
         can_pick = features[action_validity_start + 1]
         can_give = features[action_validity_start + 2]
         can_clean = features[action_validity_start + 3]
-        # can_drop = features[action_validity_start + 4]
+        can_drop = features[action_validity_start + 4]
         # should_rotate = features[action_validity_start + 5]
 
         # Override invalid predictions
@@ -251,6 +256,17 @@ class AIMLPlayer:
                 direction = self._find_best_rotation_direction(state_dict, robot_orient)
                 logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
 
+        elif action == "drop" and can_drop == 0.0:
+            logger.warning("⚠️  Model predicted 'drop' but can_drop=0.0! Overriding...")
+            if can_move == 1.0:
+                action = "move"
+                direction = None
+                logger.info("🔧 Override: Choosing 'move' (no flowers to drop)")
+            else:
+                action = "rotate"
+                direction = self._find_best_rotation_direction(state_dict, robot_orient)
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+
         elif action == "give" and can_give == 0.0:
             logger.warning("⚠️  Model predicted 'give' but can_give=0.0! Overriding...")
             if can_move == 1.0:
@@ -268,10 +284,14 @@ class AIMLPlayer:
                 action = "move"
                 direction = None
                 logger.info("🔧 Override: Choosing 'move' (no obstacle)")
+            elif can_drop == 1.0:
+                action = "drop"
+                direction = None
+                logger.info("🔧 Override: Choosing 'drop' (no obstacle)")
             else:
                 action = "rotate"
                 direction = self._find_best_rotation_direction(state_dict, robot_orient)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
+                logger.info(f"🔧 Override: Choosing 'rotate' to {direction} (no obstacle)")
 
         logger.info(f"✅ AIMLPlayer._predict_with_ml: Final action={action} and direction={direction}")
         return (action, direction)

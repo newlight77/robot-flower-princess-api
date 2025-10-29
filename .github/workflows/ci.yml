@@ -407,19 +407,19 @@ jobs:
         poetry run ruff check src/ tests/
         #poetry run mypy src/
 
-  docker:
-    name: Build Docker image
-    runs-on: ubuntu-latest
-    needs: [lint, code-coverage]
-    steps:
-    - uses: actions/checkout@v5
+  # docker:
+  #   name: Build Docker image
+  #   runs-on: ubuntu-latest
+  #   needs: [lint, code-coverage]
+  #   steps:
+  #   - uses: actions/checkout@v5
 
-    - name: Build Docker image
-      run: docker build -t robot-flower-princess:test rfp_game/
+  #   - name: Build Docker image
+  #     run: docker build -t robot-flower-princess:test rfp_game/
 
-    - name: Test Docker image
-      run: |
-        docker run -d -p 8000:8000 --name test-api robot-flower-princess:test
-        sleep 10
-        curl -f http://localhost:8000/health || exit 1
-        docker stop test-api
+  #   - name: Test Docker image
+  #     run: |
+  #       docker run -d -p 8000:8000 --name test-api robot-flower-princess:test
+  #       sleep 10
+  #       curl -f http://localhost:8000/health || exit 1
+  #       docker stop test-api

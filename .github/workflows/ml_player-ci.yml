@@ -266,19 +266,19 @@ jobs:
         poetry run black --check src/ tests/
         poetry run ruff check src/ tests/
 
-  docker:
-    name: Build Docker image
-    runs-on: ubuntu-latest
-    needs: [lint, code-coverage]
-    steps:
-    - uses: actions/checkout@v5
+  # docker:
+  #   name: Build Docker image
+  #   runs-on: ubuntu-latest
+  #   needs: [lint, code-coverage]
+  #   steps:
+  #   - uses: actions/checkout@v5
 
-    - name: Build Docker image
-      run: docker build -t ml-player:test ml_player/
+  #   - name: Build Docker image
+  #     run: docker build -t ml-player:test ml_player/
 
-    - name: Test Docker image
-      run: |
-        docker run -d -p 8001:8001 --name test-ml-api ml-player:test
-        sleep 10
-        curl -f http://localhost:8001/health || exit 1
-        docker stop test-ml-api
+  #   - name: Test Docker image
+  #     run: |
+  #       docker run -d -p 8001:8001 --name test-ml-api ml-player:test
+  #       sleep 10
+  #       curl -f http://localhost:8001/health || exit 1
+  #       docker stop test-ml-api

@@ -229,9 +229,15 @@ class AIMLPlayer:
 
         # Priority 3: DROP - When blocked by obstacle while carrying flowers
         # (Need to drop before cleaning obstacle)
-        if blocked_with_flowers == 1.0 and can_drop == 1.0:
-            logger.info("📦 PRIORITY: Blocked with flowers! → DROP")
-            return ("drop", None)
+        if blocked_with_flowers == 1.0:
+            if can_drop == 1.0:
+                logger.info("📦 PRIORITY: Blocked with flowers! → DROP")
+                return ("drop", None)
+            else:
+                # Blocked with flowers but can't drop in current direction - rotate to find empty cell
+                logger.info("📦 PRIORITY: Blocked with flowers, rotating to find drop location")
+                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=True)
+                return ("rotate", direction)
 
         # Priority 3b: DROP - Carrying flowers, can drop, and nearby obstacle blocking path
         if has_flowers and can_drop == 1.0:
@@ -246,7 +252,7 @@ class AIMLPlayer:
 
         # Priority 5: MOVE - Already facing target and can move
         if self._is_facing_target(robot_pos, robot_orient, has_flowers, state_dict) and can_move == 1.0:
-            logger.info(f"🚀 PRIORITY: Facing target, can move → MOVE")
+            logger.info("🚀 PRIORITY: Facing target, can move → MOVE")
             return ("move", None)
 
         # ============================================================
@@ -264,24 +270,38 @@ class AIMLPlayer:
 
         # Fix invalid predictions by mapping to valid actions
         if action == "pick" and can_pick == 0.0:
-            action, direction = self._fix_invalid_action("pick", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+            action, direction = self._fix_invalid_action(
+                "pick", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict
+            )
         elif action == "give" and can_give == 0.0:
-            action, direction = self._fix_invalid_action("give", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+            action, direction = self._fix_invalid_action(
+                "give", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict
+            )
         elif action == "drop" and can_drop == 0.0:
-            action, direction = self._fix_invalid_action("drop", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+            action, direction = self._fix_invalid_action(
+                "drop", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict
+            )
         elif action == "clean" and can_clean == 0.0:
-            action, direction = self._fix_invalid_action("clean", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+            action, direction = self._fix_invalid_action(
+                "clean", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict
+            )
         elif action == "move" and can_move == 0.0:
             if can_clean == 1.0:
                 action, direction = "clean", None
             else:
-                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+                action, direction = self._get_rotation_toward_target(
+                    robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers
+                )
         elif action == "rotate":
             # Fix rotation: don't rotate to same direction, use better direction if needed
             if direction == robot_orient:
-                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+                action, direction = self._get_rotation_toward_target(
+                    robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers
+                )
             elif self._is_rotation_suboptimal(direction, robot_pos, has_flowers, state_dict):
-                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+                action, direction = self._get_rotation_toward_target(
+                    robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers
+                )
 
         logger.info(f"✅ Final action: {action} {direction or ''}")
         return (action, direction)
@@ -325,8 +345,13 @@ class AIMLPlayer:
         return False
 
     def _fix_invalid_action(
-        self, invalid_action: str, can_move: float, can_clean: float,
-        blocked_with_flowers: float, robot_orient: str, state_dict: dict
+        self,
+        invalid_action: str,
+        can_move: float,
+        can_clean: float,
+        blocked_with_flowers: float,
+        robot_orient: str,
+        state_dict: dict,
     ) -> tuple[str, str | None]:
         """Fix invalid action prediction by mapping to valid alternative."""
         if invalid_action == "pick":
@@ -342,7 +367,11 @@ class AIMLPlayer:
             if can_move == 1.0:
                 return ("move", None)
             elif blocked_with_flowers == 1.0:
-                return ("drop", None)
+                # Blocked with flowers - rotate to find drop location
+                robot_pos = state_dict["robot"]["position"]
+                has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
+                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=True)
+                return ("rotate", direction)
 
         # Default: rotate toward target
         robot_pos = state_dict["robot"]["position"]
@@ -350,12 +379,13 @@ class AIMLPlayer:
         return self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
 
     def _get_rotation_toward_target(
-        self, robot_pos: dict, robot_orient: str, has_flowers: bool,
-        state_dict: dict, blocked_with_flowers: float
+        self, robot_pos: dict, robot_orient: str, has_flowers: bool, state_dict: dict, blocked_with_flowers: float
     ) -> tuple[str, str | None]:
         """Get rotation direction toward target, using simplified heuristic."""
         seeking_drop_location = blocked_with_flowers == 1.0
-        direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=seeking_drop_location)
+        direction = self._find_best_rotation_direction(
+            state_dict, robot_orient, seeking_drop_location=seeking_drop_location
+        )
         return ("rotate", direction)
 
     def _is_rotation_suboptimal(self, direction: str, robot_pos: dict, has_flowers: bool, state_dict: dict) -> bool:
@@ -475,10 +505,16 @@ class AIMLPlayer:
         # Default: rotate to find a clear path
         return ("rotate", "NORTH")
 
-    def _find_best_rotation_direction(self, state_dict: dict, current_orientation: str, seeking_drop_location: bool = False) -> str:
+    def _find_best_rotation_direction(
+        self, state_dict: dict, current_orientation: str, seeking_drop_location: bool = False
+    ) -> str:
         """
-        Find the best direction to rotate to when the current path is blocked.
-        Uses advanced heuristics: path lookahead, distance weighting, obstacle avoidance.
+        Find the best direction to rotate to (simplified like greedy player).
+
+        Simplified approach:
+        1. Check immediate cell types (flower > empty > obstacle)
+        2. Use simple Manhattan distance-based direction selection (like greedy's _get_direction)
+        3. Avoid obstacles and boundaries
 
         Args:
             state_dict: Game state dictionary
@@ -495,220 +531,107 @@ class AIMLPlayer:
         board = state_dict["board"]
         has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
 
-        # All possible directions
+        # Determine target (like greedy player does)
+        if seeking_drop_location:
+            # When seeking drop location, prioritize empty cells (no specific target needed)
+            target = None
+        elif has_flowers:
+            # When holding flowers, go to princess
+            target = princess_pos
+        else:
+            # When collecting, go to nearest flower
+            if flowers_positions:
+                target = min(
+                    flowers_positions,
+                    key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
+                )
+            else:
+                target = princess_pos
+
+        # Get all possible directions (excluding current)
         all_directions = ["NORTH", "SOUTH", "EAST", "WEST"]
+        valid_directions = [d for d in all_directions if d != current_orientation.upper()]
 
-        # Score each direction
-        direction_scores = {}
-        for direction in all_directions:
-            if direction == current_orientation.upper():
-                continue  # Don't rotate to the same direction
-
-            score = 0.0
-
-            # === IMMEDIATE CELL SCORING ===
+        # First pass: Check for immediate opportunities (like greedy player's priority checks)
+        for direction in valid_directions:
             forward_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), direction)
             cell_type = self._get_cell_type(forward_pos, flowers_positions, obstacles_positions, princess_pos, board)
 
-            # SPECIAL MODE: Seeking drop location (blocked with flowers, need to drop)
-            if seeking_drop_location:
-                # Prioritize empty cells above all else (except boundaries/obstacles)
-                if cell_type == "empty":
-                    score += 300.0  # MASSIVE bonus for empty cell when seeking drop location!
-                    logger.info(f"📦 [DROP MODE] Direction {direction} has EMPTY CELL ahead! Bonus +300")
-                elif cell_type == "flower":
-                    score += 50.0  # Lower priority than empty cells when dropping
-                    logger.info(f"🌸 [DROP MODE] Direction {direction} has FLOWER ahead! Bonus +50")
-                elif cell_type == "princess":
-                    score += 50.0  # Can't drop on princess anyway
-                    logger.info(f"👑 [DROP MODE] Direction {direction} has PRINCESS ahead! Bonus +50")
-                elif cell_type == "obstacle":
-                    score -= 100.0  # Heavy penalty - obstacles block dropping
-                    logger.info(f"🚧 [DROP MODE] Direction {direction} has OBSTACLE ahead! Penalty -100")
-                elif cell_type == "boundary":
-                    score -= 200.0  # Very bad: edge of map
-                    logger.info(f"🚫 [DROP MODE] Direction {direction} is BOUNDARY! Penalty -200")
+            # Highest priority: Flower directly ahead (when not seeking drop location)
+            if not seeking_drop_location and cell_type == "flower":
+                logger.info(f"🌸 Priority: Flower ahead in direction {direction}")
+                return direction
+
+            # When seeking drop location: Empty cell is highest priority
+            if seeking_drop_location and cell_type == "empty":
+                logger.info(f"📦 Priority: Empty cell ahead in direction {direction} (for dropping)")
+                return direction
+
+            # Princess ahead when carrying flowers (can give)
+            if cell_type == "princess" and has_flowers:
+                logger.info(f"👑 Priority: Princess ahead in direction {direction} (can give)")
+                return direction
+
+        # Second pass: Use simple direction selection based on target (like greedy player's _get_direction)
+        # When seeking drop location with no target, skip this and go to third pass
+        if target:
+            dx = target["col"] - robot_pos["col"]
+            dy = target["row"] - robot_pos["row"]
+
+            # Simple direction selection: prioritize larger axis (like greedy player)
+            # This matches the greedy player's approach in _get_direction
+            candidate_directions = []
+            if abs(dy) > abs(dx):
+                # Vertical movement is primary
+                if dy < 0:
+                    candidate_directions.append("NORTH")
+                elif dy > 0:
+                    candidate_directions.append("SOUTH")
             else:
-                # NORMAL MODE: Standard scoring
-                # HIGHEST PRIORITY: Flower directly ahead
-                if cell_type == "flower":
-                    score += 200.0  # MASSIVE bonus for flower directly ahead!
-                    logger.info(f"🌸 Direction {direction} has FLOWER ahead! Bonus +200")
-                elif cell_type == "empty":
-                    score += 20.0  # Good: clear path (increased from 15.0 to break ties)
-                elif cell_type == "obstacle":
-                    score -= 40.0  # Bad: obstacle blocking (increased penalty)
-                elif cell_type == "princess" and has_flowers:
-                    score += 150.0  # Excellent: can deliver flowers!
-                elif cell_type == "boundary":
-                    score -= 50.0  # Very bad: edge of map
+                # Horizontal movement is primary
+                if dx > 0:
+                    candidate_directions.append("EAST")
+                elif dx < 0:
+                    candidate_directions.append("WEST")
 
-            # === PATH LOOKAHEAD (check 2-3 cells ahead) ===
-            lookahead_bonus = 0.0
-            current_pos = forward_pos
-            for depth in range(1, 4):  # Look 1-3 cells ahead
-                current_pos = self._get_adjacent_position(current_pos, direction)
-                lookahead_cell = self._get_cell_type(current_pos, flowers_positions, obstacles_positions, princess_pos, board)
+            # Also include secondary direction if both axes are significant
+            if abs(dy) > 0:
+                candidate_directions.append("SOUTH" if dy > 0 else "NORTH")
+            if abs(dx) > 0:
+                candidate_directions.append("EAST" if dx > 0 else "WEST")
 
-                if seeking_drop_location:
-                    # When seeking drop location, prioritize empty cells in lookahead
-                    if lookahead_cell == "empty":
-                        lookahead_bonus += 100.0 / depth  # Massive bonus for empty cells when dropping
-                    elif lookahead_cell == "flower":
-                        lookahead_bonus += 20.0 / depth  # Lower priority
-                    elif lookahead_cell == "obstacle":
-                        lookahead_bonus -= 30.0 / depth  # Heavy penalty for obstacles
-                    elif lookahead_cell == "boundary":
-                        break  # Stop lookahead at boundary
-                else:
-                    # Normal mode: standard lookahead scoring
-                    if lookahead_cell == "flower":
-                        lookahead_bonus += 50.0 / depth  # Closer flowers = higher bonus
-                    elif lookahead_cell == "empty":
-                        lookahead_bonus += 3.0 / depth  # Clear path ahead
-                    elif lookahead_cell == "obstacle":
-                        lookahead_bonus -= 10.0 / depth  # Obstacles ahead are bad
-                    elif lookahead_cell == "boundary":
-                        break  # Stop lookahead at boundary
+            # Filter to valid directions and check if they're clear
+            for direction in candidate_directions:
+                if direction not in valid_directions:
+                    continue
 
-            score += lookahead_bonus
+                forward_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), direction)
+                cell_type = self._get_cell_type(
+                    forward_pos, flowers_positions, obstacles_positions, princess_pos, board
+                )
 
-            # === DISTANCE-WEIGHTED TARGETING ===
-            # When seeking drop location, prioritize empty cells over target distance
-            # (we need to drop flowers before we can move toward targets anyway)
-            if not seeking_drop_location:
-                # Choose target based on game state
-                if has_flowers:
-                    target = princess_pos
-                    target_weight = 5.0  # High priority when delivering
-                else:
-                    # Find nearest flower (Manhattan distance)
-                    if flowers_positions:
-                        nearest_flower = min(
-                            flowers_positions,
-                            key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
-                        )
-                        target = nearest_flower
-                        target_weight = 8.0  # Very high priority when collecting (increased from 4.0)
-                    else:
-                        target = princess_pos
-                        target_weight = 2.0
+                # Skip if blocked by obstacle or boundary
+                if cell_type == "obstacle" or cell_type == "boundary":
+                    continue
 
-                # Calculate Manhattan distance to target
-                dx = target["col"] - robot_pos["col"]
-                dy = target["row"] - robot_pos["row"]
+                logger.info(f"🧭 Selected direction {direction} toward target (dx={dx}, dy={dy})")
+                return direction
 
-                # Reward directions that reduce distance to target
-                # CRITICAL: When both dx and dy are non-zero, we need BOTH directions!
-                # Give bonus to the direction that matches the axis, regardless of magnitude
-                if direction == "NORTH" and dy < 0:
-                    bonus = max(abs(dy), abs(dx)) * target_weight
-                    # SPECIAL CASE: If target is directly in this direction (dx=0 or dy is the only movement needed)
-                    if dx == 0:  # Target is directly NORTH/SOUTH
-                        bonus *= 2.0  # Double bonus for direct line!
-                    score += bonus
-                    logger.info(f"🎯 Direction {direction} moves toward target (dy={dy}, dx={dx}) bonus={bonus:.1f}")
-                elif direction == "SOUTH" and dy > 0:
-                    bonus = max(abs(dy), abs(dx)) * target_weight
-                    if dx == 0:  # Target is directly SOUTH/NORTH
-                        bonus *= 2.0  # Double bonus for direct line!
-                    score += bonus
-                    logger.info(f"🎯 Direction {direction} moves toward target (dy={dy}, dx={dx}) bonus={bonus:.1f}")
-                elif direction == "EAST" and dx > 0:
-                    bonus = max(abs(dx), abs(dy)) * target_weight
-                    if dy == 0:  # Target is directly EAST/WEST
-                        bonus *= 2.0  # Double bonus for direct line!
-                    score += bonus
-                    logger.info(f"🎯 Direction {direction} moves toward target (dx={dx}, dy={dy}) bonus={bonus:.1f}")
-                elif direction == "WEST" and dx < 0:
-                    bonus = max(abs(dx), abs(dy)) * target_weight
-                    if dy == 0:  # Target is directly EAST/WEST
-                        bonus *= 2.0  # Double bonus for direct line!
-                    score += bonus
-                    logger.info(f"🎯 Direction {direction} moves toward target (dx={dx}, dy={dy}) bonus={bonus:.1f}")
+        # Third pass: Any valid direction that's not blocked
+        for direction in valid_directions:
+            forward_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), direction)
+            cell_type = self._get_cell_type(forward_pos, flowers_positions, obstacles_positions, princess_pos, board)
 
-                # ANTI-LOOP: If moving in this direction would take us AWAY from target, penalize heavily
-                if direction == "NORTH" and dy > 0:  # Going NORTH when target is SOUTH
-                    score -= 50.0
-                    logger.info(f"🔄 Direction {direction} moves AWAY from target! Penalty -50")
-                elif direction == "SOUTH" and dy < 0:  # Going SOUTH when target is NORTH
-                    score -= 50.0
-                    logger.info(f"🔄 Direction {direction} moves AWAY from target! Penalty -50")
-                elif direction == "EAST" and dx < 0:  # Going EAST when target is WEST
-                    score -= 50.0
-                    logger.info(f"🔄 Direction {direction} moves AWAY from target! Penalty -50")
-                elif direction == "WEST" and dx > 0:  # Going WEST when target is EAST
-                    score -= 50.0
-                    logger.info(f"🔄 Direction {direction} moves AWAY from target! Penalty -50")
-            else:
-                # DROP MODE: Lower priority for target distance (empty cells are more important)
-                # Still give some bonus for moving toward princess (eventual goal after dropping)
-                if has_flowers:
-                    target = princess_pos
-                    target_weight = 1.0  # Lower weight in drop mode
-                else:
-                    # When not carrying flowers, we shouldn't be in drop mode, but handle gracefully
-                    target_weight = 0.5
+            if cell_type != "obstacle" and cell_type != "boundary":
+                logger.info(f"🧭 Fallback: Selected direction {direction} (not blocked)")
+                return direction
 
-                dx = target["col"] - robot_pos["col"]
-                dy = target["row"] - robot_pos["row"]
+        # Ultimate fallback: any direction
+        if valid_directions:
+            logger.info(f"🧭 Ultimate fallback: Selected direction {valid_directions[0]}")
+            return valid_directions[0]
 
-                # Give smaller bonuses when seeking drop location
-                if direction == "NORTH" and dy < 0:
-                    score += max(abs(dy), abs(dx)) * target_weight * 0.5  # Reduced bonus
-                elif direction == "SOUTH" and dy > 0:
-                    score += max(abs(dy), abs(dx)) * target_weight * 0.5
-                elif direction == "EAST" and dx > 0:
-                    score += max(abs(dx), abs(dy)) * target_weight * 0.5
-                elif direction == "WEST" and dx < 0:
-                    score += max(abs(dx), abs(dy)) * target_weight * 0.5
-
-            # === NEARBY FLOWER BONUS ===
-            # Give bonus for directions that have flowers within 2-3 cells
-            # (Lower priority when seeking drop location)
-            if not seeking_drop_location:
-                nearby_flower_bonus = 0.0
-                for flower in flowers_positions:
-                    flower_dx = flower["col"] - robot_pos["col"]
-                    flower_dy = flower["row"] - robot_pos["row"]
-                    flower_dist = abs(flower_dx) + abs(flower_dy)
-
-                    # Check if this direction leads toward this flower
-                    moves_toward_flower = False
-                    if direction == "NORTH" and flower_dy < 0:
-                        moves_toward_flower = True
-                    elif direction == "SOUTH" and flower_dy > 0:
-                        moves_toward_flower = True
-                    elif direction == "EAST" and flower_dx > 0:
-                        moves_toward_flower = True
-                    elif direction == "WEST" and flower_dx < 0:
-                        moves_toward_flower = True
-
-                    if moves_toward_flower and flower_dist <= 5:
-                        nearby_flower_bonus += 15.0 / max(flower_dist, 1)
-
-                score += nearby_flower_bonus
-
-            direction_scores[direction] = score
-
-        # Pick the best direction
-        if direction_scores:
-            best_direction = max(direction_scores, key=direction_scores.get)
-            best_score = direction_scores[best_direction]
-            logger.info(f"🧭 Best rotation: {best_direction} (score={best_score:.1f})")
-
-            # Log all scores for debugging
-            sorted_scores = sorted(direction_scores.items(), key=lambda x: x[1], reverse=True)
-            logger.info(f"📊 Direction scores: {', '.join([f'{d}={s:.1f}' for d, s in sorted_scores])}")
-
-            return best_direction
-        else:
-            # Fallback: just pick any direction different from current
-            for direction in all_directions:
-                if direction != current_orientation.upper():
-                    logger.info(f"🧭 Fallback rotation direction: {direction}")
-                    return direction
-            return "NORTH"  # Ultimate fallback
+        return "NORTH"  # Last resort
 
     @staticmethod
     def _get_adjacent_position(pos: tuple[int, int], direction: str) -> tuple[int, int]:

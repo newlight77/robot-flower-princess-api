@@ -27,10 +27,10 @@ async def test_autoplay_with_optimal_strategy():
     game = make_game_with_small_board()
     repo.save("a3", game)
 
-    # stub AIOptimalPlayer solver
+    # stub AIOptimalPlayer solver - rotate south then move (valid from (0,0) facing EAST)
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",
-        return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ):
         use_case = AutoplayUseCase(repo)
         res = await use_case.execute(AutoplayCommand(game_id="a3", strategy="optimal"))
@@ -68,7 +68,7 @@ async def test_autoplay_optimal_strategy_called():
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",
-        return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ) as mock_optimal:
         use_case = AutoplayUseCase(repo)
         await use_case.execute(AutoplayCommand(game_id="optimal_called", strategy="optimal"))

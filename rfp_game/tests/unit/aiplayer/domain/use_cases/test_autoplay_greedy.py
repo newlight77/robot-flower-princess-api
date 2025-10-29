@@ -27,10 +27,10 @@ async def test_autoplay_applies_greedy_solver_actions_and_records_direction():
     game = make_game_with_small_board()
     repo.save("a1", game)
 
-    # stub solver to rotate north then move
+    # stub solver to rotate south then move (valid from (0,0), avoiding flower at (0,1))
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
-        return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ):
         use_case = AutoplayUseCase(repo)
         res = await use_case.execute(AutoplayCommand(game_id="a1"))
@@ -68,7 +68,7 @@ async def test_autoplay_with_greedy_strategy_explicit():
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
-        return_value=[("rotate", Direction.SOUTH), ("move", Direction.SOUTH)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ):
         use_case = AutoplayUseCase(repo)
         res = await use_case.execute(AutoplayCommand(game_id="a4", strategy="greedy"))
@@ -89,7 +89,7 @@ async def test_autoplay_defaults_to_greedy_strategy():
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
-        return_value=[("rotate", Direction.WEST), ("move", Direction.WEST)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ):
         use_case = AutoplayUseCase(repo)
         # No strategy parameter - should default to greedy
@@ -111,7 +111,7 @@ async def test_autoplay_greedy_strategy_called():
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
-        return_value=[("rotate", Direction.NORTH), ("move", Direction.NORTH)],
+        return_value=[("rotate", Direction.SOUTH), ("move", None)],
     ) as mock_greedy:
         use_case = AutoplayUseCase(repo)
         await use_case.execute(AutoplayCommand(game_id="greedy_called", strategy="greedy"))

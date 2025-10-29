@@ -130,7 +130,9 @@ class MLProxyPlayer:
                 if action in ("pick", "give"):
                     position_history.clear()
                     steps_since_progress = 0
-                    logger.info("MLProxyPlayer.solve_async: Progress event detected (%s). Resetting loop detector.", action)
+                    logger.info(
+                        "MLProxyPlayer.solve_async: Progress event detected (%s). Resetting loop detector.", action
+                    )
                 else:
                     steps_since_progress += 1
             except Exception as e:

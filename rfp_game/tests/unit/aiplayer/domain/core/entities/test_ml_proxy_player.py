@@ -330,7 +330,8 @@ class TestMLProxyPlayerEdgeCases:
         result = await player.solve_async(game, "test-game-123")
 
         # Loop detection will stop it early (robot rotating in place triggers loop detection)
-        # Should have ~9 actions due to loop detection (3 visits in last 10 moves)
+        # Should have actions but less than max_iterations due to loop detection
+        # (loop detection: 5 visits in last 20 moves, with no progress for 5+ steps)
         assert len(result) > 0  # At least some actions executed
         assert len(result) < 50  # But less than max_iterations due to loop detection
         assert mock_ml_client.predict_action.call_count == len(result)

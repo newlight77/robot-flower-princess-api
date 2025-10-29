@@ -151,7 +151,7 @@ class ModelTrainer:
 
         # Calculate sample weights for class balancing
         # GradientBoosting doesn't support class_weight, so we compute sample weights manually
-        sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+        sample_weights = compute_sample_weight(class_weight="balanced", y=y_train)
 
         # Train model
         model = GradientBoostingClassifier(**params)

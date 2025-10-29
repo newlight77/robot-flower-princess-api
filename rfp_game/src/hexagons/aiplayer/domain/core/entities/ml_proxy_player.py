@@ -79,8 +79,10 @@ class MLProxyPlayer:
 
         # Loop detection: track recent positions to detect oscillation
         position_history: list[tuple[int, int]] = []
-        loop_detection_window = 10  # Check last 10 positions
-        max_same_position_visits = 3  # If we visit same position 3+ times in window, we're stuck
+        # Relaxed detector: larger window and threshold to avoid premature aborts
+        loop_detection_window = 20  # Check last 20 positions
+        max_same_position_visits = 5  # Require 5+ visits before considering it a loop
+        steps_since_progress = 0  # Reset when we make meaningful progress (pick/give)
 
         logger.info(f"MLProxyPlayer.solve_async: Game={game.to_dict()}")
 
@@ -99,10 +101,11 @@ class MLProxyPlayer:
                 recent_positions = position_history[-loop_detection_window:]
                 same_position_count = recent_positions.count(current_pos)
 
-                if same_position_count >= max_same_position_visits:
+                # Only treat as a loop if we've also not made progress for a while
+                if same_position_count >= max_same_position_visits and steps_since_progress >= max_same_position_visits:
                     logger.warning(
                         f"MLProxyPlayer.solve_async: Loop detected! Position {current_pos} visited "
-                        f"{same_position_count} times in last {loop_detection_window} moves. Breaking out."
+                        f"{same_position_count} times in last {loop_detection_window} moves (no progress for {steps_since_progress} steps). Breaking out."
                     )
                     break
 
@@ -122,6 +125,14 @@ class MLProxyPlayer:
                 logger.info(
                     f"MLProxyPlayer.solve_async: Action {iteration} executed successfully: {action} {direction}"
                 )
+
+                # Reset loop detector on meaningful progress to avoid premature abort
+                if action in ("pick", "give"):
+                    position_history.clear()
+                    steps_since_progress = 0
+                    logger.info("MLProxyPlayer.solve_async: Progress event detected (%s). Resetting loop detector.", action)
+                else:
+                    steps_since_progress += 1
             except Exception as e:
                 # If action fails (invalid move, etc.), log and break
                 logger.warning(f"MLProxyPlayer.solve_async: Action failed: {e}")

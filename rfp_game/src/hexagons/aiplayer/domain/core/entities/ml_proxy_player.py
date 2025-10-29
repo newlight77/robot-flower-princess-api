@@ -132,11 +132,15 @@ class MLProxyPlayer:
 
     def _execute_action(self, action: str, direction: Direction, game: Game) -> Tuple[str, Direction]:
         """
-        Execute action.
+        Execute action on the game copy (for simulation/validation only).
+
+        Note: This method does NOT save to repository - that's handled by AutoplayUseCase
+        after all actions are collected.
 
         Args:
-            prediction: Prediction dictionary
-            game: Game
+            action: Action type (rotate, move, pick, etc.)
+            direction: Direction for the action
+            game: Game object (typically a copy used for simulation)
 
         Returns:
             Tuple of action and direction
@@ -144,30 +148,19 @@ class MLProxyPlayer:
 
         logger.info(f"MLProxyPlayer.execute_action: execute Action={action} and direction={direction}")
 
-        # Execute action
+        # Execute action (on game copy for simulation)
         if action == "rotate":
             GameService.rotate_robot(game, direction)
-            self.repository.save(game_id=game.game_id, game=game)
         elif action == "move":
-            # GameService.rotate_robot(game, direction)
             GameService.move_robot(game)
-            self.repository.save(game_id=game.game_id, game=game)
         elif action == "pick":
-            # GameService.rotate_robot(game, direction)
             GameService.pick_flower(game)
-            self.repository.save(game_id=game.game_id, game=game)
         elif action == "drop":
-            # GameService.rotate_robot(game, direction)
             GameService.drop_flower(game)
-            self.repository.save(game_id=game.game_id, game=game)
         elif action == "give":
-            # GameService.rotate_robot(game, direction)
             GameService.give_flowers(game)
-            self.repository.save(game_id=game.game_id, game=game)
         elif action == "clean":
-            # GameService.rotate_robot(game, direction)
             GameService.clean_obstacle(game)
-            self.repository.save(game_id=game.game_id, game=game)
         else:
             logger.error(f"MLProxyPlayer.execute_action: Unknown action={action}")
             return None, None

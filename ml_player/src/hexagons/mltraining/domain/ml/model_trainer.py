@@ -14,6 +14,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
+from sklearn.utils.class_weight import compute_sample_weight
 
 from shared.logging import get_logger
 
@@ -100,6 +101,7 @@ class ModelTrainer:
             "min_samples_leaf": 2,
             "random_state": 42,
             "n_jobs": -1,
+            "class_weight": "balanced",  # CRITICAL: Balance classes (fixes pick/give underrepresentation)
         }
         params.update(kwargs)
 
@@ -147,9 +149,13 @@ class ModelTrainer:
         }
         params.update(kwargs)
 
+        # Calculate sample weights for class balancing
+        # GradientBoosting doesn't support class_weight, so we compute sample weights manually
+        sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
+
         # Train model
         model = GradientBoostingClassifier(**params)
-        model.fit(X_train, y_train)
+        model.fit(X_train, y_train, sample_weight=sample_weights)
 
         # Evaluate
         metrics = self._evaluate_model(model, X_train, y_train, X_test, y_test)

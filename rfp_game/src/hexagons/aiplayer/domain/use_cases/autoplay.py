@@ -69,11 +69,9 @@ class AutoplayUseCase:
             logger.info("Using %s, generated %d actions", strategy_name, len(actions))
 
             # Apply actions to original board
+            # IMPORTANT: MLProxyPlayer returns actions that are already validated
+            # Each action is self-contained - no need for pre-rotation
             for action_type, direction in actions:
-                # Always rotate to the solver-provided direction first (if provided)
-                if direction is not None:
-                    GameService.rotate_robot(game, direction)
-
                 if action_type == "rotate":
                     GameService.rotate_robot(game, direction)
 

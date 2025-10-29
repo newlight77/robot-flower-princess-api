@@ -102,11 +102,11 @@ class Board:
 
     def get_remaining_flowers_count(self) -> int:
         """Get the number of remaining flowers on the board."""
-        return self.initial_flowers_count - len(self.flowers_positions)
+        return len(self.flowers_positions)
 
     def get_remaining_obstacles_count(self) -> int:
         """Get the number of remaining obstacles on the board."""
-        return self.initial_obstacles_count - len(self.obstacles_positions)
+        return len(self.obstacles_positions)
 
     def get_grid(self) -> list[list[str]]:
         """Generate the grid representation with emojis."""

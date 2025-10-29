@@ -225,6 +225,14 @@ class AIMLPlayer:
         can_drop = features[action_validity_start + 4]
         # should_rotate = features[action_validity_start + 5]
 
+        # PRIORITY OVERRIDE: Always pick flowers when available (optimal strategy)
+        # This overcomes training data imbalance where "pick" is rare (4.6% of samples)
+        if can_pick == 1.0:
+            logger.info("🌸 PRIORITY: Flower ahead! Overriding to 'pick' (optimal strategy)")
+            action = "pick"
+            direction = None
+            return action, direction
+
         # Override invalid predictions
         if action == "rotate" and direction == robot_orient:
             # Don't rotate to the same direction we're already facing!
@@ -407,7 +415,10 @@ class AIMLPlayer:
             cell_type = self._get_cell_type(forward_pos, flowers_positions, obstacles_positions, princess_pos, board)
 
             # Heavily prefer clear paths
-            if cell_type in ["empty", "flower"]:
+            if cell_type == "flower":
+                score += 100.0  # MASSIVE bonus for flower directly ahead!
+                logger.info(f"🌸 Direction {direction} has FLOWER ahead! Bonus +100")
+            elif cell_type == "empty":
                 score += 10.0
 
             # If has flowers, prefer directions toward princess

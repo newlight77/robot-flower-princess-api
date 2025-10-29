@@ -175,7 +175,13 @@ class AIMLPlayer:
 
     def _predict_with_ml(self, state: GameState) -> tuple[str, str | None]:
         """
-        Predict action using trained ML model.
+        Predict action using trained ML model with priority-based decision tree.
+
+        Simplified approach following greedy player structure:
+        1. Priority checks (pick, give, drop when blocked)
+        2. ML prediction
+        3. Validate and fix invalid predictions
+        4. Simplify rotation using pathfinding hints
 
         Args:
             state: Current game state
@@ -183,308 +189,215 @@ class AIMLPlayer:
         Returns:
             Tuple of (action, direction)
         """
-        # Extract features
+        # Extract features and state info
         state_dict = state.to_dict()
         features = self.feature_engineer.extract_features(state_dict)
-
-        # Log key state info for debugging
         robot_pos = state_dict["robot"]["position"]
         robot_orient = state_dict["robot"]["orientation"]
-        obstacles = state_dict["board"].get("obstacles_positions", [])
-        flowers = state_dict["board"].get("flowers_positions", [])
-        logger.info(f"🤖 ML Prediction - Robot at ({robot_pos['row']},{robot_pos['col']}) facing {robot_orient}")
-        logger.info(f"🚧 ML Prediction - Obstacles: {obstacles}")
-        logger.info(f"🌺 ML Prediction - Flowers: {flowers}")
+        has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
 
-        # Log action validity features (features 72-77, always at these indices)
-        action_validity_start = 72  # Fixed index - action validity always starts at feature 72
-        strategic_features_start = 78  # Strategic features start at 78
-
-        # Extract strategic features
-        blocked_with_flowers = features[strategic_features_start] if len(features) > strategic_features_start else 0.0
-
-        logger.info(
-            f"🎯 ML Prediction - Action Validity: "
-            f"can_move={features[action_validity_start]:.1f}, "
-            f"can_pick={features[action_validity_start+1]:.1f}, "
-            f"can_give={features[action_validity_start+2]:.1f}, "
-            f"can_clean={features[action_validity_start+3]:.1f}, "
-            f"can_drop={features[action_validity_start+4]:.1f}, "
-            f"should_rotate={features[action_validity_start+5]:.1f}, "
-            f"blocked_with_flowers={blocked_with_flowers:.1f}"
-        )
-
-        # Predict action label
-        label = self.model.predict([features])[0]
-        logger.info(f"📊 ML Prediction - Model output label: {label}")
-
-        # Decode action
-        action, direction = self.feature_engineer.decode_action(int(label))
-        logger.info(f"🔮 ML Prediction - Decoded: action={action}, direction={direction}")
-
-        # CRITICAL: Validate prediction against action validity features
-        # Extract action validity flags
+        # Extract action validity flags (fixed indices)
+        action_validity_start = 72
+        strategic_features_start = 78
         can_move = features[action_validity_start]
         can_pick = features[action_validity_start + 1]
         can_give = features[action_validity_start + 2]
         can_clean = features[action_validity_start + 3]
         can_drop = features[action_validity_start + 4]
-        # should_rotate = features[action_validity_start + 5]
+        blocked_with_flowers = features[strategic_features_start] if len(features) > strategic_features_start else 0.0
 
-        # PRIORITY OVERRIDE: Always pick flowers when available (optimal strategy)
-        # This overcomes training data imbalance where "pick" is rare (4.6% of samples)
+        logger.info(
+            f"🤖 State: pos=({robot_pos['row']},{robot_pos['col']}) facing={robot_orient}, "
+            f"flowers={has_flowers}, can_move={can_move:.1f}, can_pick={can_pick:.1f}, "
+            f"can_give={can_give:.1f}, can_clean={can_clean:.1f}, can_drop={can_drop:.1f}, "
+            f"blocked_with_flowers={blocked_with_flowers:.1f}"
+        )
+
+        # ============================================================
+        # PRIORITY-BASED DECISION TREE (similar to greedy player)
+        # ============================================================
+
+        # Priority 1: PICK - Always pick when flower is directly ahead
         if can_pick == 1.0:
-            logger.info("🌸 PRIORITY: Flower ahead! Overriding to 'pick' (optimal strategy)")
-            action = "pick"
-            direction = None
-            return action, direction
+            logger.info("🌸 PRIORITY: Flower ahead! → PICK")
+            return ("pick", None)
 
-        # PRIORITY OVERRIDE: Always give flowers when at princess and able to give
-        # Ensures delivery is not missed due to model bias
+        # Priority 2: GIVE - Always give when at princess with flowers
         if can_give == 1.0:
-            logger.info("👑 PRIORITY: At princess with flowers! Overriding to 'give'")
-            action = "give"
-            direction = None
-            return action, direction
+            logger.info("👑 PRIORITY: At princess with flowers! → GIVE")
+            return ("give", None)
 
-        # PRIORITY OVERRIDE: If blocked by obstacle while carrying flowers and can drop, prioritize drop
-        # This allows the robot to clear the way for cleaning the obstacle
+        # Priority 3: DROP - When blocked by obstacle while carrying flowers
+        # (Need to drop before cleaning obstacle)
         if blocked_with_flowers == 1.0 and can_drop == 1.0:
-            logger.info("📦 PRIORITY: Blocked by obstacle while carrying flowers! Overriding to 'drop' to clear path")
-            action = "drop"
-            direction = None
-            return action, direction
+            logger.info("📦 PRIORITY: Blocked with flowers! → DROP")
+            return ("drop", None)
 
-        # PRIORITY OVERRIDE: If carrying flowers and can drop, check if we need to drop to clear path
-        # This is critical when blocked by obstacles - we need to drop before cleaning
-        has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
+        # Priority 3b: DROP - Carrying flowers, can drop, and nearby obstacle blocking path
         if has_flowers and can_drop == 1.0:
-            obstacles_positions = state_dict["board"].get("obstacles_positions", [])
-            robot_pos = state_dict["robot"]["position"]
+            if self._has_nearby_obstacle(robot_pos, state_dict) or can_move == 0.0:
+                logger.info("📦 PRIORITY: Carrying flowers, nearby obstacle → DROP")
+                return ("drop", None)
 
-            # Check all 4 directions for nearby obstacles (adjacent cells)
-            has_nearby_obstacle = False
-            nearby_obstacle_dirs = []
-            for check_dir in ["NORTH", "SOUTH", "EAST", "WEST"]:
-                adj_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), check_dir)
-                for obstacle in obstacles_positions:
-                    if obstacle["row"] == adj_pos[0] and obstacle["col"] == adj_pos[1]:
-                        has_nearby_obstacle = True
-                        nearby_obstacle_dirs.append(check_dir)
-                        break
+        # Priority 4: CLEAN - Blocked by obstacle and can clean
+        if can_move == 0.0 and can_clean == 1.0:
+            logger.info("🧹 PRIORITY: Obstacle ahead, can clean → CLEAN")
+            return ("clean", None)
 
-            # Check if robot cannot move in current direction (blocked)
-            cannot_move_current_dir = can_move == 0.0
+        # Priority 5: MOVE - Already facing target and can move
+        if self._is_facing_target(robot_pos, robot_orient, has_flowers, state_dict) and can_move == 1.0:
+            logger.info(f"🚀 PRIORITY: Facing target, can move → MOVE")
+            return ("move", None)
 
-            # If we have nearby obstacle OR are blocked in current direction, prioritize dropping
-            # (This handles both cases: directly facing obstacle, and just rotated to find drop location)
-            if has_nearby_obstacle or cannot_move_current_dir:
-                logger.info(
-                    f"📦 PRIORITY: Carrying flowers ({len(state_dict['robot'].get('flowers_collected', []))} flowers), "
-                    f"can_drop={can_drop:.1f}, nearby_obstacles={nearby_obstacle_dirs}, "
-                    f"can_move={can_move:.1f}! Overriding to 'drop' to enable obstacle cleaning"
-                )
-                action = "drop"
-                direction = None
-                return action, direction
+        # ============================================================
+        # ML PREDICTION (for navigation decisions)
+        # ============================================================
 
-        # PRIORITY OVERRIDE: If we can move toward target, prefer moving over rotating
-        # Prevents unnecessary rotation when already facing the right direction
-        if action == "rotate" and can_move == 1.0:
-            robot_pos = state_dict["robot"]["position"]
-            has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
+        # Predict action label from ML model
+        label = self.model.predict([features])[0]
+        action, direction = self.feature_engineer.decode_action(int(label))
+        logger.info(f"📊 ML Prediction: {action} {direction or ''}")
 
-            # Determine target
-            if has_flowers:
-                target = state_dict["princess"]["position"]
-            else:
-                flowers_positions = state_dict["board"].get("flowers_positions", [])
-                if flowers_positions:
-                    target = min(
-                        flowers_positions,
-                        key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
-                    )
-                else:
-                    target = state_dict["princess"]["position"]
+        # ============================================================
+        # VALIDATE AND FIX INVALID PREDICTIONS
+        # ============================================================
 
-            # Check if current orientation moves toward target
-            dx = target["col"] - robot_pos["col"]
-            dy = target["row"] - robot_pos["row"]
-
-            current_moves_toward_target = False
-            if robot_orient == "NORTH" and dy < 0:  # Moving NORTH toward target
-                current_moves_toward_target = True
-            elif robot_orient == "SOUTH" and dy > 0:  # Moving SOUTH toward target
-                current_moves_toward_target = True
-            elif robot_orient == "EAST" and dx > 0:  # Moving EAST toward target
-                current_moves_toward_target = True
-            elif robot_orient == "WEST" and dx < 0:  # Moving WEST toward target
-                current_moves_toward_target = True
-
-            # If already facing toward target and can move, prioritize moving!
-            if current_moves_toward_target:
-                logger.info(
-                    f"🚀 PRIORITY: Already facing {robot_orient} toward target (dx={dx}, dy={dy})! "
-                    f"Overriding 'rotate' to 'move' (can_move={can_move:.1f})"
-                )
-                action = "move"
-                direction = None
-                return action, direction
-
-        # Override invalid predictions
-        if action == "rotate":
-            # PRIORITY: If blocked by obstacle while carrying flowers, use heuristic to find drop location
-            if blocked_with_flowers == 1.0:
-                logger.warning(
-                    "🚫 PRIORITY: Blocked by obstacle while carrying flowers! "
-                    "Must drop flowers first. Using heuristic to find empty cell..."
-                )
-                # Use heuristic to find best direction (should prefer directions with empty cells)
-                # Pass seeking_drop_location=True to prioritize empty cells for dropping
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=True)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction} to find drop location")
-                # Continue with rotation - don't return yet, let normal flow handle it
-            # If path is blocked and obstacle can be cleaned, prefer cleaning over rotating
-            elif can_move == 0.0 and can_clean == 1.0:
-                logger.info("🧹 PRIORITY: Obstacle ahead and cannot move. Overriding 'rotate' to 'clean'")
-                action = "clean"
-                direction = None
-                return action, direction
-
-            # Check if direction is valid
-            if direction == robot_orient:
-                # Don't rotate to the same direction we're already facing!
-                logger.warning(f"⚠️  Model predicted 'rotate {direction}' but already facing {robot_orient}! Overriding...")
-                # Find a different direction (check if we're seeking drop location)
-                drop_seeking = blocked_with_flowers == 1.0
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction} instead")
-            else:
-                # Check if this rotation is optimal toward target
-                robot_pos = state_dict["robot"]["position"]
-                has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
-
-                # Determine target
-                if has_flowers:
-                    target = state_dict["princess"]["position"]
-                else:
-                    flowers_positions = state_dict["board"].get("flowers_positions", [])
-                    if flowers_positions:
-                        target = min(
-                            flowers_positions,
-                            key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
-                        )
-                    else:
-                        target = state_dict["princess"]["position"]
-
-                # Calculate required movement
-                dx = target["col"] - robot_pos["col"]
-                dy = target["row"] - robot_pos["row"]
-
-                # Check if predicted direction moves AWAY from target (bad rotation)
-                moves_away = False
-                if direction == "NORTH" and dy > 0:  # Target is SOUTH, but rotating NORTH
-                    moves_away = True
-                elif direction == "SOUTH" and dy < 0:  # Target is NORTH, but rotating SOUTH
-                    moves_away = True
-                elif direction == "EAST" and dx < 0:  # Target is WEST, but rotating EAST
-                    moves_away = True
-                elif direction == "WEST" and dx > 0:  # Target is EAST, but rotating WEST
-                    moves_away = True
-
-                # Also check if we're perpendicular when we need primary movement in one axis
-                # (e.g., need SOUTH primarily (dy=2) but rotating EAST/WEST)
-                perpendicular_when_direct_needed = False
-                abs_dx = abs(dx)
-                abs_dy = abs(dy)
-
-                # If primary movement is vertical (dy >> dx) and rotating horizontal, it's suboptimal
-                if abs_dy > abs_dx * 1.5 and direction in ["EAST", "WEST"]:
-                    perpendicular_when_direct_needed = True
-                # If primary movement is horizontal (dx >> dy) and rotating vertical, it's suboptimal
-                elif abs_dx > abs_dy * 1.5 and direction in ["NORTH", "SOUTH"]:
-                    perpendicular_when_direct_needed = True
-                # Exact alignment cases (dx=0 or dy=0)
-                elif dx == 0 and direction in ["EAST", "WEST"]:  # Need vertical movement but rotating horizontal
-                    perpendicular_when_direct_needed = True
-                elif dy == 0 and direction in ["NORTH", "SOUTH"]:  # Need horizontal movement but rotating vertical
-                    perpendicular_when_direct_needed = True
-
-                if moves_away or perpendicular_when_direct_needed:
-                    logger.warning(
-                        f"⚠️  Model predicted 'rotate {direction}' but target requires different direction "
-                        f"(dx={dx}, dy={dy})! Overriding with heuristic..."
-                    )
-                    drop_seeking = blocked_with_flowers == 1.0
-                    direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                    logger.info(f"🔧 Override: Using heuristic rotation to {direction}")
-
-        elif action == "move" and can_move == 0.0:
-            logger.warning("⚠️  Model predicted 'move' but can_move=0.0! Overriding...")
-            # Prefer clean if obstacle ahead, otherwise rotate to a DIFFERENT direction
-            if can_clean == 1.0:
-                action = "clean"
-                logger.info("🔧 Override: Choosing 'clean' (obstacle ahead)")
-            else:
-                action = "rotate"
-                # Find a different direction to rotate to (not current orientation)
-                drop_seeking = blocked_with_flowers == 1.0
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
-
-        elif action == "pick" and can_pick == 0.0:
-            logger.warning("⚠️  Model predicted 'pick' but can_pick=0.0! Overriding...")
-            if can_move == 1.0:
-                action = "move"
-                direction = None
-                logger.info("🔧 Override: Choosing 'move' instead")
-            else:
-                action = "rotate"
-                drop_seeking = blocked_with_flowers == 1.0
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
-
-        elif action == "drop" and can_drop == 0.0:
-            logger.warning("⚠️  Model predicted 'drop' but can_drop=0.0! Overriding...")
-            if can_move == 1.0:
-                action = "move"
-                direction = None
-                logger.info("🔧 Override: Choosing 'move' (no flowers to drop)")
-            else:
-                action = "rotate"
-                drop_seeking = blocked_with_flowers == 1.0
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
-
+        # Fix invalid predictions by mapping to valid actions
+        if action == "pick" and can_pick == 0.0:
+            action, direction = self._fix_invalid_action("pick", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
         elif action == "give" and can_give == 0.0:
-            logger.warning("⚠️  Model predicted 'give' but can_give=0.0! Overriding...")
-            if can_move == 1.0:
-                action = "move"
-                direction = None
-                logger.info("🔧 Override: Choosing 'move' toward princess")
-            else:
-                action = "rotate"
-                drop_seeking = blocked_with_flowers == 1.0
-                direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=drop_seeking)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction}")
-
+            action, direction = self._fix_invalid_action("give", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+        elif action == "drop" and can_drop == 0.0:
+            action, direction = self._fix_invalid_action("drop", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
         elif action == "clean" and can_clean == 0.0:
-            logger.warning("⚠️  Model predicted 'clean' but can_clean=0.0! Overriding...")
-            if can_move == 1.0:
-                action = "move"
-                direction = None
-                logger.info("🔧 Override: Choosing 'move' (no obstacle)")
-            elif can_drop == 1.0:
-                action = "drop"
-                direction = None
-                logger.info("🔧 Override: Choosing 'drop' (no obstacle)")
+            action, direction = self._fix_invalid_action("clean", can_move, can_clean, blocked_with_flowers, robot_orient, state_dict)
+        elif action == "move" and can_move == 0.0:
+            if can_clean == 1.0:
+                action, direction = "clean", None
             else:
-                action = "rotate"
-                direction = self._find_best_rotation_direction(state_dict, robot_orient)
-                logger.info(f"🔧 Override: Choosing 'rotate' to {direction} (no obstacle)")
+                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+        elif action == "rotate":
+            # Fix rotation: don't rotate to same direction, use better direction if needed
+            if direction == robot_orient:
+                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+            elif self._is_rotation_suboptimal(direction, robot_pos, has_flowers, state_dict):
+                action, direction = self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
 
-        logger.info(f"✅ AIMLPlayer._predict_with_ml: Final action={action} and direction={direction}")
+        logger.info(f"✅ Final action: {action} {direction or ''}")
         return (action, direction)
+
+    def _has_nearby_obstacle(self, robot_pos: dict, state_dict: dict) -> bool:
+        """Check if there's an obstacle in any adjacent direction."""
+        obstacles_positions = state_dict["board"].get("obstacles_positions", [])
+        for check_dir in ["NORTH", "SOUTH", "EAST", "WEST"]:
+            adj_pos = self._get_adjacent_position((robot_pos["row"], robot_pos["col"]), check_dir)
+            for obstacle in obstacles_positions:
+                if obstacle["row"] == adj_pos[0] and obstacle["col"] == adj_pos[1]:
+                    return True
+        return False
+
+    def _is_facing_target(self, robot_pos: dict, robot_orient: str, has_flowers: bool, state_dict: dict) -> bool:
+        """Check if current orientation moves toward the target."""
+        # Determine target
+        if has_flowers:
+            target = state_dict["princess"]["position"]
+        else:
+            flowers_positions = state_dict["board"].get("flowers_positions", [])
+            if flowers_positions:
+                target = min(
+                    flowers_positions,
+                    key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
+                )
+            else:
+                target = state_dict["princess"]["position"]
+
+        dx = target["col"] - robot_pos["col"]
+        dy = target["row"] - robot_pos["row"]
+
+        if robot_orient == "NORTH" and dy < 0:
+            return True
+        elif robot_orient == "SOUTH" and dy > 0:
+            return True
+        elif robot_orient == "EAST" and dx > 0:
+            return True
+        elif robot_orient == "WEST" and dx < 0:
+            return True
+        return False
+
+    def _fix_invalid_action(
+        self, invalid_action: str, can_move: float, can_clean: float,
+        blocked_with_flowers: float, robot_orient: str, state_dict: dict
+    ) -> tuple[str, str | None]:
+        """Fix invalid action prediction by mapping to valid alternative."""
+        if invalid_action == "pick":
+            if can_move == 1.0:
+                return ("move", None)
+        elif invalid_action == "give":
+            if can_move == 1.0:
+                return ("move", None)
+        elif invalid_action == "drop":
+            if can_move == 1.0:
+                return ("move", None)
+        elif invalid_action == "clean":
+            if can_move == 1.0:
+                return ("move", None)
+            elif blocked_with_flowers == 1.0:
+                return ("drop", None)
+
+        # Default: rotate toward target
+        robot_pos = state_dict["robot"]["position"]
+        has_flowers = len(state_dict["robot"].get("flowers_collected", [])) > 0
+        return self._get_rotation_toward_target(robot_pos, robot_orient, has_flowers, state_dict, blocked_with_flowers)
+
+    def _get_rotation_toward_target(
+        self, robot_pos: dict, robot_orient: str, has_flowers: bool,
+        state_dict: dict, blocked_with_flowers: float
+    ) -> tuple[str, str | None]:
+        """Get rotation direction toward target, using simplified heuristic."""
+        seeking_drop_location = blocked_with_flowers == 1.0
+        direction = self._find_best_rotation_direction(state_dict, robot_orient, seeking_drop_location=seeking_drop_location)
+        return ("rotate", direction)
+
+    def _is_rotation_suboptimal(self, direction: str, robot_pos: dict, has_flowers: bool, state_dict: dict) -> bool:
+        """Check if rotation moves away from target or is suboptimal."""
+        # Determine target
+        if has_flowers:
+            target = state_dict["princess"]["position"]
+        else:
+            flowers_positions = state_dict["board"].get("flowers_positions", [])
+            if flowers_positions:
+                target = min(
+                    flowers_positions,
+                    key=lambda f: abs(robot_pos["row"] - f["row"]) + abs(robot_pos["col"] - f["col"]),
+                )
+            else:
+                target = state_dict["princess"]["position"]
+
+        dx = target["col"] - robot_pos["col"]
+        dy = target["row"] - robot_pos["row"]
+
+        # Check if rotation moves away from target
+        if direction == "NORTH" and dy > 0:
+            return True
+        elif direction == "SOUTH" and dy < 0:
+            return True
+        elif direction == "EAST" and dx < 0:
+            return True
+        elif direction == "WEST" and dx > 0:
+            return True
+
+        # Check if perpendicular when direct movement needed
+        abs_dx, abs_dy = abs(dx), abs(dy)
+        if abs_dy > abs_dx * 1.5 and direction in ["EAST", "WEST"]:
+            return True
+        elif abs_dx > abs_dy * 1.5 and direction in ["NORTH", "SOUTH"]:
+            return True
+        elif dx == 0 and direction in ["EAST", "WEST"]:
+            return True
+        elif dy == 0 and direction in ["NORTH", "SOUTH"]:
+            return True
+
+        return False
 
     def _select_action_heuristic(self, state: GameState) -> tuple[str, str | None]:
         """

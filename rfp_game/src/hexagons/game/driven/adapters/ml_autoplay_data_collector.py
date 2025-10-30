@@ -9,12 +9,12 @@ from typing import Any
 
 import httpx
 from shared.logging import get_logger
-from ...domain.ports.mltraining_data_collector import MLTrainingDataCollectorPort
+from ...domain.ports.ml_autoplay_data_collector import MLAutoplayDataCollectorPort
 
 logger = get_logger("mltraining_data_collector")
 
 
-class MLTrainingDataCollector(MLTrainingDataCollectorPort):
+class MLAutoplayDataCollector(MLAutoplayDataCollectorPort):
     """Collects gameplay data by sending it to ML Training service for storage."""
 
     def __init__(
@@ -27,9 +27,7 @@ class MLTrainingDataCollector(MLTrainingDataCollectorPort):
         self.timeout = timeout
         self.enabled = data_collection_enabled
 
-        logger.info(
-            f"MLTrainingDataCollector initialized: enabled={self.enabled}, ml_training_url={self.ml_training_url}"
-        )
+        logger.info(f"MLAutoplayDataCollector initialized: enabled={self.enabled}, ml_training_url={self.ml_training_url}")
 
     def collect_action(
         self,

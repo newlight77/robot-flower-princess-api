@@ -4,7 +4,7 @@ from ...domain.services.game_service import GameService
 from ..core.exceptions.game_exceptions import GameException
 from ..core.value_objects.direction import Direction
 from ..core.entities.game import Game
-from ..ports.mltraining_data_collector import MLTrainingDataCollectorPort
+from ..ports.ml_autoplay_data_collector import MLAutoplayDataCollectorPort
 from shared.logging import get_logger
 
 
@@ -21,7 +21,7 @@ class PickFlowerResult:
 
 
 class PickFlowerUseCase:
-    def __init__(self, repository: GameRepository, data_collector: MLTrainingDataCollectorPort):
+    def __init__(self, repository: GameRepository, data_collector: MLAutoplayDataCollectorPort):
         self.logger = get_logger(self)
         self.logger.debug("Initializing PickFlowerUseCase repository=%r", repository)
         self.repository = repository

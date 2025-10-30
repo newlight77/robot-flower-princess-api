@@ -1,5 +1,5 @@
 """Driven adapters for ML player."""
 
-from .http_ml_player_client import HttpMLPlayerClient
+from .ml_autoplay_client import MLAutoplayClient
 
 __all__ = ["HttpMLPlayerClient"]

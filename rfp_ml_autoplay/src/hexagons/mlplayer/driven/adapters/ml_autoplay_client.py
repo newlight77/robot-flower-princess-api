@@ -5,7 +5,7 @@ import httpx
 from hexagons.mlplayer.domain.ports.ml_player_client import MLPlayerClientPort
 
 
-class HttpMLPlayerClient(MLPlayerClientPort):
+class MLAutoplayClient(MLPlayerClientPort):
     """
     HTTP client implementation for interacting with the ML Player service.
 

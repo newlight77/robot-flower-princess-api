@@ -1,16 +1,16 @@
-"""Unit tests for HttpMLPlayerClient."""
+"""Unit tests for MLAutoplayClient."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from hexagons.mlplayer.driven.adapters import HttpMLPlayerClient
+from hexagons.mlplayer.driven.adapters import MLAutoplayClient
 
 
 @pytest.fixture
 def ml_player_client():
-    """Create HttpMLPlayerClient instance for testing."""
-    return HttpMLPlayerClient(base_url="http://localhost:8001", timeout=30)
+    """Create MLAutoplayClient instance for testing."""
+    return MLAutoplayClient(base_url="http://localhost:8001", timeout=30)
 
 
 @pytest.fixture
@@ -172,7 +172,7 @@ async def test_health_check_success(ml_player_client):
 @pytest.mark.asyncio
 async def test_client_with_custom_timeout():
     """Test client initialization with custom timeout."""
-    client = HttpMLPlayerClient(base_url="http://localhost:8001", timeout=60)
+    client = MLAutoplayClient(base_url="http://localhost:8001", timeout=60)
 
     assert client.base_url == "http://localhost:8001"
     assert client.timeout == 60
@@ -181,7 +181,7 @@ async def test_client_with_custom_timeout():
 @pytest.mark.asyncio
 async def test_client_strips_trailing_slash():
     """Test that base URL trailing slash is stripped."""
-    client = HttpMLPlayerClient(base_url="http://localhost:8001/", timeout=30)
+    client = MLAutoplayClient(base_url="http://localhost:8001/", timeout=30)
 
     assert client.base_url == "http://localhost:8001"
 

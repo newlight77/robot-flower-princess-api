@@ -133,7 +133,7 @@ ml_player/
 
 ### 3. HttpMLPlayerClient (`rfp_game`)
 
-**Location**: `rfp_game/src/hexagons/aiplayer/driven/adapters/http_ml_player_client.py`
+**Location**: `rfp_game/src/hexagons/aiplayer/driven/adapters/ml_autoplay_client.py`
 
 **Purpose**: HTTP client adapter for ML Player service communication
 

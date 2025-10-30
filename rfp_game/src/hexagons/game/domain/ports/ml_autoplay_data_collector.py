@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class MLTrainingDataCollectorPort(ABC):
+class MLAutoplayDataCollectorPort(ABC):
     """Port for collecting gameplay data samples for ML training service."""
 
     @abstractmethod

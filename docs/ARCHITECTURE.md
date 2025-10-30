@@ -331,7 +331,7 @@ Robot-Flower-Princess-Claude-API-FastAPI-v4/
 │   │   │   │   │       └── autoplay.py      # Autoplay use case
 │   │   │   │   ├── driven/                  # Driven Adapters
 │   │   │   │   │   └── adapters/
-│   │   │   │   │       └── http_ml_player_client.py  # HTTP client for ML Player
+│   │   │   │   │       └── ml_autoplay_client.py  # HTTP client for ML Player
 │   │   │   │   └── driver/
 │   │   │   │       └── bff/
 │   │   │   │           └── routers/

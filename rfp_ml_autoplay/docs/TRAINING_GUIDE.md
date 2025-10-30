@@ -7,7 +7,7 @@ Complete guide to training a high-accuracy ML model (>85% test accuracy) for the
 ## 🚀 Quick Start (3 Commands)
 
 ```bash
-cd /Users/kong/workspace/robot-flower-princess/Robot-Flower-Princess-Claude-API-FastAPI-v4/ml_player
+cd /Users/kong/workspace/robot-flower-princess/Robot-Flower-Princess-Claude-API-FastAPI-v4/rfp_autoplay_prediction
 
 make ml-collect-quality-data  # 1. Collect data (~10 min)
 make ml-train                 # 2. Train model (~3 min)

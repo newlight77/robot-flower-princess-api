@@ -19,7 +19,7 @@ The main game service implementing the Robot Flower Princess game logic.
 - [Game Rules](docs/GAME_RULES.md) - Learn how to play
 - [Service README](rfp_game/README.md) - Technical details
 
-### 2. ML Player (`ml_player/`)
+### 2. Autoplay Prediction (`rfp_ml_autoplay/`)
 Machine learning-based player service that provides intelligent game-playing strategies.
 
 **Key Features**:
@@ -30,7 +30,7 @@ Machine learning-based player service that provides intelligent game-playing str
 
 **Tech Stack**: Python 3.13, FastAPI, Poetry, Pytest
 
-**Documentation**: See [`ml_player/README.md`](ml_player/README.md)
+**Documentation**: See [`rfp_ml_autoplay/README.md`](rfp_ml_autoplay/README.md)
 
 ---
 
@@ -48,7 +48,7 @@ This project uses **separate GitHub Actions workflows** for each service:
 - ✅ Docker build & health check
 
 ### ML Player CI (`.github/workflows/ml_player-ci.yml`)
-**Triggers**: Only when files in `ml_player/` change
+**Triggers**: Only when files in `rfp_ml_autoplay/` change
 - ✅ Unit tests (21 tests)
 - ✅ Coverage check (80%+ enforced)
 - ✅ Linting (Black + Ruff)
@@ -80,7 +80,7 @@ This project uses **separate GitHub Actions workflows** for each service:
 │   ├── Makefile
 │   └── pyproject.toml
 │
-├── ml_player/             # ML Player service
+├── rfp_ml_autoplay/             # ML Player service
 │   ├── src/
 │   │   ├── hexagons/      # Hexagonal architecture
 │   │   │   ├── mlplayer/  # ML Player hexagon
@@ -149,10 +149,10 @@ make docker-run
 make run
 ```
 
-### ML Player
+### Autoplay Prediction
 
 ```bash
-cd ml_player
+cd rfp_ml_autoplay
 
 # Install dependencies
 make install
@@ -203,7 +203,7 @@ Both services follow the **test pyramid** approach:
 - **Feature-Component Tests** (13): End-to-end workflow tests
 - **Total**: 165 tests with ~90% coverage
 
-### ML Player
+### Autoplay Prediction
 - **Unit Tests** (21): Core AI logic and HTTP client tests
 - **Total**: 21 tests with 80%+ coverage
 
@@ -223,7 +223,7 @@ docker run -p 8000:8000 rfp-game:latest
 
 ### ML Player
 ```bash
-docker build -t ml-player:latest ml_player/
+docker build -t ml-player:latest rfp_ml_autoplay/
 docker run -p 8001:8001 ml-player:latest
 ```
 

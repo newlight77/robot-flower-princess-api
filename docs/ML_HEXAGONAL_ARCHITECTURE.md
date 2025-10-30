@@ -7,17 +7,17 @@ The ML Player application contains two separate hexagons following the Single Re
 1. **mltraining** hexagon - Data collection and model training
 2. **mlplayer** hexagon - ML model inference and predictions
 
-Both hexagons are within the **same ml_player application** (port 8001).
+Both hexagons are within the **same rfp_ml_autoplay application** (port 8001).
 
 ### Important: AI Player Distribution
 
-**ml_player application** (port 8001):
+**rfp_ml_autoplay application** (port 8001):
 - `AIMLPlayer` - Machine learning-based AI (uses trained models)
 
 **rfp_game application** (port 8000):
 - `AIGreedyPlayer` - BFS-based greedy strategy
 - `AIOptimalPlayer` - A* pathfinding with multi-step planning
-- `MLProxyPlayer` - HTTP client that delegates to ml_player service
+- `MLProxyPlayer` - HTTP client that delegates to rfp_ml_autoplay service
 
 The separation allows the game to function with local AI strategies (Greedy, Optimal) without requiring the ML service, while optionally delegating to ML predictions when the service is available.
 
@@ -75,7 +75,7 @@ Legend:
 ### mltraining Hexagon
 **Purpose**: Collect data and train models
 
-**Location**: `ml_player/src/hexagons/mltraining/`
+**Location**: `rfp_ml_autoplay/src/hexagons/mltraining/`
 
 **Components**:
 - `domain/ml/DataCollector` - Stores gameplay samples
@@ -83,24 +83,24 @@ Legend:
 - `domain/ml/ModelTrainer` - Trains ML models (Random Forest, Gradient Boosting)
 - `driver/bff/routers/ml_training_router` - Training API endpoints
 
-**API Endpoints** (within ml_player app):
+**API Endpoints** (within rfp_ml_autoplay app):
 - `POST /api/ml-training/collect` - Receive gameplay data
 - `GET /api/ml-training/statistics` - Get collection stats
 
-**Scripts** (in ml_player/scripts/):
+**Scripts** (in rfp_ml_autoplay/scripts/):
 - `generate_training_data.py` - Create synthetic data
 - `train_model.py` - Train models
 
 **Data Flow**:
 1. RFP Game → mltraining hexagon (gameplay data via `/api/ml-training/collect`)
-2. mltraining → File System (stores in `ml_player/data/training/`)
+2. mltraining → File System (stores in `rfp_ml_autoplay/data/training/`)
 3. Training Scripts → mltraining (train models)
 4. mltraining → File System (saves to `ml_player/models/`)
 
 ### mlplayer Hexagon
 **Purpose**: Use trained models for ML-based predictions
 
-**Location**: `ml_player/src/hexagons/mlplayer/`
+**Location**: `rfp_ml_autoplay/src/hexagons/mlplayer/`
 
 **Components**:
 - `domain/core/entities/AIMLPlayer` - ML-based AI with heuristic fallback
@@ -108,14 +108,14 @@ Legend:
 - `domain/ml/FeatureEngineer` - Converts game states to features (for inference)
 - `driver/bff/routers/ml_player_router` - Prediction API endpoints
 
-**API Endpoints** (within ml_player app):
+**API Endpoints** (within rfp_ml_autoplay app):
 - `POST /api/ml-player/predict/{game_id}` - Get ML-based action prediction
 - `GET /api/ml-player/strategies` - List available ML strategies
 - `GET /api/ml-player/strategies/{name}` - Get ML strategy details
 
 **Data Flow**:
 1. RFP Game → mlplayer hexagon (game state via `/api/ml-player/predict/{game_id}`)
-2. mlplayer → File System (loads trained model from `ml_player/models/`)
+2. mlplayer → File System (loads trained model from `rfp_ml_autoplay/models/`)
 3. mlplayer → Uses FeatureEngineer to extract features from game state
 4. mlplayer → Predicts action using trained ML model
 5. mlplayer → RFP Game (returns predicted action)
@@ -124,7 +124,7 @@ Legend:
 
 ## Related: RFP Game AI Player Hexagon
 
-**Note**: The following AI players are NOT in ml_player, but in the RFP Game application:
+**Note**: The following AI players are NOT in rfp_ml_autoplay, but in the RFP Game application:
 
 ### aiplayer Hexagon (rfp_game)
 **Purpose**: Non-ML AI strategies and autoplay functionality
@@ -147,27 +147,27 @@ Legend:
 
 ## Key Changes
 
-### 1. New Hexagon Created Within ml_player
-- `ml_player/src/hexagons/mltraining/` - Training hexagon
+### 1. New Hexagon Created Within rfp_ml_autoplay
+- `rfp_ml_autoplay/src/hexagons/mltraining/` - Training hexagon
 - Same application, same port (8001)
 - Shares FastAPI app, but has own router
 
 ### 2. Files Organized by Hexagon
 
-**mltraining hexagon** (`ml_player/src/hexagons/mltraining/`):
+**mltraining hexagon** (`rfp_ml_autoplay/src/hexagons/mltraining/`):
 - `domain/ml/data_collector.py`
 - `domain/ml/feature_engineer.py`
 - `domain/ml/model_trainer.py`
 - `driver/bff/routers/ml_training_router.py` - `/collect` endpoint
 - `driver/bff/schemas/data_collection_schema.py`
 
-**mlplayer hexagon** (`ml_player/src/hexagons/mlplayer/`):
+**mlplayer hexagon** (`rfp_ml_autoplay/src/hexagons/mlplayer/`):
 - `domain/core/entities/ai_ml_player.py` - ML-based AI player only
 - `domain/ml/model_registry.py` - Loads and manages trained models
 - `domain/ml/feature_engineer.py` - Feature extraction for inference (duplicate of mltraining's version)
 - `driver/bff/routers/ml_player_router.py` - `/predict` and `/strategies` endpoints
 
-**Shared** (`ml_player/`):
+**Shared** (`rfp_ml_autoplay/`):
 - `scripts/generate_training_data.py`
 - `scripts/train_model.py`
 - `models/` directory
@@ -226,7 +226,7 @@ cd rfp_game
 make run  # Port 8000
 
 # Terminal 2: ML Player (includes both hexagons)
-cd ml_player
+cd rfp_ml_autoplay
 make run  # Port 8001
 ```
 
@@ -238,22 +238,22 @@ Both `/api/ml-player/*` and `/api/ml-training/*` endpoints are available on port
 ```
 1. Player performs action in RFP Game (port 8000)
 2. RFP Game sends to ML Player service → mltraining hexagon (/api/ml-training/collect on port 8001)
-3. mltraining hexagon stores in ml_player/data/training/samples_YYYY-MM-DD.jsonl
+3. mltraining hexagon stores in rfp_ml_autoplay/data/training/samples_YYYY-MM-DD.jsonl
 ```
 
 ### Training Model
 ```
-1. Run: cd ml_player && make ml-train (or ml-train-gb)
-2. Script loads samples from ml_player/data/training/
+1. Run: cd rfp_ml_autoplay && make ml-train (or ml-train-gb)
+2. Script loads samples from rfp_ml_autoplay/data/training/
 3. mltraining hexagon extracts features using FeatureEngineer
 4. mltraining hexagon trains model (Random Forest or Gradient Boosting)
-5. Saves to ml_player/models/model_name_timestamp.pkl
+5. Saves to rfp_ml_autoplay/models/model_name_timestamp.pkl
 ```
 
 ### Using AI
 ```
 1. RFP Game calls ML Player service → mlplayer hexagon (/api/ml-player/predict on port 8001)
-2. mlplayer hexagon loads best model from ml_player/models/
+2. mlplayer hexagon loads best model from rfp_ml_autoplay/models/
 3. mlplayer hexagon extracts features from game state
 4. mlplayer hexagon predicts action using trained model
 5. Returns action to RFP Game
@@ -263,22 +263,22 @@ Both `/api/ml-player/*` and `/api/ml-training/*` endpoints are available on port
 
 ```bash
 # Test ML Player (both hexagons)
-cd ml_player
+cd rfp_ml_autoplay
 make test
 
 # E2E Test
 # 1. Start both services
 cd rfp_game && make run  # Terminal 1
-cd ml_player && make run  # Terminal 2
+cd rfp_ml_autoplay && make run  # Terminal 2
 
 # 2. Enable data collection
 export ENABLE_DATA_COLLECTION=true
 
 # 3. Play game and verify data is collected
-# Check ml_player/data/training/samples_*.jsonl
+# Check rfp_ml_autoplay/data/training/samples_*.jsonl
 
 # 4. Train model
-cd ml_player && make ml-train
+cd rfp_ml_autoplay && make ml-train
 
 # 5. Test AI: Use ML Player strategy in game
 ```
@@ -286,7 +286,7 @@ cd ml_player && make ml-train
 ## Project Structure
 
 ```
-ml_player/
+rfp_ml_autoplay/
 ├── src/
 │   ├── hexagons/
 │   │   ├── mltraining/          # Training Hexagon

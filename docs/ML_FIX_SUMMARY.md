@@ -35,9 +35,9 @@ This prevents the robot from wasting all 50 iterations oscillating between two p
 Created comprehensive data collection pipeline to train on **real successful gameplay**:
 
 **New Files:**
-- `ml_player/scripts/collect_quality_training_data.sh` - One-command data collection
-- `ml_player/scripts/analyze_training_data.py` - Data quality analysis
-- `ml_player/docs/TRAINING_GUIDE.md` - Complete training guide
+- `rfp_ml_autoplay/scripts/collect_quality_training_data.sh` - One-command data collection
+- `rfp_ml_autoplay/scripts/analyze_training_data.py` - Data quality analysis
+- `rfp_ml_autoplay/docs/TRAINING_GUIDE.md` - Complete training guide
 
 **How to use:**
 ```bash
@@ -97,7 +97,7 @@ The loop detection is already active. Test it:
 ### Long-term Fix (Retrain Model)
 
 ```bash
-cd /Users/kong/workspace/robot-flower-princess/Robot-Flower-Princess-Claude-API-FastAPI-v4/ml_player
+cd /Users/kong/workspace/robot-flower-princess/Robot-Flower-Princess-Claude-API-FastAPI-v4/rfp_ml_autoplay
 
 # Step 1: Collect quality data (takes ~10 minutes)
 make ml-collect-quality-data
@@ -215,9 +215,9 @@ Watch logs for:
 
 ## 📚 Documentation
 
-- **Training Guide:** `ml_player/docs/TRAINING_GUIDE.md`
-- **ML Strategy:** `ml_player/docs/OPTIMAL_ML_STRATEGY.md`
-- **Architecture:** `ml_player/docs/ML_IMPLEMENTATION.md`
+- **Training Guide:** `rfp_ml_autoplay/docs/TRAINING_GUIDE.md`
+- **ML Strategy:** `rfp_ml_autoplay/docs/OPTIMAL_ML_STRATEGY.md`
+- **Architecture:** `rfp_ml_autoplay/docs/ML_IMPLEMENTATION.md`
 - **Game Rules:** `docs/GAME_RULES.md`
 
 ---

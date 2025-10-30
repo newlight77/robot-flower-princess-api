@@ -111,26 +111,26 @@ logger.info(f"📊 ML Prediction - Model output label: {label}")
 ### Core Fixes (Critical)
 1. `rfp_game/src/hexagons/game/domain/core/value_objects/direction.py`
 2. `rfp_game/src/hexagons/aiplayer/domain/core/entities/ml_proxy_player.py`
-3. `ml_player/src/hexagons/mlplayer/domain/ml/feature_engineer.py`
-4. `ml_player/src/hexagons/mltraining/domain/ml/feature_engineer.py`
-5. `ml_player/src/hexagons/mlplayer/domain/core/entities/ai_ml_player.py`
+3. `rfp_autoplay_prediction/src/hexagons/mlplayer/domain/ml/feature_engineer.py`
+4. `rfp_autoplay_prediction/src/hexagons/mltraining/domain/ml/feature_engineer.py`
+5. `rfp_autoplay_prediction/src/hexagons/mlplayer/domain/core/entities/ai_ml_player.py`
 
 ### API & Schemas
 6. `rfp_game/src/hexagons/game/driver/bff/schemas/game_schema.py`
 7. `rfp_game/src/hexagons/game/driver/bff/routers/game_router.py`
-8. `ml_player/src/hexagons/mlplayer/domain/use_cases/predict_action.py`
+8. `rfp_autoplay_prediction/src/hexagons/mlplayer/domain/use_cases/predict_action.py`
 
 ### Training & Data
-9. `ml_player/scripts/generate_balanced_training_data.py`
+9. `rfp_autoplay_prediction/scripts/generate_balanced_training_data.py`
 
 ### Testing
-10. Created diagnostic test scripts in `ml_player/scripts/`
+10. Created diagnostic test scripts in `rfp_autoplay_prediction/scripts/`
 
 ## 🎯 Verification Steps
 
 Run this test to verify the fix:
 ```bash
-cd ml_player
+cd rfp_autoplay_prediction
 poetry run python scripts/test_uppercase_directions.py
 ```
 
@@ -145,7 +145,7 @@ Should output:
 
 1. **Restart ML Player Service**:
    ```bash
-   cd ml_player
+   cd rfp_autoplay_prediction
    # Stop current service (Ctrl+C)
    poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8001 --app-dir src
    ```

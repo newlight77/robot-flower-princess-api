@@ -4,7 +4,7 @@ from ..services.game_service import GameService
 from ..core.value_objects.direction import Direction
 from ..core.exceptions.game_exceptions import GameException
 from ..core.entities.game import Game
-from ..ports.gameplay_data_collector import GameplayDataCollectorPort
+from ..ports.mltraining_data_collector import MLTrainingDataCollectorPort
 from shared.logging import get_logger
 
 
@@ -21,7 +21,7 @@ class RotateRobotResult:
 
 
 class RotateRobotUseCase:
-    def __init__(self, repository: GameRepository, data_collector: GameplayDataCollectorPort):
+    def __init__(self, repository: GameRepository, data_collector: MLTrainingDataCollectorPort):
         self.logger = get_logger(self)
         self.logger.debug("Initializing RotateRobotUseCase repository=%r", repository)
         self.repository = repository

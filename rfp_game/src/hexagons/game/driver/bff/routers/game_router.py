@@ -11,9 +11,9 @@ from ..schemas.game_schema import (
     ActionResponse,
     GamesResponse,
 )
-from configurator.dependencies import get_game_repository, get_gameplay_data_collector
+from configurator.dependencies import get_game_repository, get_mltraining_data_collector
 from ....domain.ports.game_repository import GameRepository
-from ....domain.ports.gameplay_data_collector import GameplayDataCollectorPort
+from ....domain.ports.mltraining_data_collector import MLTrainingDataCollectorPort
 from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
 from ....domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
@@ -159,7 +159,7 @@ def perform_action(
         ),
     ),
     repository: GameRepository = Depends(get_game_repository),
-    data_collector: GameplayDataCollectorPort = Depends(get_gameplay_data_collector),
+    data_collector: MLTrainingDataCollectorPort = Depends(get_mltraining_data_collector),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.
 
@@ -190,7 +190,6 @@ def perform_action(
         }
 
         logger.info(f"Action: {action}, Direction: {direction}")
-        logger.info(f"Game state before: {game_state_before}")
 
         if action == ActionType.rotate:
             use_case = RotateRobotUseCase(repository, data_collector)

@@ -46,8 +46,8 @@ async def test_autoplay_applies_greedy_solver_actions_and_records_direction():
 async def test_autoplay_greedy_handles_solver_exception_gracefully():
     """Test that autoplay handles AIGreedyPlayer solver exceptions gracefully."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("a2", board)
+    game = make_game_with_small_board()
+    repo.save("a2", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
@@ -63,8 +63,8 @@ async def test_autoplay_greedy_handles_solver_exception_gracefully():
 async def test_autoplay_with_greedy_strategy_explicit():
     """Test autoplay uses AIGreedyPlayer when strategy='greedy' (explicit)."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("a4", board)
+    game = make_game_with_small_board()
+    repo.save("a4", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
@@ -84,8 +84,8 @@ async def test_autoplay_with_greedy_strategy_explicit():
 async def test_autoplay_defaults_to_greedy_strategy():
     """Test autoplay defaults to AIGreedyPlayer when no strategy specified."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("a5", board)
+    game = make_game_with_small_board()
+    repo.save("a5", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",
@@ -106,8 +106,8 @@ async def test_autoplay_defaults_to_greedy_strategy():
 async def test_autoplay_greedy_strategy_called():
     """Test that AIGreedyPlayer.solve is called when using greedy strategy."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("greedy_called", board)
+    game = make_game_with_small_board()
+    repo.save("greedy_called", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_greedy_player.AIGreedyPlayer.solve",

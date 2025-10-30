@@ -46,8 +46,8 @@ async def test_autoplay_with_optimal_strategy():
 async def test_autoplay_optimal_handles_exception_gracefully():
     """Test autoplay handles AIOptimalPlayer exceptions gracefully."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("a6", board)
+    game = make_game_with_small_board()
+    repo.save("a6", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",
@@ -63,8 +63,8 @@ async def test_autoplay_optimal_handles_exception_gracefully():
 async def test_autoplay_optimal_strategy_called():
     """Test that AIOptimalPlayer.solve is called when using optimal strategy."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("optimal_called", board)
+    game = make_game_with_small_board()
+    repo.save("optimal_called", game)
 
     with patch(
         "hexagons.aiplayer.domain.core.entities.ai_optimal_player.AIOptimalPlayer.solve",

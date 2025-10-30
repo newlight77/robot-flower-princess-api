@@ -20,12 +20,13 @@ def test_find_path_trivial_returns_empty():
 
 def test_find_path_simple_straight_line():
     """_find_path should return a straight line path when corridor is clear."""
-    board = Game(rows=3, cols=4)
+    game = Game(rows=3, cols=3)
+    game.board.initial_flowers_count = 1
     # Clear board by default; ensure start/goal are empty
     start = Position(0, 0)
-    goal = Position(0, 2)
+    goal = Position(2, 2)
 
-    path = AIGreedyPlayer._find_path(board, start, goal)
+    path = AIGreedyPlayer._find_path(game, start, goal)
 
     # Expect two steps to the east
     assert [p for p in path] == [Position(0, 1), Position(0, 2)]

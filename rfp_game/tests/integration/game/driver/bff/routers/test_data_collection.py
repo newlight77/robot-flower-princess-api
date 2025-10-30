@@ -9,21 +9,21 @@ from unittest.mock import patch, MagicMock
 def enable_data_collection(monkeypatch):
     """Enable data collection for tests."""
     # Clear the lru_cache before enabling to ensure fresh instance
-    from configurator.dependencies import get_gameplay_data_collector
+    from configurator.dependencies import get_mltraining_data_collector
 
-    get_gameplay_data_collector.cache_clear()
+    get_mltraining_data_collector.cache_clear()
 
     monkeypatch.setenv("ENABLE_DATA_COLLECTION", "true")
     yield
 
     # Clear cache after test
-    get_gameplay_data_collector.cache_clear()
+    get_mltraining_data_collector.cache_clear()
 
 
 @pytest.fixture
 def mock_ml_player_http():
     """Mock HTTP calls to ML Player service."""
-    with patch("hexagons.game.driven.adapters.gameplay_data_collector.httpx.Client") as mock_client:
+    with patch("hexagons.game.driven.adapters.ml_autoplay_data_collector.httpx.Client") as mock_client:
         mock_instance = MagicMock()
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -39,11 +39,11 @@ def mock_ml_player_http():
 def test_data_collection_disabled_by_default(client: TestClient, create_game, mock_ml_player_http, monkeypatch):
     """Test that data collection can be disabled via environment variable."""
     # Clear cache to ensure fresh instance
-    from configurator.dependencies import get_gameplay_data_collector
+    from configurator.dependencies import get_mltraining_data_collector
 
     # Disable data collection via environment variable
     monkeypatch.setenv("ENABLE_DATA_COLLECTION", "false")
-    get_gameplay_data_collector.cache_clear()
+    get_mltraining_data_collector.cache_clear()
 
     # GIVEN
     game_id = create_game(rows=5, cols=5)
@@ -61,7 +61,7 @@ def test_data_collection_disabled_by_default(client: TestClient, create_game, mo
     mock_ml_player_http.post.assert_not_called()
 
     # Clear cache after test
-    get_gameplay_data_collector.cache_clear()
+    get_mltraining_data_collector.cache_clear()
 
 
 def test_data_collection_enabled(client: TestClient, create_game, enable_data_collection, mock_ml_player_http):

@@ -29,7 +29,7 @@ class RandomBoardGenerator:
         princess_pos = Position(rows - 1, cols - 1)
 
         robot = Robot(position=robot_pos, orientation=Direction.EAST)
-        board = Game(rows=rows, cols=cols, robot=robot, princess_position=princess_pos)
+        game = Game(rows=rows, cols=cols, robot=robot, princess_position=princess_pos)
 
         # Generate random positions for flowers and obstacles
         available_positions = []
@@ -53,12 +53,12 @@ class RandomBoardGenerator:
         for i in range(num_flowers, min(num_flowers + num_obstacles, len(available_positions))):
             obstacles.add(available_positions[i])
 
-        board.flowers = flowers
-        board.board.initial_flowers_count = len(board.flowers)
-        board.obstacles = obstacles
-        board.board.initial_flowers_count = len(flowers)
+        game.flowers = flowers
+        game.board.initial_flowers_count = len(game.flowers)
+        game.obstacles = obstacles
+        game.board.initial_flowers_count = len(flowers)
 
-        return board
+        return game
 
 
 def run_iteration(iteration: int, num_tests: int = 10, player: AIGreedyPlayer | AIOptimalPlayer = AIGreedyPlayer()):

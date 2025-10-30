@@ -49,8 +49,8 @@ async def test_autoplay_greedy_and_optimal_both_callable():
 async def test_autoplay_strategy_selection_isolation():
     """Test that strategy parameter correctly selects the AI player without calling the other."""
     repo = InMemoryGameRepository()
-    board = make_game_with_small_board()
-    repo.save("validation", board)
+    game = make_game_with_small_board()
+    repo.save("validation", game)
 
     # Patch both strategies but only greedy should be called
     with (

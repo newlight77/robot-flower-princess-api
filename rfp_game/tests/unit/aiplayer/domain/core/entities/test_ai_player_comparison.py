@@ -11,45 +11,45 @@ from hexagons.aiplayer.domain.core.entities.ai_optimal_player import AIOptimalPl
 
 
 @pytest.fixture
-def simple_board():
+def simple_game():
     """Create a simple solvable game board."""
-    board = Game(rows=5, cols=5)
+    game = Game(rows=5, cols=5)
 
-    board.robot.position = Position(0, 0)
+    game.robot.position = Position(0, 0)
 
-    board.robot.orientation = Direction.EAST
+    game.robot.orientation = Direction.EAST
 
-    board.princess.position = Position(4, 4)
-    board.flowers = {Position(1, 1), Position(3, 3)}
-    board.board.initial_flowers_count = len(board.flowers)
-    board.obstacles = set()
-    board.board.initial_flowers_count = len(board.flowers)
-    return board
+    game.princess.position = Position(4, 4)
+    game.flowers = {Position(1, 1), Position(3, 3)}
+    game.board.initial_flowers_count = len(game.flowers)
+    game.obstacles = set()
+    game.board.initial_flowers_count = len(game.flowers)
+    return game
 
 
 @pytest.fixture
-def complex_board():
+def complex_game():
     """Create a complex board with multiple flowers and obstacles."""
-    board = Game(rows=7, cols=7)
+    game = Game(rows=7, cols=7)
 
-    board.robot.position = Position(0, 0)
+    game.robot.position = Position(0, 0)
 
-    board.robot.orientation = Direction.EAST
+    game.robot.orientation = Direction.EAST
 
-    board.princess.position = Position(6, 6)
-    board.flowers = {
+    game.princess.position = Position(6, 6)
+    game.flowers = {
         Position(1, 1),
         Position(2, 3),
         Position(4, 2),
         Position(5, 4),
     }
-    board.obstacles = {
+    game.obstacles = {
         Position(2, 2),
         Position(3, 3),
         Position(4, 4),
     }
-    board.board.initial_flowers_count = len(board.flowers)
-    return board
+    game.board.initial_flowers_count = len(game.flowers)
+    return game
 
 
 class TestAIPlayerComparison:

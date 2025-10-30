@@ -21,7 +21,7 @@ class RotateRobotResult:
 
 
 class RotateRobotUseCase:
-    def __init__(self, repository: GameRepository, data_collector: MLAutoplayDataCollectorPort):
+    def __init__(self, repository: GameRepository, data_collector: MLAutoplayDataCollectorPort | None = None):
         self.logger = get_logger(self)
         self.logger.debug("Initializing RotateRobotUseCase repository=%r", repository)
         self.repository = repository

@@ -29,12 +29,12 @@ def make_center_board(rows=3, cols=3):
     return board
 
 
-def test_move_rotates_then_moves():
+def test_move_rotates_then_moves(data_collector):
     repo = InMemoryGameRepository()
     board = make_center_board()
     repo.save("m1", board)
 
-    use_case = MoveRobotUseCase(repo)
+    use_case = MoveRobotUseCase(repo, data_collector)
     res = use_case.execute(MoveRobotCommand(game_id="m1", direction=Direction.NORTH))
 
     assert isinstance(res.success, bool)
@@ -46,7 +46,7 @@ def test_move_rotates_then_moves():
         assert b.robot.position == Position(0, 1)
 
 
-def test_pick_rotates_then_picks():
+def test_pick_rotates_then_picks(data_collector):
     repo = InMemoryGameRepository()
     board = make_center_board()
     # place a flower north of center
@@ -55,7 +55,7 @@ def test_pick_rotates_then_picks():
     board.board.initial_flowers_count = 1
     repo.save("p1", board)
 
-    use_case = PickFlowerUseCase(repo)
+    use_case = PickFlowerUseCase(repo, data_collector)
     res = use_case.execute(PickFlowerCommand(game_id="p1", direction=Direction.NORTH))
 
     assert isinstance(res.success, bool)
@@ -67,13 +67,13 @@ def test_pick_rotates_then_picks():
         assert flower_pos not in b.flowers
 
 
-def test_drop_rotates_then_drops():
+def test_drop_rotates_then_drops(data_collector):
     repo = InMemoryGameRepository()
     board = make_center_board()
     board.robot.pick_flower(Position(0, 1))
     repo.save("d1", board)
 
-    use_case = DropFlowerUseCase(repo)
+    use_case = DropFlowerUseCase(repo, data_collector)
     res = use_case.execute(DropFlowerCommand(game_id="d1", direction=Direction.NORTH))
 
     assert isinstance(res.success, bool)
@@ -85,7 +85,7 @@ def test_drop_rotates_then_drops():
         assert Position(0, 1) in b.flowers
 
 
-def test_give_rotates_then_gives():
+def test_give_rotates_then_gives(data_collector):
     repo = InMemoryGameRepository()
     board = make_center_board()
     # place princess north of robot
@@ -93,7 +93,7 @@ def test_give_rotates_then_gives():
     board.robot.pick_flower(Position(0, 1))
     repo.save("g1", board)
 
-    use_case = GiveFlowersUseCase(repo)
+    use_case = GiveFlowersUseCase(repo, data_collector)
     res = use_case.execute(GiveFlowersCommand(game_id="g1", direction=Direction.NORTH))
 
     assert isinstance(res.success, bool)
@@ -104,14 +104,14 @@ def test_give_rotates_then_gives():
         assert b.robot.flowers_held == 0
 
 
-def test_clean_rotates_then_cleans():
+def test_clean_rotates_then_cleans(data_collector):
     repo = InMemoryGameRepository()
     board = make_center_board()
     obs_pos = Position(0, 1)
     board.obstacles = {obs_pos}
     repo.save("c1", board)
 
-    use_case = CleanObstacleUseCase(repo)
+    use_case = CleanObstacleUseCase(repo, data_collector)
     res = use_case.execute(CleanObstacleCommand(game_id="c1", direction=Direction.NORTH))
 
     assert isinstance(res.success, bool)

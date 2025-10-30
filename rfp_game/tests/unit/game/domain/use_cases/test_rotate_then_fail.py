@@ -15,21 +15,21 @@ from hexagons.game.domain.use_cases.rotate_robot import (
 )
 
 
-def make_small_board():
-    board = Game(rows=2, cols=2)
-    board.robot.position = Position(0, 0)
-    board.robot.orientation = Direction.EAST
-    board.princess.position = Position(1, 1)
-    board.flowers = set()
-    board.obstacles = set()
-    board.board.initial_flowers_count = 0
-    return board
+def make_small_game():
+    game = Game(rows=2, cols=2)
+    game.robot.position = Position(0, 0)
+    game.robot.orientation = Direction.EAST
+    game.princess.position = Position(1, 1)
+    game.flowers = set()
+    game.obstacles = set()
+    game.board.initial_flowers_count = 0
+    return game
 
 
-def test_rotate_then_move_failure_records_both_entries():
+def test_rotate_then_move_failure_records_both_entries(data_collector):
     repo = InMemoryGameRepository()
-    board = make_small_board()
-    repo.save("r1", board)
+    game = make_small_game()
+    repo.save("r1", game)
 
     # Patch move to raise after rotate is applied
     with patch(
@@ -37,10 +37,10 @@ def test_rotate_then_move_failure_records_both_entries():
         side_effect=GameException("blocked"),
     ):
         # Apply rotate then move via commands
-        rot_uc = RotateRobotUseCase(repo)
+        rot_uc = RotateRobotUseCase(repo, data_collector)
         rot_uc.execute(RotateRobotCommand(game_id="r1", direction=Direction.NORTH))
 
-        move_uc = MoveRobotUseCase(repo)
+        move_uc = MoveRobotUseCase(repo, data_collector)
         res = move_uc.execute(MoveRobotCommand(game_id="r1", direction=Direction.NORTH))
 
     assert res.success is False

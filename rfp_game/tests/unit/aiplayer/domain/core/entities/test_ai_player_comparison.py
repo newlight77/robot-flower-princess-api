@@ -55,33 +55,33 @@ def complex_game():
 class TestAIPlayerComparison:
     """Compare both AI strategies on the same boards."""
 
-    def test_both_players_solve_simple_board(self, simple_board):
+    def test_both_players_solve_simple_board(self, simple_game):
         """Both AI players should successfully solve a simple board."""
-        greedy_board = deepcopy(simple_board)
-        optimal_board = deepcopy(simple_board)
+        greedy_game = deepcopy(simple_game)
+        optimal_game = deepcopy(simple_game)
 
-        greedy_actions = AIGreedyPlayer.solve(greedy_board)
-        optimal_actions = AIOptimalPlayer.solve(optimal_board)
+        greedy_actions = AIGreedyPlayer.solve(greedy_game)
+        optimal_actions = AIOptimalPlayer.solve(optimal_game)
 
         # Both should succeed
-        assert greedy_board.get_status().value == "victory"
-        assert optimal_board.get_status().value == "victory"
+        assert greedy_game.get_status().value == "victory"
+        assert optimal_game.get_status().value == "victory"
 
         # Both should deliver all flowers
-        assert greedy_board.flowers_delivered == 2
-        assert optimal_board.flowers_delivered == 2
+        assert greedy_game.flowers_delivered == 2
+        assert optimal_game.flowers_delivered == 2
 
         # Both should return non-empty action lists
         assert len(greedy_actions) > 0
         assert len(optimal_actions) > 0
 
-    def test_both_players_solve_complex_board(self, complex_board):
+    def test_both_players_solve_complex_board(self, complex_game):
         """Both AI players should handle complex boards."""
-        greedy_board = deepcopy(complex_board)
-        optimal_board = deepcopy(complex_board)
+        greedy_game = deepcopy(complex_game)
+        optimal_game = deepcopy(complex_game)
 
-        greedy_actions = AIGreedyPlayer.solve(greedy_board)
-        optimal_actions = AIOptimalPlayer.solve(optimal_board)
+        greedy_actions = AIGreedyPlayer.solve(greedy_game)
+        optimal_actions = AIOptimalPlayer.solve(optimal_game)
 
         # Both should return action lists
         assert isinstance(greedy_actions, list)
@@ -91,18 +91,18 @@ class TestAIPlayerComparison:
         assert len(greedy_actions) > 0
         assert len(optimal_actions) > 0
 
-    def test_optimal_player_efficiency_trend(self, simple_board):
+    def test_optimal_player_efficiency_trend(self, simple_game):
         """
         On simple boards, optimal player often (but not always) uses fewer actions.
 
         Note: This is a general trend test, not a strict requirement.
         The optimal player aims for efficiency but may not always be shorter.
         """
-        greedy_board = deepcopy(simple_board)
-        optimal_board = deepcopy(simple_board)
+        greedy_game = deepcopy(simple_game)
+        optimal_game = deepcopy(simple_game)
 
-        greedy_actions = AIGreedyPlayer.solve(greedy_board)
-        optimal_actions = AIOptimalPlayer.solve(optimal_board)
+        greedy_actions = AIGreedyPlayer.solve(greedy_game)
+        optimal_actions = AIOptimalPlayer.solve(optimal_game)
 
         # Just verify both return valid action lists
         # (The "optimal" strategy may not always be shorter in practice)

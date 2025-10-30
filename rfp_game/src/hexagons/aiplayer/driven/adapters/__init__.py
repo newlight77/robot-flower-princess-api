@@ -2,4 +2,4 @@
 
 from .ml_autoplay_client import MLAutoplayClient
 
-__all__ = ["HttpMLPlayerClient"]
+__all__ = ["MLAutoplayClient"]

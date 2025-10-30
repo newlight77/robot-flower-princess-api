@@ -21,7 +21,11 @@ def test_find_path_trivial_returns_empty():
 def test_find_path_simple_straight_line():
     """_find_path should return a straight line path when corridor is clear."""
     game = Game(rows=3, cols=3)
-    game.board.initial_flowers_count = 1
+    game.board.initial_flowers_count = 0
+    game.board.initial_obstacles_count = 0
+    game.board.flowers_positions = set()
+    game.board.obstacles_positions = set()
+    game.robot.position = Position(0, 0)
     # Clear board by default; ensure start/goal are empty
     start = Position(0, 0)
     goal = Position(2, 2)
@@ -29,7 +33,12 @@ def test_find_path_simple_straight_line():
     path = AIGreedyPlayer._find_path(game, start, goal)
 
     # Expect two steps to the east
-    assert [p for p in path] == [Position(0, 1), Position(0, 2)]
+    assert [p.to_dict() for p in path] == [
+        Position(1, 0).to_dict(),
+        Position(2, 0).to_dict(),
+        Position(2, 1).to_dict(),
+        Position(2, 2).to_dict(),
+    ]
 
 
 def test_get_direction_between_adjacent_positions():

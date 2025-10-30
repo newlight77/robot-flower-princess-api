@@ -27,7 +27,9 @@ class MLAutoplayDataCollector(MLAutoplayDataCollectorPort):
         self.timeout = timeout
         self.enabled = data_collection_enabled
 
-        logger.info(f"MLAutoplayDataCollector initialized: enabled={self.enabled}, ml_training_url={self.ml_training_url}")
+        logger.info(
+            f"MLAutoplayDataCollector initialized: enabled={self.enabled}, ml_training_url={self.ml_training_url}"
+        )
 
     def collect_action(
         self,

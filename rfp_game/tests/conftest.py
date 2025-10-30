@@ -1,5 +1,5 @@
 import pytest
-from typing import Callable
+from typing import Any, Callable
 from fastapi.testclient import TestClient
 
 from main import app
@@ -10,6 +10,7 @@ from configurator.dependencies import get_game_repository
 from hexagons.game.driven.persistence.in_memory_game_repository import (
     InMemoryGameRepository,
 )
+from hexagons.game.domain.ports.ml_autoplay_data_collector import MLAutoplayDataCollectorPort
 
 
 @pytest.fixture(scope="session")
@@ -153,3 +154,22 @@ def place_robot():
         return board
 
     return _place
+
+
+@pytest.fixture
+def data_collector():
+    return NullMLAutoplayDataCollector()
+
+
+class NullMLAutoplayDataCollector(MLAutoplayDataCollectorPort):
+    """No-op implementation used for tests or when collection is disabled."""
+
+    def collect_action(
+        self,
+        game_id: str,
+        game_state: dict[str, Any],
+        action: str,
+        direction: str | None,
+        outcome: dict[str, Any],
+    ) -> None:
+        return

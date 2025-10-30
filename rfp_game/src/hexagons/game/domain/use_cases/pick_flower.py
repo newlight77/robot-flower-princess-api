@@ -4,6 +4,7 @@ from ...domain.services.game_service import GameService
 from ..core.exceptions.game_exceptions import GameException
 from ..core.value_objects.direction import Direction
 from ..core.entities.game import Game
+from ..ports.gameplay_data_collector import GameplayDataCollectorPort
 from shared.logging import get_logger
 
 
@@ -20,10 +21,11 @@ class PickFlowerResult:
 
 
 class PickFlowerUseCase:
-    def __init__(self, repository: GameRepository):
+    def __init__(self, repository: GameRepository, data_collector: GameplayDataCollectorPort):
         self.logger = get_logger(self)
         self.logger.debug("Initializing PickFlowerUseCase repository=%r", repository)
         self.repository = repository
+        self.data_collector = data_collector
 
     def execute(self, command: PickFlowerCommand) -> PickFlowerResult:
         """Pick a flower from an adjacent cell."""
@@ -32,18 +34,42 @@ class PickFlowerUseCase:
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")
 
+        state_before = game.to_dict()
+
         try:
             # rotate robot to the requested direction first
             GameService.rotate_robot(game, command.direction)
             GameService.pick_flower(game)
             self.repository.save(command.game_id, game)
 
-            return PickFlowerResult(
+            result = PickFlowerResult(
                 success=True,
                 game=game,
             )
+            try:
+                self.data_collector.collect_action(
+                    game_id=command.game_id,
+                    game_state=state_before,
+                    action="pick",
+                    direction=command.direction.value,
+                    outcome={"success": True, "message": "action performed successfully"},
+                )
+            except Exception:
+                pass
+            return result
         except GameException:
-            return PickFlowerResult(
+            result = PickFlowerResult(
                 success=False,
                 game=game,
             )
+            try:
+                self.data_collector.collect_action(
+                    game_id=command.game_id,
+                    game_state=state_before,
+                    action="pick",
+                    direction=command.direction.value,
+                    outcome={"success": False, "message": "failed"},
+                )
+            except Exception:
+                pass
+            return result

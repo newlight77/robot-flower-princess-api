@@ -9,11 +9,12 @@ from typing import Any
 
 import httpx
 from shared.logging import get_logger
+from ...domain.ports.gameplay_data_collector import GameplayDataCollectorPort
 
 logger = get_logger("gameplay_data_collector")
 
 
-class GameplayDataCollector:
+class GameplayDataCollector(GameplayDataCollectorPort):
     """Collects gameplay data by sending it to ML Training service for storage."""
 
     def __init__(

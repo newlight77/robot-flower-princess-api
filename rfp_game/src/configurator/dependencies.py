@@ -3,6 +3,7 @@ import os
 from hexagons.game.driven.persistence.in_memory_game_repository import InMemoryGameRepository
 from hexagons.game.domain.ports.game_repository import GameRepository
 from hexagons.game.driven.adapters.gameplay_data_collector import GameplayDataCollector
+from hexagons.game.domain.ports.gameplay_data_collector import GameplayDataCollectorPort
 from hexagons.aiplayer.driven.adapters.http_ml_player_client import HttpMLPlayerClient
 from hexagons.aiplayer.domain.ports.ml_player_client import MLPlayerClientPort
 from configurator.settings import settings
@@ -24,7 +25,7 @@ def get_ml_player_client() -> MLPlayerClientPort:
 
 
 @lru_cache()
-def get_gameplay_data_collector() -> GameplayDataCollector:
+def get_gameplay_data_collector() -> GameplayDataCollectorPort:
     """Dependency injection for gameplay data collector."""
     # Use settings value (can be overridden by ENABLE_DATA_COLLECTION env var)
     enabled = (

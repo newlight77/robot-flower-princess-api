@@ -4,6 +4,7 @@ from ..services.game_service import GameService
 from ..core.value_objects.direction import Direction
 from ..core.exceptions.game_exceptions import GameException
 from ..core.entities.game import Game
+from ..ports.gameplay_data_collector import GameplayDataCollectorPort
 from shared.logging import get_logger
 
 
@@ -20,10 +21,11 @@ class RotateRobotResult:
 
 
 class RotateRobotUseCase:
-    def __init__(self, repository: GameRepository):
+    def __init__(self, repository: GameRepository, data_collector: GameplayDataCollectorPort):
         self.logger = get_logger(self)
         self.logger.debug("Initializing RotateRobotUseCase repository=%r", repository)
         self.repository = repository
+        self.data_collector = data_collector
 
     def execute(self, command: RotateRobotCommand) -> RotateRobotResult:
         """Rotate the robot to face a direction."""
@@ -36,16 +38,41 @@ class RotateRobotUseCase:
         if game is None:
             raise ValueError(f"Game {command.game_id} not found")
 
+        state_before = game.to_dict()
+
         try:
             GameService.rotate_robot(game, command.direction)
             self.repository.save(command.game_id, game)
 
-            return RotateRobotResult(
+            result = RotateRobotResult(
                 success=True,
                 game=game,
             )
+            try:
+                self.data_collector.collect_action(
+                    game_id=command.game_id,
+                    game_state=state_before,
+                    action="rotate",
+                    direction=command.direction.value,
+                    outcome={"success": True, "message": "action performed successfully"},
+                )
+            except Exception:
+                # Intentionally ignore data collection failures
+                pass
+            return result
         except GameException:
-            return RotateRobotResult(
+            result = RotateRobotResult(
                 success=False,
                 game=game,
             )
+            try:
+                self.data_collector.collect_action(
+                    game_id=command.game_id,
+                    game_state=state_before,
+                    action="rotate",
+                    direction=command.direction.value,
+                    outcome={"success": False, "message": "failed"},
+                )
+            except Exception:
+                pass
+            return result

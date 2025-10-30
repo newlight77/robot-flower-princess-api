@@ -13,7 +13,7 @@ from ..schemas.game_schema import (
 )
 from configurator.dependencies import get_game_repository, get_gameplay_data_collector
 from ....domain.ports.game_repository import GameRepository
-from ....driven.adapters.gameplay_data_collector import GameplayDataCollector
+from ....domain.ports.gameplay_data_collector import GameplayDataCollectorPort
 from ....domain.use_cases.create_game import CreateGameUseCase, CreateGameCommand
 from ....domain.use_cases.get_game_state import GetGameStateUseCase, GetGameStateQuery
 from ....domain.use_cases.rotate_robot import RotateRobotUseCase, RotateRobotCommand
@@ -159,7 +159,7 @@ def perform_action(
         ),
     ),
     repository: GameRepository = Depends(get_game_repository),
-    data_collector: GameplayDataCollector = Depends(get_gameplay_data_collector),
+    data_collector: GameplayDataCollectorPort = Depends(get_gameplay_data_collector),
 ) -> ActionResponse:
     """Perform an action on the game. The request.action selects the operation.
 
@@ -174,16 +174,6 @@ def perform_action(
     )
 
     try:
-        # Get game state BEFORE action for data collection
-        logger.info(f"Getting game state before action for game_id={game_id}")
-        try:
-            get_state_use_case = GetGameStateUseCase(repository)
-            state_before = get_state_use_case.execute(GetGameStateQuery(game_id=game_id))
-            game_state_before = state_before.game.to_dict()
-        except Exception as e:
-            logger.error(f"Failed to get game state before action: {e} for game_id={game_id}")
-            raise HTTPException(status_code=500, detail=str(e)) from e
-
         action = request.action
 
         # direction required for all actions now
@@ -203,46 +193,25 @@ def perform_action(
         logger.info(f"Game state before: {game_state_before}")
 
         if action == ActionType.rotate:
-            use_case = RotateRobotUseCase(repository)
+            use_case = RotateRobotUseCase(repository, data_collector)
             result = use_case.execute(RotateRobotCommand(game_id=game_id, direction=direction))
         elif action == ActionType.move:
-            use_case = MoveRobotUseCase(repository)
+            use_case = MoveRobotUseCase(repository, data_collector)
             result = use_case.execute(MoveRobotCommand(game_id=game_id, direction=direction))
         elif action == ActionType.pickFlower:
-            use_case = PickFlowerUseCase(repository)
+            use_case = PickFlowerUseCase(repository, data_collector)
             result = use_case.execute(PickFlowerCommand(game_id=game_id, direction=direction))
         elif action == ActionType.dropFlower:
-            use_case = DropFlowerUseCase(repository)
+            use_case = DropFlowerUseCase(repository, data_collector)
             result = use_case.execute(DropFlowerCommand(game_id=game_id, direction=direction))
         elif action == ActionType.giveFlower:
-            use_case = GiveFlowersUseCase(repository)
+            use_case = GiveFlowersUseCase(repository, data_collector)
             result = use_case.execute(GiveFlowersCommand(game_id=game_id, direction=direction))
         elif action == ActionType.clean:
-            use_case = CleanObstacleUseCase(repository)
+            use_case = CleanObstacleUseCase(repository, data_collector)
             result = use_case.execute(CleanObstacleCommand(game_id=game_id, direction=direction))
         else:
             raise ValueError(f"Unknown action: {action}")
-
-        # Collect gameplay data for ML training
-        logger.info(
-            f"Collecting gameplay data: game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}"
-        )
-        try:
-            data_collector.collect_action(
-                game_id=game_id,
-                game_state=game_state_before,
-                action=action_name_map[action],
-                direction=direction.value,
-                outcome={
-                    "success": result.success,
-                    "message": "action performed successfully" if result.success else "failed",
-                },
-            )
-        except Exception as e:
-            logger.error(
-                f"Failed to collect gameplay data: {e} for game_id={game_id}, action={action_name_map[action]}, direction={direction.value}, outcome={result.success}"
-            )
-            raise HTTPException(status_code=500, detail=str(e)) from e
 
         return ActionResponse(
             success=result.success,
